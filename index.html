@@ -404,8 +404,7 @@
 
     .diary-bg {
       min-height: calc(100vh - 120px);
-      background:
-        linear-gradient(to bottom, transparent 39px, var(--diary-line) 39px);
+      background: linear-gradient(to bottom, transparent 39px, var(--diary-line) 39px);
       background-size: 100% 40px;
       background-color: var(--diary-bg);
       padding: 20px 20px 20px 60px;
@@ -648,6 +647,9 @@
                onkeydown="if(event.key==='Enter') confirmDay()" />
         <div class="modal-error" id="modal-error"></div>
       </div>
+      <div id="full-note" class="modal-full-note" style="display:none">
+        Чтобы записать нового человека, сначала попросите убрать выходной кого-то из тех, кто ранее взял.
+      </div>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeModal()">Отмена</button>
         <button class="btn-primary" id="confirm-btn" onclick="confirmDay()">Взять выходной</button>
@@ -665,7 +667,6 @@
 const SUPABASE_URL = 'https://heubrattlnikielnfheg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhldWJyYXR0bG5pa2llbG5maGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NzYyMjcsImV4cCI6MjEwMDU1MjIyN30._lRs77YnsILFN_Ru4uR2wDWQFtAlazZh8UaaKa7fsnM';
 
-// URL хостинга игр (измените на ваш домен)
 const GAMES_BASE_URL = 'https://wwwgolybfs-dev.github.io/test_hyan/';
 
 const USE_SUPABASE = SUPABASE_URL.indexOf('http') === 0 && SUPABASE_ANON_KEY.length > 20;
@@ -679,6 +680,9 @@ if (USE_SUPABASE) {
   }
 }
 
+// ═══════════════════════════════════════════════
+// LOCAL STORAGE FALLBACK
+// ═══════════════════════════════════════════════
 const LS_VACATIONS = 'petzker_vacations_v3';
 const LS_DIARY = 'petzker_diary_v2';
 
@@ -696,6 +700,115 @@ function saveDiaryLocal(data) { localStorage.setItem(LS_DIARY, JSON.stringify(da
 
 function uid() {
   return (crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+}
+
+// ═══════════════════════════════════════════════
+// DATA LAYER (Supabase + localStorage fallback)
+// ═══════════════════════════════════════════════
+async function fetchVacations() {
+  if (!USE_SUPABASE) return loadVacationsLocal();
+  try {
+    const { data, error } = await supabaseClient
+      .from('vacations')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (error) { console.error('fetchVacations error:', error); return loadVacationsLocal(); }
+    const grouped = {};
+    (data || []).forEach(row => {
+      if (!grouped[row.day]) grouped[row.day] = [];
+      grouped[row.day].push({ id: row.id, name: row.name, telegram_user_id: row.telegram_user_id ?? null });
+    });
+    return grouped;
+  } catch (e) { console.error('fetchVacations catch:', e); return loadVacationsLocal(); }
+}
+
+async function fetchDayEntries(day) {
+  if (!USE_SUPABASE) return loadVacationsLocal()[day] || [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('vacations')
+      .select('*')
+      .eq('day', day)
+      .order('created_at', { ascending: true });
+    if (error) { console.error('fetchDayEntries error:', error); return vacations[day] || []; }
+    return (data || []).map(r => ({ id: r.id, name: r.name, telegram_user_id: r.telegram_user_id ?? null }));
+  } catch (e) { console.error('fetchDayEntries catch:', e); return vacations[day] || []; }
+}
+
+async function insertVacation(day, name, ownerId) {
+  if (USE_SUPABASE) {
+    const payload = { day, name };
+    if (ownerId != null) payload.telegram_user_id = ownerId;
+    try {
+      const { data, error } = await supabaseClient.from('vacations').insert([payload]).select().single();
+      if (error) throw error;
+      return { id: data.id, name, telegram_user_id: data.telegram_user_id ?? null };
+    } catch (e) {
+      if (ownerId != null && /telegram_user_id/i.test(String(e && e.message || ''))) {
+        try {
+          const { data, error: e2 } = await supabaseClient.from('vacations').insert([{ day, name }]).select().single();
+          if (e2) throw e2;
+          return { id: data.id, name, telegram_user_id: null };
+        } catch (e2) { console.error('insertVacation fallback error:', e2); throw e2; }
+      }
+      console.error('insertVacation error:', e);
+      throw e;
+    }
+  }
+  const id = uid();
+  const all = loadVacationsLocal();
+  if (!all[day]) all[day] = [];
+  const entry = { id, name, telegram_user_id: ownerId != null ? ownerId : null };
+  all[day].push(entry);
+  saveVacationsLocal(all);
+  return entry;
+}
+
+async function deleteVacation(day, id) {
+  if (USE_SUPABASE) {
+    try {
+      const { error } = await supabaseClient.from('vacations').delete().eq('id', id);
+      if (error) throw new Error(error.message);
+    } catch (e) { console.error('deleteVacation error:', e); throw e; }
+    return;
+  }
+  const all = loadVacationsLocal();
+  if (all[day]) {
+    all[day] = all[day].filter(v => v.id !== id);
+    if (!all[day].length) delete all[day];
+    saveVacationsLocal(all);
+  }
+}
+
+async function fetchDiary() {
+  if (!USE_SUPABASE) return loadDiaryLocal();
+  try {
+    const { data, error } = await supabaseClient
+      .from('diary_entries')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (error) { console.error('fetchDiary error:', error); return loadDiaryLocal(); }
+    return (data || []).map(r => ({ id: r.id, text: r.text, created_at: r.created_at }));
+  } catch (e) { console.error('fetchDiary catch:', e); return loadDiaryLocal(); }
+}
+
+async function insertDiaryEntry(text) {
+  if (USE_SUPABASE) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('diary_entries')
+        .insert([{ text }])
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return { id: data.id, text, created_at: data.created_at };
+    } catch (e) { console.error('insertDiaryEntry error:', e); throw e; }
+  }
+  const entry = { id: uid(), text, created_at: new Date().toISOString() };
+  const all = loadDiaryLocal();
+  all.push(entry);
+  saveDiaryLocal(all);
+  return entry;
 }
 
 // ═══════════════════════════════════════════════
@@ -731,7 +844,6 @@ function toggleTheme() {
   localStorage.setItem('petzker_theme', next);
   applyThemeIcon();
   haptic('light');
-
   const gameFrame = document.getElementById('game-frame');
   if (gameFrame && gameFrame.contentWindow) {
     try { gameFrame.contentWindow.postMessage({ type: 'petzker-theme', value: next }, '*'); }
@@ -752,6 +864,19 @@ function haptic(kind) {
       tg.HapticFeedback.impactOccurred(kind || 'light');
     }
   } catch (e) { }
+}
+
+function askConfirm(message) {
+  return new Promise((resolve) => {
+    try {
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (tg && typeof tg.showConfirm === 'function') {
+        tg.showConfirm(message, (ok) => resolve(!!ok));
+        return;
+      }
+    } catch (e) { }
+    resolve(window.confirm(message));
+  });
 }
 
 function getTelegramUser() {
@@ -777,6 +902,9 @@ function showToast(msg) {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function escAttr(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ═══════════════════════════════════════════════
@@ -804,7 +932,6 @@ function selectGame(game) {
     'doodle': GAMES_BASE_URL + 'doodle.html',
     'throne': GAMES_BASE_URL + 'throne.html'
   };
-
   currentGame = game;
   document.getElementById('games-menu').style.display = 'none';
   document.getElementById('game-container').classList.add('active');
@@ -819,7 +946,6 @@ function selectGame(game) {
 
   const iframe = document.getElementById('game-frame');
   iframe.src = gameUrls[game] + (gameUrls[game].includes('?') ? '&' : '?') + params.toString();
-
   haptic('light');
 }
 
@@ -828,13 +954,12 @@ function backToGamesMenu() {
   document.getElementById('games-menu').style.display = 'grid';
   document.getElementById('game-container').classList.remove('active');
   document.getElementById('game-back-btn').style.display = 'none';
-  const iframe = document.getElementById('game-frame');
-  iframe.src = '';
+  document.getElementById('game-frame').src = '';
   haptic('light');
 }
 
 // ═══════════════════════════════════════════════
-// CALENDAR (сокращено для экономии места)
+// CALENDAR
 // ═══════════════════════════════════════════════
 const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const MONTHS_RU_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
@@ -855,7 +980,6 @@ function changeMonth(dir) {
 
 function renderCalendar() {
   document.getElementById('month-label').textContent = `${MONTHS_RU[curMonth]} ${curYear}`;
-
   const grid = document.getElementById('calendar-grid');
   grid.innerHTML = '';
 
@@ -898,7 +1022,6 @@ function renderCalendar() {
     if (count > 0) {
       dots = '<div class="day-dots">' + names.slice(0,2).map(() => `<div class="dot ${count >= 2 ? 'orange' : ''}"></div>`).join('') + '</div>';
     }
-
     cell.innerHTML = `<div class="day-num">${d}</div>${dots}`;
     if (!isPast) cell.addEventListener('click', () => openModal(key, d));
     grid.appendChild(cell);
@@ -925,7 +1048,6 @@ function renderUpcoming() {
     list.innerHTML = '<div class="empty-state">Пока нет запланированных выходных</div>';
     return;
   }
-
   relevant.forEach(([key, names], i) => {
     const d = new Date(key + 'T00:00:00');
     const item = document.createElement('div');
@@ -942,15 +1064,81 @@ function renderUpcoming() {
 }
 
 // ═══════════════════════════════════════════════
-// MODAL (кратко)
+// MODAL
 // ═══════════════════════════════════════════════
+function canDeleteEntry(entry) {
+  if (currentUser) return entry.telegram_user_id != null && String(entry.telegram_user_id) === String(currentUser.id);
+  return entry.telegram_user_id == null;
+}
+
+function renderModalContent(day, names) {
+  const d = new Date(day + 'T00:00:00');
+  document.getElementById('modal-title').textContent = `${d.getDate()} ${MONTHS_RU_GEN[d.getMonth()]} ${d.getFullYear()}`;
+
+  const whoDiv = document.getElementById('modal-who');
+  if (names.length) {
+    whoDiv.innerHTML = names.map(n => `
+      <span class="who-chip" data-id="${n.id}" data-name="${escAttr(n.name)}">
+        <span>${escHtml(n.name)}</span>
+        ${canDeleteEntry(n) ? `<button type="button" class="chip-remove" aria-label="Убрать ${escHtml(n.name)}">×</button>` : ''}
+      </span>`).join('');
+    whoDiv.style.display = 'flex';
+  } else {
+    whoDiv.innerHTML = '';
+    whoDiv.style.display = 'none';
+  }
+
+  const full = names.length >= 2;
+  const addFields = document.getElementById('add-form-fields');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const fullNote = document.getElementById('full-note');
+
+  if (full) {
+    document.getElementById('modal-sub').textContent = '😅 Уже 2 человека — мест нет.';
+    addFields.style.display = 'none';
+    confirmBtn.style.display = 'none';
+    fullNote.style.display = 'block';
+  } else {
+    document.getElementById('modal-sub').textContent = names.length ? 'Ещё одно место свободно!' : 'Запишите своё имя';
+    addFields.style.display = 'block';
+    confirmBtn.style.display = 'block';
+    fullNote.style.display = 'none';
+  }
+}
+
+function applyAuthToForm() {
+  const nameEl = document.getElementById('name-input');
+  const noteEl = document.getElementById('auth-note');
+  if (currentUser) {
+    nameEl.value = currentUser.name;
+    nameEl.readOnly = true;
+    noteEl.textContent = `👤 Вы вошли как ${currentUser.name} (Telegram)`;
+    noteEl.style.display = 'flex';
+  } else {
+    nameEl.value = '';
+    nameEl.readOnly = false;
+    noteEl.style.display = 'none';
+  }
+}
+
 async function openModal(key, day) {
   selectedKey = key;
   document.getElementById('modal-overlay').classList.add('open');
-  document.getElementById('name-input').value = currentUser ? currentUser.name : '';
-  document.getElementById('name-input').readOnly = !!currentUser;
+  applyAuthToForm();
+  document.getElementById('name-input').classList.remove('error');
+  document.getElementById('modal-error').classList.remove('show');
   renderModalContent(key, vacations[key] || []);
   haptic('light');
+
+  const names = await fetchDayEntries(key);
+  if (selectedKey !== key) return;
+  vacations[key] = names;
+  renderModalContent(key, names);
+
+  setTimeout(() => {
+    const input = document.getElementById('name-input');
+    if (input.offsetParent !== null) input.focus();
+  }, 200);
 }
 
 function closeModal() {
@@ -959,48 +1147,101 @@ function closeModal() {
 }
 function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
-function renderModalContent(day, names) {
-  const d = new Date(day + 'T00:00:00');
-  document.getElementById('modal-title').textContent = `${d.getDate()} ${MONTHS_RU_GEN[d.getMonth()]} ${d.getFullYear()}`;
-  document.getElementById('modal-sub').textContent = names.length >= 2 ? '😅 Мест нет' : (names.length ? 'Ещё одно место!' : 'Запишите имя');
-
-  const whoDiv = document.getElementById('modal-who');
-  whoDiv.innerHTML = names.map(n => `<span class="who-chip">${escHtml(n.name)}</span>`).join('');
-}
-
 async function confirmDay() {
-  const name = currentUser ? currentUser.name : document.getElementById('name-input').value.trim();
+  const nameEl = document.getElementById('name-input');
+  const errEl = document.getElementById('modal-error');
+  const name = currentUser ? currentUser.name : nameEl.value.trim();
+  const ownerId = currentUser ? currentUser.id : null;
+
+  errEl.classList.remove('show');
+  nameEl.classList.remove('error');
+
   if (!name) {
-    showToast('Введите имя');
+    nameEl.classList.add('error');
+    errEl.textContent = 'Пожалуйста, введите имя';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const current = await fetchDayEntries(selectedKey);
+  vacations[selectedKey] = current;
+
+  const alreadyBooked = currentUser
+    ? current.some(v => v.telegram_user_id != null && String(v.telegram_user_id) === String(ownerId))
+    : current.some(v => v.name.trim().toLowerCase() === name.toLowerCase());
+  if (alreadyBooked) {
+    renderModalContent(selectedKey, current);
+    nameEl.classList.add('error');
+    errEl.textContent = `${name} уже записан(а) на этот день.`;
+    errEl.classList.add('show');
+    haptic('warning');
+    return;
+  }
+
+  if (current.length >= 2) {
+    renderModalContent(selectedKey, current);
+    haptic('warning');
     return;
   }
 
   const confirmBtn = document.getElementById('confirm-btn');
+  const originalLabel = confirmBtn.textContent;
   confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Сохраняем…';
 
   try {
+    const entry = await insertVacation(selectedKey, name, ownerId);
     if (!vacations[selectedKey]) vacations[selectedKey] = [];
-    if (vacations[selectedKey].length < 2) {
-      vacations[selectedKey].push({ name, id: uid() });
-      renderModalContent(selectedKey, vacations[selectedKey]);
-      closeModal();
-      renderCalendar();
-      showToast(`✅ ${name} записан(а)!`);
-      haptic('success');
-    } else {
-      showToast('Мест нет');
-      haptic('warning');
-    }
+    vacations[selectedKey].push(entry);
+    highlightKey = selectedKey;
+    closeModal();
+    renderCalendar();
+    showToast(`✅ ${name} записан(а) на выходной!`);
+    haptic('success');
   } catch (e) {
-    showToast('Ошибка сохранения');
+    console.error(e);
+    errEl.textContent = 'Ошибка сохранения. Попробуйте ещё раз.';
+    errEl.classList.add('show');
     haptic('error');
   } finally {
     confirmBtn.disabled = false;
+    confirmBtn.textContent = originalLabel;
   }
 }
 
+async function handleChipRemove(id, name, chipEl) {
+  const ok = await askConfirm(`Убрать выходной для ${name}?`);
+  if (!ok) return;
+  chipEl.classList.add('removing');
+  try {
+    await deleteVacation(selectedKey, id);
+    vacations[selectedKey] = (vacations[selectedKey] || []).filter(v => v.id !== id);
+    if (!vacations[selectedKey].length) delete vacations[selectedKey];
+    highlightKey = selectedKey;
+    setTimeout(() => {
+      if (selectedKey) renderModalContent(selectedKey, vacations[selectedKey] || []);
+    }, 180);
+    renderCalendar();
+    showToast(`Выходной для ${name} убран`);
+    haptic('success');
+  } catch (e) {
+    console.error(e);
+    chipEl.classList.remove('removing');
+    showToast('Ошибка. Попробуйте ещё раз.');
+    haptic('error');
+  }
+}
+
+document.getElementById('modal-who').addEventListener('click', function (e) {
+  const btn = e.target.closest('.chip-remove');
+  if (!btn) return;
+  const chip = btn.closest('.who-chip');
+  if (!chip) return;
+  handleChipRemove(chip.dataset.id, chip.dataset.name, chip);
+});
+
 // ═══════════════════════════════════════════════
-// DIARY (кратко)
+// DIARY
 // ═══════════════════════════════════════════════
 function formatDiaryDate(iso) {
   const d = new Date(iso);
@@ -1013,6 +1254,7 @@ function renderDiary() {
 
   const totalPages = Math.max(1, Math.ceil(diaryEntries.length / DIARY_PAGE_SIZE));
   if (diaryPage > totalPages) diaryPage = totalPages;
+  if (diaryPage < 1) diaryPage = 1;
 
   const start = (diaryPage - 1) * DIARY_PAGE_SIZE;
   const pageEntries = diaryEntries.slice(start, start + DIARY_PAGE_SIZE);
@@ -1033,30 +1275,97 @@ function renderDiary() {
     });
   }
 
-  const paginationEl = document.getElementById('diary-pagination');
-  if (totalPages <= 1) { paginationEl.innerHTML = ''; } else {
-    let html = `<button class="page-btn" onclick="diaryPage=1;renderDiary()" ${diaryPage===1?'disabled':''}>«</button>`;
-    html += `<button class="page-btn" onclick="diaryPage--;renderDiary()" ${diaryPage===1?'disabled':''}>‹</button>`;
-    for (let p = 1; p <= totalPages; p++) {
-      html += `<button class="page-btn ${p===diaryPage?'active':''}" onclick="diaryPage=${p};renderDiary()">${p}</button>`;
-    }
-    html += `<button class="page-btn" onclick="diaryPage++;renderDiary()" ${diaryPage===totalPages?'disabled':''}>›</button>`;
-    html += `<button class="page-btn" onclick="diaryPage=${totalPages};renderDiary()" ${diaryPage===totalPages?'disabled':''}>»</button>`;
-    paginationEl.innerHTML = html;
-  }
+  renderPagination(totalPages);
 }
+
+function renderPagination(totalPages) {
+  const el = document.getElementById('diary-pagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  let html = '';
+  html += `<button class="page-btn" onclick="goToDiaryPage(1)" ${diaryPage===1?'disabled':''}>«</button>`;
+  html += `<button class="page-btn" onclick="goToDiaryPage(${diaryPage-1})" ${diaryPage===1?'disabled':''}>‹</button>`;
+
+  const maxShown = 5;
+  let startP = Math.max(1, diaryPage - 2);
+  let endP = Math.min(totalPages, startP + maxShown - 1);
+  startP = Math.max(1, endP - maxShown + 1);
+
+  if (startP > 1) {
+    html += `<button class="page-btn" onclick="goToDiaryPage(1)">1</button>`;
+    if (startP > 2) html += `<span class="page-ellipsis">…</span>`;
+  }
+  for (let p = startP; p <= endP; p++) {
+    html += `<button class="page-btn ${p===diaryPage?'active':''}" onclick="goToDiaryPage(${p})">${p}</button>`;
+  }
+  if (endP < totalPages) {
+    if (endP < totalPages - 1) html += `<span class="page-ellipsis">…</span>`;
+    html += `<button class="page-btn" onclick="goToDiaryPage(${totalPages})">${totalPages}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goToDiaryPage(${diaryPage+1})" ${diaryPage===totalPages?'disabled':''}>›</button>`;
+  html += `<button class="page-btn" onclick="goToDiaryPage(${totalPages})" ${diaryPage===totalPages?'disabled':''}>»</button>`;
+
+  el.innerHTML = html;
+}
+
+function goToDiaryPage(p) { diaryPage = p; renderDiary(); haptic('light'); }
 
 async function addDiaryEntry() {
   const ta = document.getElementById('diary-input');
+  const btn = document.getElementById('diary-add-btn');
   const text = ta.value.trim();
   if (!text) return;
 
-  diaryEntries.push({ id: uid(), text, created_at: new Date().toISOString() });
-  ta.value = '';
-  diaryPage = Math.ceil(diaryEntries.length / DIARY_PAGE_SIZE);
-  renderDiary();
-  showToast('✦ Записано!');
-  haptic('success');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Записываем…';
+
+  try {
+    const entry = await insertDiaryEntry(text);
+    diaryEntries.push(entry);
+    ta.value = '';
+    diaryPage = Math.ceil(diaryEntries.length / DIARY_PAGE_SIZE);
+    renderDiary();
+    showToast('✦ Записано!');
+    haptic('success');
+  } catch (e) {
+    console.error(e);
+    showToast('Ошибка сохранения. Попробуйте ещё раз.');
+    haptic('error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// REALTIME
+// ═══════════════════════════════════════════════
+function setupRealtime() {
+  if (!USE_SUPABASE) {
+    console.log('Realtime disabled — Supabase not configured');
+    return;
+  }
+  try {
+    supabaseClient
+      .channel('public:vacations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vacations' }, () => {
+        fetchVacations().then(v => { vacations = v; renderCalendar(); });
+      })
+      .subscribe();
+
+    supabaseClient
+      .channel('public:diary_entries')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'diary_entries' }, () => {
+        fetchDiary().then(d => {
+          diaryEntries = d;
+          if (document.getElementById('view-diary').classList.contains('active')) renderDiary();
+        });
+      })
+      .subscribe();
+  } catch (e) {
+    console.error('Realtime setup error:', e);
+  }
 }
 
 // ═══════════════════════════════════════════════
