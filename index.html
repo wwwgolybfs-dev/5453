@@ -1064,15 +1064,24 @@ async function addDiaryEntry() {
 // ═══════════════════════════════════════════════
 async function init() {
   applyThemeIcon();
+
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
     window.Telegram.WebApp.expand();
   }
   currentUser = getTelegramUser();
-  vacations = loadVacationsLocal();
-  diaryEntries = loadDiaryLocal();
-  diaryPage = Math.ceil(diaryEntries.length / DIARY_PAGE_SIZE) || 1;
+
+  if (!USE_SUPABASE) {
+    document.getElementById('config-banner').style.display = 'flex';
+  }
+
+  try { vacations = await fetchVacations(); } catch (e) { console.error(e); vacations = {}; }
   renderCalendar();
+
+  try { diaryEntries = await fetchDiary(); } catch (e) { console.error(e); diaryEntries = []; }
+  diaryPage = Math.ceil(diaryEntries.length / DIARY_PAGE_SIZE) || 1;
+
+  setupRealtime();
 }
 
 init();
