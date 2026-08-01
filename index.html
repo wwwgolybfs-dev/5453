@@ -726,6 +726,7 @@
       border-top: 1px solid var(--border);
       padding-top: 8px;
       margin-top: 8px;
+      padding-top: 8px;
     }
 
     .event-actions {
@@ -893,11 +894,11 @@
     </div>
 
     <div class="bet-games-strip">
-      <div class="bet-game-tag active" data-game="all" onclick="filterEventsByGame('all', this)">Все события</div>
-      <div class="bet-game-tag" data-game="dice" onclick="filterEventsByGame('dice', this)">🎲 Кубики</div>
-      <div class="bet-game-tag" data-game="minesweeper" onclick="filterEventsByGame('minesweeper', this)">💣 Минёр</div>
-      <div class="bet-game-tag" data-game="doodle" onclick="filterEventsByGame('doodle', this)">🧑 Дудл Джамп</div>
-      <div class="bet-game-tag" data-game="throne" onclick="filterEventsByGame('throne', this)">👑 Альфа 5.3</div>
+      <div class="bet-game-tag active" onclick="filterEventsByGame('all')">Все события</div>
+      <div class="bet-game-tag" onclick="filterEventsByGame('dice')">🎲 Кубики</div>
+      <div class="bet-game-tag" onclick="filterEventsByGame('minesweeper')">💣 Минёр</div>
+      <div class="bet-game-tag" onclick="filterEventsByGame('doodle')">🧑 Дудл Джамп</div>
+      <div class="bet-game-tag" onclick="filterEventsByGame('throne')">👑 Альфа 5.3</div>
     </div>
 
     <div class="bet-events-list" id="events-list">
@@ -1038,10 +1039,10 @@ if (USE_SUPABASE) {
 // ═══════════════════════════════════════════════
 // ADMIN USERS
 // ═══════════════════════════════════════════════
-const ADMIN_ID = 438081341;
-const COMMISSION_USER_ID = 438081341;
-const ADMIN_COMMISSION = 0.06;
-const COMMISSION_USER_COMMISSION = 0.04;
+const ADMIN_ID = 438081341; // Анатолий - 6%
+const COMMISSION_USER_ID = 438081341; // vnvv - 4% (ПРИМЕЧАНИЕ: совпадает с админом, нужно уточнить правильный ID)
+const ADMIN_COMMISSION = 0.06; // 6%
+const COMMISSION_USER_COMMISSION = 0.04; // 4%
 
 // ═══════════════════════════════════════════════
 // LOCAL STORAGE FALLBACK
@@ -1212,19 +1213,20 @@ async function fetchBetEvents() {
 }
 
 async function insertBetEvent(eventData) {
-  // Не отправляем id и created_at — пусть генерирует база (DEFAULT gen_random_uuid() и now())
+  // eventData = { title, description, outcome_1_name, outcome_2_name, game, created_by_user_id }
   const payload = {
+    id: uid(),
     title: eventData.title,
     description: eventData.description || null,
     outcome_1_name: eventData.outcome_1_name,
     outcome_2_name: eventData.outcome_2_name,
     game_type: eventData.game || 'general',
-    created_by_user_id: eventData.created_by_user_id || null,
-    created_by_name: eventData.created_by_name || null,
+    created_by_user_id: eventData.created_by_user_id,
     total_bets_outcome_1: 0,
     total_bets_outcome_2: 0,
     winning_outcome: null,
-    status: 'active'
+    status: 'active',
+    created_at: new Date().toISOString()
   };
 
   if (USE_SUPABASE) {
@@ -1234,28 +1236,20 @@ async function insertBetEvent(eventData) {
         .insert([payload])
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data;
-    } catch (e) {
-      console.error('insertBetEvent error:', e);
-      throw e;
-    }
+    } catch (e) { console.error('insertBetEvent error:', e); throw e; }
   }
   
-  // Fallback localStorage
-  const localPayload = {
-    id: uid(),
-    ...payload,
-    created_at: new Date().toISOString()
-  };
   const all = loadBetEventsLocal();
-  all.unshift(localPayload);
+  all.push(payload);
   saveBetEventsLocal(all);
-  return localPayload;
+  return payload;
 }
 
-// ЗАГЛУШКИ: Функции для работы со ставками (пока не реализованы полностью)
+// ЗАГЛУШКА: Функции для работы со ставками
 async function placeBet(eventId, userId, amount, chosenOutcome) {
+  // TODO: Реализовать логику размещения ставки
   console.log('STUB: placeBet', { eventId, userId, amount, chosenOutcome });
   const bet = {
     id: uid(),
@@ -1268,7 +1262,7 @@ async function placeBet(eventId, userId, amount, chosenOutcome) {
   };
   
   if (USE_SUPABASE) {
-    // TODO: Insert into bet_placements
+    // TODO: Insert into bet_placements table
   } else {
     const all = loadUserBetsLocal();
     all.push(bet);
@@ -1278,18 +1272,10 @@ async function placeBet(eventId, userId, amount, chosenOutcome) {
 }
 
 async function setEventOutcome(eventId, winningOutcome) {
+  // TODO: Реализовать логику установки исхода события
   console.log('STUB: setEventOutcome', { eventId, winningOutcome });
   if (USE_SUPABASE) {
-    try {
-      const { error } = await supabaseClient
-        .from('bet_events')
-        .update({ winning_outcome: winningOutcome })
-        .eq('id', eventId);
-      if (error) throw error;
-    } catch (e) {
-      console.error('setEventOutcome error:', e);
-      throw e;
-    }
+    // TODO: Update bet_events table
   } else {
     const all = loadBetEventsLocal();
     const event = all.find(e => e.id === eventId);
@@ -1299,18 +1285,10 @@ async function setEventOutcome(eventId, winningOutcome) {
 }
 
 async function closeEvent(eventId) {
+  // TODO: Реализовать логику закрытия события
   console.log('STUB: closeEvent', { eventId });
   if (USE_SUPABASE) {
-    try {
-      const { error } = await supabaseClient
-        .from('bet_events')
-        .update({ status: 'closed' })
-        .eq('id', eventId);
-      if (error) throw error;
-    } catch (e) {
-      console.error('closeEvent error:', e);
-      throw e;
-    }
+    // TODO: Update bet_events table status to 'closed'
   } else {
     const all = loadBetEventsLocal();
     const event = all.find(e => e.id === eventId);
@@ -1482,7 +1460,7 @@ const MONTHS_RU = ['Январь','Февраль','Март','Апрель','М
 const MONTHS_RU_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WEEKDAYS_RU = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
 
-function dayKey(y, m, d) { return `\( {y}- \){String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function dayKey(y, m, d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 
 function changeMonth(dir) {
   curMonth += dir;
@@ -1539,7 +1517,7 @@ function renderCalendar() {
     if (count > 0) {
       dots = '<div class="day-dots">' + names.slice(0,2).map(() => `<div class="dot ${count >= 2 ? 'orange' : ''}"></div>`).join('') + '</div>';
     }
-    cell.innerHTML = `<div class="day-num">\( {d}</div> \){dots}`;
+    cell.innerHTML = `<div class="day-num">${d}</div>${dots}`;
     if (!isPast) cell.addEventListener('click', () => openModal(key, d));
     grid.appendChild(cell);
   }
@@ -1575,7 +1553,7 @@ function renderUpcoming() {
         <div class="ud-day">${d.getDate()}</div>
         <div class="ud-mon">${MONTHS_RU_GEN[d.getMonth()].slice(0,3)}</div>
       </div>
-      <div class="upcoming-names">\( {names.map(n => `<span class="name-chip"> \){escHtml(n.name)}</span>`).join('')}</div>`;
+      <div class="upcoming-names">${names.map(n => `<span class="name-chip">${escHtml(n.name)}</span>`).join('')}</div>`;
     list.appendChild(item);
   });
 }
@@ -1595,7 +1573,7 @@ function renderModalContent(day, names) {
   const whoDiv = document.getElementById('modal-who');
   if (names.length) {
     whoDiv.innerHTML = names.map(n => `
-      <span class="who-chip" data-id="\( {n.id}" data-name=" \){escAttr(n.name)}">
+      <span class="who-chip" data-id="${n.id}" data-name="${escAttr(n.name)}">
         <span>${escHtml(n.name)}</span>
         ${canDeleteEntry(n) ? `<button type="button" class="chip-remove" aria-label="Убрать ${escHtml(n.name)}">×</button>` : ''}
       </span>`).join('');
@@ -1815,11 +1793,11 @@ function renderPagination(totalPages) {
     if (startP > 2) html += `<span class="page-ellipsis">…</span>`;
   }
   for (let p = startP; p <= endP; p++) {
-    html += `<button class="page-btn \( {p===diaryPage?'active':''}" onclick="goToDiaryPage( \){p})">${p}</button>`;
+    html += `<button class="page-btn ${p===diaryPage?'active':''}" onclick="goToDiaryPage(${p})">${p}</button>`;
   }
   if (endP < totalPages) {
     if (endP < totalPages - 1) html += `<span class="page-ellipsis">…</span>`;
-    html += `<button class="page-btn" onclick="goToDiaryPage(\( {totalPages})"> \){totalPages}</button>`;
+    html += `<button class="page-btn" onclick="goToDiaryPage(${totalPages})">${totalPages}</button>`;
   }
   html += `<button class="page-btn" onclick="goToDiaryPage(${diaryPage+1})" ${diaryPage===totalPages?'disabled':''}>›</button>`;
   html += `<button class="page-btn" onclick="goToDiaryPage(${totalPages})" ${diaryPage===totalPages?'disabled':''}>»</button>`;
@@ -1877,7 +1855,6 @@ function openBetCreateModal() {
   document.getElementById('outcome-2-input').value = 'Поражение';
   document.getElementById('event-game-input').value = 'general';
   document.getElementById('bet-modal-error').classList.remove('show');
-  document.getElementById('bet-modal-error').textContent = '';
   setTimeout(() => document.getElementById('event-title-input').focus(), 200);
   haptic('light');
 }
@@ -1900,7 +1877,6 @@ async function createEvent() {
   const createBtn = document.getElementById('create-event-btn');
 
   errorEl.classList.remove('show');
-  errorEl.textContent = '';
 
   const title = titleInput.value.trim();
   const desc = descInput.value.trim();
@@ -1926,29 +1902,17 @@ async function createEvent() {
       outcome_1_name: outcome1,
       outcome_2_name: outcome2,
       game,
-      created_by_user_id: currentUser.id,
-      created_by_name: currentUser.name
+      created_by_user_id: currentUser.id
     };
     const event = await insertBetEvent(eventData);
     betEvents.unshift(event);
     closeBetModal();
     renderBetEvents();
-    showToast(`✅ Событие «${title}» создано!`);
+    showToast(`✅ Событие "${title}" создано!`);
     haptic('success');
   } catch (e) {
-    console.error('createEvent error:', e);
-    // Показываем более понятную ошибку
-    let msg = 'Ошибка создания события';
-    if (e && e.message) {
-      if (e.message.includes('row-level security') || e.message.includes('RLS')) {
-        msg = 'Ошибка доступа (RLS). Нужно добавить политику INSERT для таблицы bet_events.';
-      } else if (e.message.includes('uuid') || e.message.includes('invalid input')) {
-        msg = 'Ошибка формата данных. Проверьте структуру таблицы.';
-      } else {
-        msg = e.message;
-      }
-    }
-    errorEl.textContent = msg;
+    console.error(e);
+    errorEl.textContent = 'Ошибка создания события';
     errorEl.classList.add('show');
     haptic('error');
   } finally {
@@ -1957,22 +1921,22 @@ async function createEvent() {
   }
 }
 
-function filterEventsByGame(game, el) {
+function filterEventsByGame(game) {
   currentGameFilter = game;
   document.querySelectorAll('.bet-game-tag').forEach(tag => {
     tag.classList.remove('active');
   });
-  if (el) el.classList.add('active');
+  event.target.classList.add('active');
   renderBetEvents();
   haptic('light');
 }
 
 function calculateOutcomePercent(event, outcome) {
-  const total = (event.total_bets_outcome_1 || 0) + (event.total_bets_outcome_2 || 0);
+  const total = event.total_bets_outcome_1 + event.total_bets_outcome_2;
   if (total === 0) return 50;
   return outcome === 1 
-    ? Math.round(((event.total_bets_outcome_1 || 0) / total) * 100)
-    : Math.round(((event.total_bets_outcome_2 || 0) / total) * 100);
+    ? Math.round((event.total_bets_outcome_1 / total) * 100)
+    : Math.round((event.total_bets_outcome_2 / total) * 100);
 }
 
 function shouldShowCommission(creatorId) {
@@ -2020,7 +1984,7 @@ function renderBetEvents() {
             <div class="outcome-progress" style="width: ${percent1}%"></div>
             <div class="outcome-content">
               <div class="outcome-name">${escHtml(event.outcome_1_name)}</div>
-              <div class="outcome-bets">Ставок: ${event.total_bets_outcome_1 || 0}</div>
+              <div class="outcome-bets">Ставок: ${event.total_bets_outcome_1}</div>
               <div class="outcome-percent">${percent1}%</div>
             </div>
           </div>
@@ -2028,7 +1992,7 @@ function renderBetEvents() {
             <div class="outcome-progress" style="width: ${percent2}%"></div>
             <div class="outcome-content">
               <div class="outcome-name">${escHtml(event.outcome_2_name)}</div>
-              <div class="outcome-bets">Ставок: ${event.total_bets_outcome_2 || 0}</div>
+              <div class="outcome-bets">Ставок: ${event.total_bets_outcome_2}</div>
               <div class="outcome-percent">${percent2}%</div>
             </div>
           </div>
@@ -2042,7 +2006,7 @@ function renderBetEvents() {
         : `${(COMMISSION_USER_COMMISSION * 100).toFixed(0)}%`;
       html += `<div class="event-commission">Вы получите комиссию: ${yourComm}</div>`;
     } else {
-      const totalPool = (event.total_bets_outcome_1 || 0) + (event.total_bets_outcome_2 || 0);
+      const totalPool = event.total_bets_outcome_1 + event.total_bets_outcome_2;
       if (totalPool > 0) {
         html += `<div class="event-commission">Комиссия Petzker Bet</div>`;
       }
@@ -2076,6 +2040,7 @@ function placeBetOnOutcome(eventId, outcome) {
     haptic('warning');
     return;
   }
+  // TODO: Открыть диалог выбора размера ставки
   console.log('Ставка на событие:', eventId, 'исход:', outcome);
   showToast('Функция ставок: скоро появится! 🚀');
   haptic('light');
@@ -2085,8 +2050,9 @@ function showOutcomeSelector(eventId) {
   const event = betEvents.find(e => e.id === eventId);
   if (!event) return;
   
-  const choice = window.confirm(`Какой исход произошел?\n\n1️⃣ ${event.outcome_1_name}\n2️⃣ ${event.outcome_2_name}\n\nОК = Исход 1, Отмена = Исход 2`);
+  const choice = window.confirm(`Какой исход произошел?\n\n1️⃣ ${event.outcome_1_name}\n2️⃣ ${event.outcome_2_name}\n\nВыберите 1 или 2 в диалоге ниже`);
   if (choice) {
+    // Для демо просто установим первый исход
     confirmOutcome(eventId, 1);
   } else {
     confirmOutcome(eventId, 2);
