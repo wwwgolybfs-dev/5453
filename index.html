@@ -972,7 +972,7 @@
     <div class="bet-form-group">
       <div class="bet-form-label">Название события</div>
       <input class="modal-input" id="event-title-input" type="text" placeholder="Например: Ставка на погоду" maxlength="50"
-             onkeydown="if(event.key==='Enter') createEvent()" />
+             onkeydown="if(event.key==='Enter') createBetEvent()" />
     </div>
 
     <div class="bet-form-group">
@@ -1009,7 +1009,7 @@
 
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeBetModal()">Отмена</button>
-      <button class="btn-primary" id="create-event-btn" onclick="createEvent()">Создать</button>
+      <button class="btn-primary" id="create-event-btn" onclick="createBetEvent()">Создать</button>
     </div>
   </div>
 </div>
@@ -1017,6 +1017,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+(function () {
 // ═══════════════════════════════════════════════
 // SUPABASE CONFIG
 // ═══════════════════════════════════════════════
@@ -1876,7 +1877,7 @@ function closeBetModalOutside(e) {
   if (e.target === document.getElementById('bet-modal-overlay')) closeBetModal();
 }
 
-async function createEvent() {
+async function createBetEvent() {
   const titleInput = document.getElementById('event-title-input');
   const descInput = document.getElementById('event-desc-input');
   const outcome1Input = document.getElementById('outcome-1-input');
@@ -1907,12 +1908,12 @@ async function createEvent() {
   try {
     const eventData = {
       title,
-  description: desc,
-  outcome_1_name: outcome1,
-  outcome_2_name: outcome2,
-  game,
-  created_by_user_id: currentUser.id,
-  created_by_name: currentUser.name
+      description: desc,
+      outcome_1_name: outcome1,
+      outcome_2_name: outcome2,
+      game,
+      created_by_user_id: currentUser.id,
+      created_by_name: currentUser.name
     };
     const event = await insertBetEvent(eventData);
     betEvents.unshift(event);
@@ -2171,7 +2172,29 @@ async function init() {
   setupRealtime();
 }
 
+// Экспортируем функции, которые вызываются из HTML (onclick)
+window.toggleTheme = toggleTheme;
+window.switchTab = switchTab;
+window.changeMonth = changeMonth;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.closeModalOutside = closeModalOutside;
+window.confirmDay = confirmDay;
+window.addDiaryEntry = addDiaryEntry;
+window.goToDiaryPage = goToDiaryPage;
+window.openBetCreateModal = openBetCreateModal;
+window.closeBetModal = closeBetModal;
+window.closeBetModalOutside = closeBetModalOutside;
+window.createBetEvent = createBetEvent;
+window.filterEventsByGame = filterEventsByGame;
+window.placeBetOnOutcome = placeBetOnOutcome;
+window.showOutcomeSelector = showOutcomeSelector;
+window.closeEventConfirm = closeEventConfirm;
+window.selectGame = selectGame;
+window.backToGamesMenu = backToGamesMenu;
+
 init();
+})();
 </script>
 </body>
 </html>
