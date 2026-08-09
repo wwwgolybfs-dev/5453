@@ -1325,91 +1325,115 @@
 
     async function loadRankAndStats() {
       if (!sb) return;
-      try {
-        if (currentUser) {
+      const box = document.getElementById('leaderboardList');
+
+      // Статистика ставок — отдельно, чтобы не ломать рейтинг
+      if (currentUser) {
+        try {
           const { data: bets } = await sb
             .from('bet_placements')
             .select('id, result')
             .eq('user_id', currentUser.id);
           const all = bets || [];
           const wins = all.filter(b => b.result === 'win').length;
-          document.getElementById('statBets').textContent = all.length;
-          document.getElementById('statWins').textContent = wins;
-        }
+          const sbEl = document.getElementById('statBets');
+          const swEl = document.getElementById('statWins');
+          if (sbEl) sbEl.textContent = all.length;
+          if (swEl) swEl.textContent = wins;
+        } catch (e) { console.warn('bets stats', e); }
+      }
 
-        let ranks = [];
+      let ranks = [];
+      // С photo_url
+      try {
+        const res = await sb
+          .from('player_ratings')
+          .select('telegram_user_id, name, total_score, photo_url')
+          .order('total_score', { ascending: false })
+          .limit(20);
+        if (res.error) throw res.error;
+        ranks = res.data || [];
+      } catch (e1) {
+        console.warn('ranks with photo_url failed', e1);
+        // Без photo_url
         try {
-          const res = await sb
-            .from('player_ratings')
-            .select('telegram_user_id, name, total_score, photo_url')
-            .order('total_score', { ascending: false })
-            .limit(15);
-          if (res.error) throw res.error;
-          ranks = res.data || [];
-        } catch (e) {
-          // fallback без photo_url, если колонки ещё нет
           const res = await sb
             .from('player_ratings')
             .select('telegram_user_id, name, total_score')
             .order('total_score', { ascending: false })
-            .limit(15);
+            .limit(20);
+          if (res.error) throw res.error;
           ranks = res.data || [];
+        } catch (e2) {
+          console.error('ranks failed', e2);
+          if (box) box.innerHTML = '<div class="empty">Ошибка загрузки рейтинга</div>';
+          return;
         }
+      }
 
-        if (currentUser && ranks?.length) {
-          const idx = ranks.findIndex(r => String(r.telegram_user_id) === String(currentUser.id));
-          document.getElementById('statRank').textContent = idx >= 0 ? '#' + (idx + 1) : '—';
-        }
+      if (currentUser && ranks.length) {
+        const idx = ranks.findIndex(r => String(r.telegram_user_id) === String(currentUser.id));
+        const sr = document.getElementById('statRank');
+        if (sr) sr.textContent = idx >= 0 ? '#' + (idx + 1) : '—';
+      }
 
-        await renderLeaderboard(ranks || []);
+      try {
+        await renderLeaderboard(ranks);
       } catch (e) {
-        console.error('stats', e);
-        const box = document.getElementById('leaderboardList');
-        if (box) box.innerHTML = '<div class="empty">Ошибка загрузки рейтинга</div>';
+        console.error('renderLeaderboard', e);
+        if (box) box.innerHTML = '<div class="empty">Ошибка отрисовки рейтинга</div>';
       }
     }
 
     async function renderLeaderboard(ranks) {
       const box = document.getElementById('leaderboardList');
       if (!box) return;
-      if (!ranks.length) {
+      if (!ranks || !ranks.length) {
         box.innerHTML = '<div class="empty">Пока пусто</div>';
         return;
       }
 
-      // Активные шляпы для топа
       let hatMap = {};
       try {
-        const ids = ranks.map(r => r.telegram_user_id);
-        const { data: hats } = await sb
-          .from('player_active_hat')
-          .select('telegram_user_id, hat_id')
-          .in('telegram_user_id', ids);
-        (hats || []).forEach(h => { hatMap[String(h.telegram_user_id)] = h.hat_id; });
-      } catch (e) { /* шляпы опциональны */ }
+        const ids = ranks.map(r => String(r.telegram_user_id)).filter(Boolean);
+        if (ids.length && sb) {
+          const { data: hats, error } = await sb
+            .from('player_active_hat')
+            .select('telegram_user_id, hat_id')
+            .in('telegram_user_id', ids);
+          if (!error && hats) {
+            hats.forEach(h => { hatMap[String(h.telegram_user_id)] = h.hat_id; });
+          }
+        }
+      } catch (e) { console.warn('hats', e); }
 
-      box.innerHTML = ranks.map((row, i) => {
+      let html = '';
+      for (let i = 0; i < ranks.length; i++) {
+        const row = ranks[i];
         const isMe = currentUser && String(row.telegram_user_id) === String(currentUser.id);
         const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
         const hatId = hatMap[String(row.telegram_user_id)];
-        const hUrl = hatUrl(hatId);
+        const hUrl = hatId ? hatUrl(hatId) : null;
         const avaId = 'lb-ava-' + i;
-        return `<div class="lb-row${isMe ? ' me' : ''}">
-          <span class="lb-rank ${rankClass}">${i + 1}</span>
-          <div class="lb-ava-wrap">
-            ${hUrl ? `<div class="lb-hat"><img src="${hUrl}" alt="" /></div>` : ''}
-            <div class="lb-ava" id="${avaId}"></div>
-          </div>
-          <span class="lb-name">${esc(row.name || 'Игрок')}</span>
-          <span class="lb-score">${fmt(row.total_score)}</span>
-        </div>`;
-      }).join('');
+        html += '<div class="lb-row' + (isMe ? ' me' : '') + '">'
+          + '<span class="lb-rank ' + rankClass + '">' + (i + 1) + '</span>'
+          + '<div class="lb-ava-wrap">'
+          + (hUrl ? '<div class="lb-hat"><img src="' + hUrl + '" alt="" /></div>' : '')
+          + '<div class="lb-ava" id="' + avaId + '"></div>'
+          + '</div>'
+          + '<span class="lb-name">' + esc(row.name || 'Игрок') + '</span>'
+          + '<span class="lb-score">' + fmt(row.total_score) + '</span>'
+          + '</div>';
+      }
+      box.innerHTML = html;
 
-      ranks.forEach((row, i) => {
-        const el = document.getElementById('lb-ava-' + i);
-        const isMe = currentUser && String(row.telegram_user_id) === String(currentUser.id);
-        setLeaderboardAvatar(el, row, isMe);
-      });
+      for (let i = 0; i < ranks.length; i++) {
+        try {
+          const el = document.getElementById('lb-ava-' + i);
+          const isMe = currentUser && String(ranks[i].telegram_user_id) === String(currentUser.id);
+          setLeaderboardAvatar(el, ranks[i], isMe);
+        } catch (e) { console.warn('ava', i, e); }
+      }
     }
 
     // ═══════════════════════════════════════
