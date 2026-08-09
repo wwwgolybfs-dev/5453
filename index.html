@@ -346,8 +346,11 @@
     .profile-hero { text-align: center; padding: 12px 0 8px; }
     .avatar-wrap {
       position: relative;
-      width: 88px; height: 88px;
-      margin: 0 auto 14px;
+      width: 96px;
+      margin: 0 auto 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .avatar {
       width: 80px; height: 80px;
@@ -358,28 +361,35 @@
       font-size: 30px;
       font-weight: 800;
       color: var(--gold-light);
-      margin: 8px auto 0;
       box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
       animation: avatarPulse 4s ease-in-out infinite;
       overflow: hidden;
       position: relative;
       z-index: 1;
+      flex-shrink: 0;
     }
     .avatar img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
     }
+    /* Шляпа строго НАД рамкой */
     .avatar-hat {
-      position: absolute;
-      top: -6px; left: 50%;
-      transform: translateX(-50%);
-      width: 52px; height: 52px;
+      position: relative;
+      width: 58px;
+      height: 34px;
+      margin-bottom: -4px;
       z-index: 2;
       pointer-events: none;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      flex-shrink: 0;
     }
-    .avatar-hat img { width: 100%; height: 100%; object-fit: contain; }
+    .avatar-hat img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+    }
     @keyframes avatarPulse {
       0%, 100% { box-shadow: 0 8px 24px rgba(212, 175, 55, 0.12); }
       50% { box-shadow: 0 8px 32px rgba(212, 175, 55, 0.28); }
@@ -406,32 +416,39 @@
     .lb-rank.top2 { color: #c0c0c0; }
     .lb-rank.top3 { color: #cd7f32; }
     .lb-ava-wrap {
-      position: relative;
-      width: 40px; height: 40px;
+      width: 40px;
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lb-hat {
+      width: 28px;
+      height: 18px;
+      margin-bottom: -3px;
+      z-index: 2;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    .lb-hat img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
     }
     .lb-ava {
       width: 36px; height: 36px;
       border-radius: 12px;
-      background: var(--chip-bg);
       border: 1px solid var(--border-soft);
       overflow: hidden;
       display: grid; place-items: center;
       font-weight: 800;
       font-size: 14px;
-      color: var(--gold-light);
-      margin-top: 4px;
+      color: #fff;
+      flex-shrink: 0;
     }
-    .lb-ava img { width: 100%; height: 100%; object-fit: cover; }
-    .lb-hat {
-      position: absolute;
-      top: -4px; left: 50%;
-      transform: translateX(-50%);
-      width: 28px; height: 28px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .lb-hat img { width: 100%; height: 100%; object-fit: contain; }
+    .lb-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .lb-name {
       flex: 1;
       overflow: hidden;
@@ -1157,29 +1174,67 @@
       return null;
     }
 
-    function setAvatarEl(el, user, sizeHint) {
-      if (!el) return;
-      const initial = ((user && user.name) || '?').trim().charAt(0).toUpperCase();
-      el.textContent = initial;
-      // Telegram иногда не отдаёт photo_url в initDataUnsafe — пробуем t.me CDN
-      const candidates = [];
-      if (user?.photo) candidates.push(user.photo);
-      if (user?.username) candidates.push('https://t.me/i/userpic/320/' + user.username + '.jpg');
-      if (user?.id) candidates.push('https://t.me/i/userpic/320/' + user.id + '.jpg');
+    function avatarColor(seed) {
+      const colors = ['#c9a227','#e8455a','#3ecf8e','#5b8def','#a855f7','#f0921a','#14b8a6','#ec4899'];
+      let h = 0;
+      const s = String(seed || '0');
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return colors[h % colors.length];
+    }
 
-      function tryNext(i) {
-        if (i >= candidates.length) return;
+    // SVG-аватар с буквой (всегда видно, не зависит от jpg CDN)
+    function letterAvatarSvg(name, seed) {
+      const letter = ((name || '?').trim().charAt(0) || '?').toUpperCase();
+      const bg = avatarColor(seed || name);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+        <rect width="128" height="128" rx="36" fill="${bg}"/>
+        <text x="64" y="64" text-anchor="middle" dominant-baseline="central"
+          font-family="Inter,system-ui,sans-serif" font-size="58" font-weight="800" fill="#fff">${letter}</text>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function setAvatarEl(el, user) {
+      if (!el) return;
+      const name = (user && user.name) || '?';
+      const seed = (user && user.id) || name;
+      // Сразу ставим SVG-букву, чтобы не было пусто
+      const fallback = letterAvatarSvg(name, seed);
+      el.innerHTML = '';
+      const base = document.createElement('img');
+      base.alt = name;
+      base.src = fallback;
+      el.appendChild(base);
+
+      // Своё фото из Telegram (если есть)
+      if (user?.photo) {
         const img = document.createElement('img');
-        img.alt = user?.name || '';
+        img.alt = name;
         img.referrerPolicy = 'no-referrer';
-        img.src = candidates[i];
-        img.onload = () => {
-          el.innerHTML = '';
-          el.appendChild(img);
-        };
-        img.onerror = () => tryNext(i + 1);
+        img.src = user.photo;
+        img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
       }
-      if (candidates.length) tryNext(0);
+    }
+
+    function setLeaderboardAvatar(el, row, isMe) {
+      if (!el) return;
+      const name = row.name || 'Игрок';
+      const seed = row.telegram_user_id || name;
+      const svgSrc = letterAvatarSvg(name, seed);
+      el.style.background = avatarColor(seed);
+      el.innerHTML = '';
+      const base = document.createElement('img');
+      base.src = svgSrc;
+      base.alt = name;
+      el.appendChild(base);
+
+      // Только для себя — пробуем реальное фото
+      if (isMe && currentUser?.photo) {
+        const img = document.createElement('img');
+        img.referrerPolicy = 'no-referrer';
+        img.src = currentUser.photo;
+        img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
+      }
     }
 
     async function loadActiveHat(userId) {
@@ -1302,37 +1357,22 @@
         const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
         const hatId = hatMap[String(row.telegram_user_id)];
         const hUrl = hatUrl(hatId);
-        const initial = (row.name || 'И').trim().charAt(0).toUpperCase();
         const avaId = 'lb-ava-' + i;
         return `<div class="lb-row${isMe ? ' me' : ''}">
           <span class="lb-rank ${rankClass}">${i + 1}</span>
           <div class="lb-ava-wrap">
             ${hUrl ? `<div class="lb-hat"><img src="${hUrl}" alt="" /></div>` : ''}
-            <div class="lb-ava" id="${avaId}">${esc(initial)}</div>
+            <div class="lb-ava" id="${avaId}"></div>
           </div>
           <span class="lb-name">${esc(row.name || 'Игрок')}</span>
           <span class="lb-score">${fmt(row.total_score)}</span>
         </div>`;
       }).join('');
 
-      // Подгружаем аватарки (t.me CDN по id — может не сработать без username, тогда останется буква)
       ranks.forEach((row, i) => {
         const el = document.getElementById('lb-ava-' + i);
-        if (!el) return;
-        const candidates = [];
-        if (currentUser && String(row.telegram_user_id) === String(currentUser.id) && currentUser.photo) {
-          candidates.push(currentUser.photo);
-        }
-        candidates.push('https://t.me/i/userpic/320/' + row.telegram_user_id + '.jpg');
-        function tryNext(j) {
-          if (j >= candidates.length) return;
-          const img = document.createElement('img');
-          img.referrerPolicy = 'no-referrer';
-          img.src = candidates[j];
-          img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
-          img.onerror = () => tryNext(j + 1);
-        }
-        tryNext(0);
+        const isMe = currentUser && String(row.telegram_user_id) === String(currentUser.id);
+        setLeaderboardAvatar(el, row, isMe);
       });
     }
 
@@ -2202,4 +2242,4 @@
     init();
   </script>
 </body>
-  </html>
+</html>
