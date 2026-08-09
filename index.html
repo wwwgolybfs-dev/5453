@@ -344,6 +344,11 @@
     }
     .section-label:first-child { margin-top: 4px; }
     .profile-hero { text-align: center; padding: 12px 0 8px; }
+    .avatar-wrap {
+      position: relative;
+      width: 88px; height: 88px;
+      margin: 0 auto 14px;
+    }
     .avatar {
       width: 80px; height: 80px;
       border-radius: 24px;
@@ -353,13 +358,94 @@
       font-size: 30px;
       font-weight: 800;
       color: var(--gold-light);
-      margin: 0 auto 14px;
+      margin: 8px auto 0;
       box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
       animation: avatarPulse 4s ease-in-out infinite;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
     }
+    .avatar img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .avatar-hat {
+      position: absolute;
+      top: -6px; left: 50%;
+      transform: translateX(-50%);
+      width: 52px; height: 52px;
+      z-index: 2;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+    }
+    .avatar-hat img { width: 100%; height: 100%; object-fit: contain; }
     @keyframes avatarPulse {
       0%, 100% { box-shadow: 0 8px 24px rgba(212, 175, 55, 0.12); }
       50% { box-shadow: 0 8px 32px rgba(212, 175, 55, 0.28); }
+    }
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-soft);
+      font-size: 13px;
+    }
+    .lb-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .lb-row:first-child { padding-top: 0; }
+    .lb-row.me { color: var(--gold-light); font-weight: 700; }
+    .lb-rank {
+      width: 22px;
+      text-align: center;
+      font-weight: 800;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .lb-rank.top1 { color: #f3d97a; }
+    .lb-rank.top2 { color: #c0c0c0; }
+    .lb-rank.top3 { color: #cd7f32; }
+    .lb-ava-wrap {
+      position: relative;
+      width: 40px; height: 40px;
+      flex-shrink: 0;
+    }
+    .lb-ava {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      background: var(--chip-bg);
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+      display: grid; place-items: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--gold-light);
+      margin-top: 4px;
+    }
+    .lb-ava img { width: 100%; height: 100%; object-fit: cover; }
+    .lb-hat {
+      position: absolute;
+      top: -4px; left: 50%;
+      transform: translateX(-50%);
+      width: 28px; height: 28px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .lb-hat img { width: 100%; height: 100%; object-fit: contain; }
+    .lb-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .lb-row.me .lb-name { color: var(--gold-light); }
+    .lb-score {
+      font-weight: 800;
+      color: var(--gold-light);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
     }
     .profile-name { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
     .profile-id { font-size: 12px; color: var(--muted); margin-top: 5px; }
@@ -750,7 +836,10 @@
       <!-- PROFILE -->
       <section class="view" id="view-profile" data-title="Профиль">
         <div class="profile-hero">
-          <div class="avatar" id="avatar">?</div>
+          <div class="avatar-wrap">
+            <div class="avatar-hat" id="profileHat" style="display:none"></div>
+            <div class="avatar" id="avatar">?</div>
+          </div>
           <div class="profile-name" id="userName">Гость</div>
           <div class="profile-id" id="userId">Telegram не определён</div>
           <div class="balance-big" id="profileBalance">—<span>очков</span></div>
@@ -771,6 +860,10 @@
         </div>
         <div class="section-label">Мои выходные</div>
         <div class="card" id="myVacations">
+          <div class="empty">Загрузка…</div>
+        </div>
+        <div class="section-label">Общий рейтинг</div>
+        <div class="card" id="leaderboardList">
           <div class="empty">Загрузка…</div>
         </div>
       </section>
@@ -828,6 +921,13 @@
       <!-- CASINO -->
       <section class="view" id="view-casino" data-title="Казино">
         <div class="games-grid">
+          <div class="game-card wide" data-href="https://wwwgolybfs-dev.github.io/Casino/casino.html">
+            <div class="game-emoji">♠️</div>
+            <div>
+              <div class="game-name">Petzker Casino</div>
+              <div class="game-desc">Открыть лобби — блэкджек, рулетка, покер</div>
+            </div>
+          </div>
           <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/Casino/petzker-blackjack-1.html">
             <div class="game-emoji">🃏</div>
             <div class="game-name">Блэкджек</div>
@@ -847,13 +947,6 @@
             <div class="game-emoji">🐶</div>
             <div class="game-name">Домик собак</div>
             <div class="game-desc">Слот</div>
-          </div>
-          <div class="game-card wide" data-href="https://wwwgolybfs-dev.github.io/Casino/casino.html">
-            <div class="game-emoji">✨</div>
-            <div>
-              <div class="game-name">Открыть лобби</div>
-              <div class="game-desc">Все столы Petzker Casino</div>
-            </div>
           </div>
         </div>
       </section>
@@ -890,7 +983,7 @@
   <div class="modal-overlay" id="dayModal">
     <div class="modal">
       <div class="modal-title" id="dayModalTitle">День</div>
-      <div class="modal-sub" id="dayModalWho">—</div>
+      <div class="modal-sub" id="dayModalWhoList" style="margin-bottom:12px"></div>
       <div id="dayModalForm">
         <input class="name-input" id="dayNameInput" placeholder="Ваше имя" />
         <div class="modal-actions">
@@ -899,7 +992,7 @@
         </div>
       </div>
       <div id="dayModalFull" style="display:none">
-        <div class="empty">Мест нет (макс. 2)</div>
+        <div class="empty" id="dayModalFullNote">Мест нет (макс. 2)</div>
         <button class="btn btn-ghost" id="dayModalClose2" style="width:100%;margin-top:10px">Закрыть</button>
       </div>
     </div>
@@ -950,6 +1043,25 @@
     const VNVV_ID = '665412797';
     const ANATOLY_COMMISSION = 0.06;
     const VNVV_COMMISSION = 0.04;
+
+    // Шляпы из Casino/hats
+    const HATS_BASE = 'https://raw.githubusercontent.com/wwwgolybfs-dev/Casino/main/hats/';
+    const HAT_FILES = {
+      chef: 'hat_chef.svg',
+      cowboy: 'hat_cowboy.svg',
+      crown: 'hat_crown.svg',
+      detective: 'hat_detective.svg',
+      party: 'hat_party.svg',
+      pirate: 'hat_pirate.svg',
+      tophat: 'hat_tophat.svg',
+      viking: 'hat_viking.svg',
+      wizard: 'hat_wizard.svg'
+    };
+    function hatUrl(hatId) {
+      if (!hatId) return null;
+      const file = HAT_FILES[hatId] || ('hat_' + hatId + '.svg');
+      return HATS_BASE + file;
+    }
 
     let sb = null;
     try {
@@ -1033,11 +1145,68 @@
           if (u?.id) {
             const name = [u.first_name, u.last_name].filter(Boolean).join(' ').trim()
               || u.username || ('User ' + u.id);
-            return { id: String(u.id), name, photo: u.photo_url || null };
+            return {
+              id: String(u.id),
+              name,
+              photo: u.photo_url || null,
+              username: u.username || null
+            };
           }
         }
       } catch (e) {}
       return null;
+    }
+
+    function setAvatarEl(el, user, sizeHint) {
+      if (!el) return;
+      const initial = ((user && user.name) || '?').trim().charAt(0).toUpperCase();
+      el.textContent = initial;
+      // Telegram иногда не отдаёт photo_url в initDataUnsafe — пробуем t.me CDN
+      const candidates = [];
+      if (user?.photo) candidates.push(user.photo);
+      if (user?.username) candidates.push('https://t.me/i/userpic/320/' + user.username + '.jpg');
+      if (user?.id) candidates.push('https://t.me/i/userpic/320/' + user.id + '.jpg');
+
+      function tryNext(i) {
+        if (i >= candidates.length) return;
+        const img = document.createElement('img');
+        img.alt = user?.name || '';
+        img.referrerPolicy = 'no-referrer';
+        img.src = candidates[i];
+        img.onload = () => {
+          el.innerHTML = '';
+          el.appendChild(img);
+        };
+        img.onerror = () => tryNext(i + 1);
+      }
+      if (candidates.length) tryNext(0);
+    }
+
+    async function loadActiveHat(userId) {
+      if (!sb || !userId) return null;
+      try {
+        const { data } = await sb
+          .from('player_active_hat')
+          .select('hat_id')
+          .eq('telegram_user_id', userId)
+          .maybeSingle();
+        return data?.hat_id || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function renderHat(containerId, hatId) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const url = hatUrl(hatId);
+      if (!url) {
+        el.style.display = 'none';
+        el.innerHTML = '';
+        return;
+      }
+      el.style.display = 'block';
+      el.innerHTML = '<img src="' + url + '" alt="" />';
     }
 
     // ═══════════════════════════════════════
@@ -1077,29 +1246,94 @@
     }
 
     async function loadRankAndStats() {
-      if (!sb || !currentUser) return;
+      if (!sb) return;
       try {
-        const { data: bets } = await sb
-          .from('bet_placements')
-          .select('id, result')
-          .eq('user_id', currentUser.id);
-        const all = bets || [];
-        const wins = all.filter(b => b.result === 'win').length;
-        document.getElementById('statBets').textContent = all.length;
-        document.getElementById('statWins').textContent = wins;
+        if (currentUser) {
+          const { data: bets } = await sb
+            .from('bet_placements')
+            .select('id, result')
+            .eq('user_id', currentUser.id);
+          const all = bets || [];
+          const wins = all.filter(b => b.result === 'win').length;
+          document.getElementById('statBets').textContent = all.length;
+          document.getElementById('statWins').textContent = wins;
+        }
 
         const { data: ranks } = await sb
           .from('player_ratings')
-          .select('telegram_user_id, total_score')
+          .select('telegram_user_id, name, total_score')
           .order('total_score', { ascending: false })
-          .limit(100);
-        if (ranks?.length) {
+          .limit(15);
+
+        if (currentUser && ranks?.length) {
           const idx = ranks.findIndex(r => String(r.telegram_user_id) === String(currentUser.id));
           document.getElementById('statRank').textContent = idx >= 0 ? '#' + (idx + 1) : '—';
         }
+
+        await renderLeaderboard(ranks || []);
       } catch (e) {
         console.error('stats', e);
+        const box = document.getElementById('leaderboardList');
+        if (box) box.innerHTML = '<div class="empty">Ошибка загрузки рейтинга</div>';
       }
+    }
+
+    async function renderLeaderboard(ranks) {
+      const box = document.getElementById('leaderboardList');
+      if (!box) return;
+      if (!ranks.length) {
+        box.innerHTML = '<div class="empty">Пока пусто</div>';
+        return;
+      }
+
+      // Активные шляпы для топа
+      let hatMap = {};
+      try {
+        const ids = ranks.map(r => r.telegram_user_id);
+        const { data: hats } = await sb
+          .from('player_active_hat')
+          .select('telegram_user_id, hat_id')
+          .in('telegram_user_id', ids);
+        (hats || []).forEach(h => { hatMap[String(h.telegram_user_id)] = h.hat_id; });
+      } catch (e) { /* шляпы опциональны */ }
+
+      box.innerHTML = ranks.map((row, i) => {
+        const isMe = currentUser && String(row.telegram_user_id) === String(currentUser.id);
+        const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+        const hatId = hatMap[String(row.telegram_user_id)];
+        const hUrl = hatUrl(hatId);
+        const initial = (row.name || 'И').trim().charAt(0).toUpperCase();
+        const avaId = 'lb-ava-' + i;
+        return `<div class="lb-row${isMe ? ' me' : ''}">
+          <span class="lb-rank ${rankClass}">${i + 1}</span>
+          <div class="lb-ava-wrap">
+            ${hUrl ? `<div class="lb-hat"><img src="${hUrl}" alt="" /></div>` : ''}
+            <div class="lb-ava" id="${avaId}">${esc(initial)}</div>
+          </div>
+          <span class="lb-name">${esc(row.name || 'Игрок')}</span>
+          <span class="lb-score">${fmt(row.total_score)}</span>
+        </div>`;
+      }).join('');
+
+      // Подгружаем аватарки (t.me CDN по id — может не сработать без username, тогда останется буква)
+      ranks.forEach((row, i) => {
+        const el = document.getElementById('lb-ava-' + i);
+        if (!el) return;
+        const candidates = [];
+        if (currentUser && String(row.telegram_user_id) === String(currentUser.id) && currentUser.photo) {
+          candidates.push(currentUser.photo);
+        }
+        candidates.push('https://t.me/i/userpic/320/' + row.telegram_user_id + '.jpg');
+        function tryNext(j) {
+          if (j >= candidates.length) return;
+          const img = document.createElement('img');
+          img.referrerPolicy = 'no-referrer';
+          img.src = candidates[j];
+          img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
+          img.onerror = () => tryNext(j + 1);
+        }
+        tryNext(0);
+      });
     }
 
     // ═══════════════════════════════════════
@@ -1136,6 +1370,38 @@
       const { data, error } = await sb.from('vacations').insert([payload]).select().single();
       if (error) throw error;
       return { id: data.id, name, telegram_user_id: data.telegram_user_id ?? null };
+    }
+
+    async function deleteVacation(id) {
+      if (!sb) throw new Error('no db');
+      const { error } = await sb.from('vacations').delete().eq('id', id);
+      if (error) throw error;
+    }
+
+    function canDeleteEntry(entry) {
+      if (!currentUser) return entry.telegram_user_id == null;
+      return entry.telegram_user_id != null && String(entry.telegram_user_id) === String(currentUser.id);
+    }
+
+    async function removeVacationEntry(day, id, name) {
+      const ok = confirm('Убрать выходной для ' + name + '?');
+      if (!ok) return;
+      try {
+        await deleteVacation(id);
+        if (vacations[day]) {
+          vacations[day] = vacations[day].filter(v => String(v.id) !== String(id));
+          if (!vacations[day].length) delete vacations[day];
+        }
+        renderCalendar();
+        renderMyVacations();
+        if (selectedDayKey === day) openDayModal(day);
+        showToast('Выходной убран');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка удаления');
+        haptic('error');
+      }
     }
 
     // ═══════════════════════════════════════
@@ -1281,22 +1547,37 @@
         box.innerHTML = '<div class="empty">Войдите через Telegram</div>';
         return;
       }
-      const mine = Object.entries(vacations)
-        .filter(([, list]) => list.some(v => String(v.telegram_user_id) === String(currentUser.id)))
-        .sort(([a], [b]) => a.localeCompare(b));
+      const mine = [];
+      Object.entries(vacations).forEach(([key, list]) => {
+        list.forEach(v => {
+          if (String(v.telegram_user_id) === String(currentUser.id)) {
+            mine.push({ key, entry: v });
+          }
+        });
+      });
+      mine.sort((a, b) => a.key.localeCompare(b.key));
 
       if (!mine.length) {
         box.innerHTML = '<div class="empty">Вы ещё не записаны на выходные</div>';
         return;
       }
-      box.innerHTML = mine.map(([key, list]) => {
+      box.innerHTML = mine.map(({ key, entry }) => {
         const d = new Date(key + 'T00:00:00');
         const wd = WEEKDAYS[d.getDay()];
         return `<div class="my-vacation">
-          <span class="vac-date">${d.getDate()} ${MONTHS_GEN[d.getMonth()].slice(0, 3)}</span>
-          <span style="text-transform:capitalize">${wd}</span>
+          <div>
+            <span class="vac-date">${d.getDate()} ${MONTHS_GEN[d.getMonth()].slice(0, 3)}</span>
+            <span style="text-transform:capitalize;margin-left:8px;color:var(--muted);font-size:12px">${wd}</span>
+          </div>
+          <button class="btn btn-ghost vac-remove-btn" data-day="${esc(key)}" data-id="${esc(entry.id)}" data-name="${esc(entry.name)}" style="width:auto;padding:6px 12px;font-size:12px">Убрать</button>
         </div>`;
       }).join('');
+
+      box.querySelectorAll('.vac-remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          removeVacationEntry(btn.dataset.day, btn.dataset.id, btn.dataset.name);
+        });
+      });
     }
 
     // ═══════════════════════════════════════
@@ -1308,14 +1589,39 @@
       document.getElementById('dayModalTitle').textContent =
         d.getDate() + ' ' + MONTHS_GEN[d.getMonth()] + ' ' + d.getFullYear();
       const names = vacations[key] || [];
-      document.getElementById('dayModalWho').textContent =
-        names.length
-          ? names.map(n => n.name).join(', ')
-          : 'Пока никто не записан';
 
+      const whoEl = document.getElementById('dayModalWhoList');
+      if (!names.length) {
+        whoEl.innerHTML = '<div class="empty" style="padding:4px 0">Пока никто не записан</div>';
+      } else {
+        whoEl.innerHTML = names.map(n => {
+          const canDel = canDeleteEntry(n);
+          return `<div class="my-vacation" style="padding:8px 0">
+            <span>${esc(n.name)}</span>
+            ${canDel ? `<button class="btn btn-ghost vac-modal-remove" data-id="${esc(n.id)}" data-name="${esc(n.name)}" style="width:auto;padding:4px 10px;font-size:12px">× Убрать</button>` : ''}
+          </div>`;
+        }).join('');
+        whoEl.querySelectorAll('.vac-modal-remove').forEach(btn => {
+          btn.addEventListener('click', () => {
+            removeVacationEntry(key, btn.dataset.id, btn.dataset.name);
+          });
+        });
+      }
+
+      const alreadyMine = currentUser && names.some(v => String(v.telegram_user_id) === String(currentUser.id));
       const full = names.length >= 2;
-      document.getElementById('dayModalForm').style.display = full ? 'none' : 'block';
-      document.getElementById('dayModalFull').style.display = full ? 'block' : 'none';
+
+      // Если уже записан — форму скрываем, оставляем возможность убрать себя через список
+      if (alreadyMine || full) {
+        document.getElementById('dayModalForm').style.display = 'none';
+        document.getElementById('dayModalFull').style.display = 'block';
+        document.getElementById('dayModalFullNote').textContent = alreadyMine
+          ? 'Вы уже записаны на этот день'
+          : 'Мест нет (макс. 2)';
+      } else {
+        document.getElementById('dayModalForm').style.display = 'block';
+        document.getElementById('dayModalFull').style.display = 'none';
+      }
 
       const input = document.getElementById('dayNameInput');
       if (currentUser) {
@@ -1862,7 +2168,7 @@
       if (currentUser) {
         document.getElementById('userName').textContent = currentUser.name;
         document.getElementById('userId').textContent = 'Telegram ID · ' + currentUser.id;
-        document.getElementById('avatar').textContent = (currentUser.name.charAt(0) || 'П').toUpperCase();
+        setAvatarEl(document.getElementById('avatar'), currentUser);
       }
 
       if (!sb) {
@@ -1880,6 +2186,11 @@
         fetchUserBets()
       ]);
 
+      if (currentUser) {
+        const hatId = await loadActiveHat(currentUser.id);
+        renderHat('profileHat', hatId);
+      }
+
       renderCalendar();
       renderDiary();
       renderBetEvents();
@@ -1891,4 +2202,4 @@
     init();
   </script>
 </body>
-</html>
+  </html>
