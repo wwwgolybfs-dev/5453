@@ -802,17 +802,17 @@
       <!-- GAMES -->
       <section class="view" id="view-games" data-title="Игры">
         <div class="games-grid">
-          <div class="game-card" data-href="minesweeper.html">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/global_obnova/minesweeper.html">
             <div class="game-emoji">💣</div>
             <div class="game-name">Минёр</div>
             <div class="game-desc">Классика</div>
           </div>
-          <div class="game-card" onclick="showToast('Скоро')">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/global_obnova/dice.html">
             <div class="game-emoji">🎲</div>
             <div class="game-name">Кубики</div>
             <div class="game-desc">Удача</div>
           </div>
-          <div class="game-card" onclick="showToast('Скоро')">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/global_obnova/doodle.html">
             <div class="game-emoji">🦘</div>
             <div class="game-name">Дудл</div>
             <div class="game-desc">Прыжки</div>
@@ -828,27 +828,27 @@
       <!-- CASINO -->
       <section class="view" id="view-casino" data-title="Казино">
         <div class="games-grid">
-          <div class="game-card" data-href="petzker-blackjack-1.html">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/Casino/petzker-blackjack-1.html">
             <div class="game-emoji">🃏</div>
             <div class="game-name">Блэкджек</div>
             <div class="game-desc">21 против дилера</div>
           </div>
-          <div class="game-card" data-href="roulette.html">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/Casino/roulette.html">
             <div class="game-emoji">🎰</div>
             <div class="game-name">Рулетка</div>
             <div class="game-desc">Классика</div>
           </div>
-          <div class="game-card" data-href="poker.html">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/Casino/poker.html">
             <div class="game-emoji">♠️</div>
             <div class="game-name">Покер</div>
             <div class="game-desc">Техасский холдем</div>
           </div>
-          <div class="game-card" data-href="doghouse/index.html">
+          <div class="game-card" data-href="https://wwwgolybfs-dev.github.io/dog_hause/">
             <div class="game-emoji">🐶</div>
             <div class="game-name">Домик собак</div>
             <div class="game-desc">Слот</div>
           </div>
-          <div class="game-card wide" data-href="casino.html">
+          <div class="game-card wide" data-href="https://wwwgolybfs-dev.github.io/Casino/casino.html">
             <div class="game-emoji">✨</div>
             <div>
               <div class="game-name">Открыть лобби</div>
@@ -905,6 +905,37 @@
     </div>
   </div>
 
+  <!-- Outcome select (admin) -->
+  <div class="modal-overlay" id="outcomeModal">
+    <div class="modal">
+      <div class="modal-title">Выбрать исход</div>
+      <div class="modal-sub" id="outcomeModalSub">—</div>
+      <button class="btn btn-primary" id="outcomeBtn1" style="margin-bottom:8px">Исход 1</button>
+      <button class="btn btn-primary" id="outcomeBtn2" style="margin-bottom:8px">Исход 2</button>
+      <button class="btn btn-ghost" id="outcomeModalClose" style="width:100%">Отмена</button>
+    </div>
+  </div>
+
+  <!-- Bet place modal -->
+  <div class="modal-overlay" id="betPlaceModal">
+    <div class="modal">
+      <div class="modal-title" id="betPlaceTitle">Сделать ставку</div>
+      <div class="modal-sub" id="betPlaceSub">—</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Баланс: <b id="betPlaceBalance" style="color:var(--gold-light)">0</b></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px" id="betPresets">
+        <button class="btn btn-ghost bet-amt" data-amt="50" style="width:auto;padding:8px 14px">50</button>
+        <button class="btn btn-ghost bet-amt" data-amt="100" style="width:auto;padding:8px 14px">100</button>
+        <button class="btn btn-ghost bet-amt" data-amt="200" style="width:auto;padding:8px 14px">200</button>
+        <button class="btn btn-ghost bet-amt" data-amt="500" style="width:auto;padding:8px 14px">500</button>
+      </div>
+      <input class="name-input" id="betAmountInput" type="number" min="1" placeholder="Своя сумма" style="margin-bottom:10px" />
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="betPlaceCancel">Отмена</button>
+        <button class="btn btn-primary" id="betPlaceConfirm" style="width:auto;flex:1">Поставить</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -914,10 +945,26 @@
     const SUPABASE_URL = 'https://heubrattlnikielnfheg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhldWJyYXR0bG5pa2llbG5maGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NzYyMjcsImV4cCI6MjEwMDU1MjIyN30._lRs77YnsILFN_Ru4uR2wDWQFtAlazZh8UaaKa7fsnM';
 
+    // Админы и комиссия (как в оригинале)
+    const ANATOLY_ID = '438081341';
+    const VNVV_ID = '665412797';
+    const ANATOLY_COMMISSION = 0.06;
+    const VNVV_COMMISSION = 0.04;
+
     let sb = null;
     try {
       if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (e) { console.warn('Supabase init', e); }
+
+    function isAdmin() {
+      return currentUser && String(currentUser.id) === String(ANATOLY_ID);
+    }
+    function isCommissionAdmin() {
+      return currentUser && (
+        String(currentUser.id) === String(ANATOLY_ID) ||
+        String(currentUser.id) === String(VNVV_ID)
+      );
+    }
 
     // ═══════════════════════════════════════
     // STATE
@@ -1392,6 +1439,9 @@
       return Math.round((part / total) * 100);
     }
 
+    let pendingOutcomeEventId = null;
+    let betPlaceState = { eventId: null, outcome: null, amount: 0 };
+
     function renderBetEvents() {
       const box = document.getElementById('eventsList');
       const active = betEvents.filter(e => e.status !== 'closed');
@@ -1402,6 +1452,15 @@
       box.innerHTML = active.map(ev => {
         const p1 = outcomePct(ev, 1);
         const p2 = 100 - p1;
+        const adminBtns = isAdmin() ? `
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-ghost admin-outcome" data-id="${esc(ev.id)}" style="flex:1;padding:10px;font-size:12px">Выбрать исход</button>
+            <button class="btn btn-primary admin-close" data-id="${esc(ev.id)}" style="flex:1;padding:10px;font-size:12px;width:auto">Закрыть</button>
+          </div>
+          ${ev.winning_outcome ? `<div style="font-size:11px;color:var(--green);margin-top:8px">Исход: ${ev.winning_outcome === 1 ? esc(ev.outcome_1_name) : esc(ev.outcome_2_name)}</div>` : ''}
+        ` : '';
+        const commissionNote = isCommissionAdmin()
+          ? `<div style="font-size:11px;color:var(--muted);margin-top:8px">Комиссия: 6% + 4%</div>` : '';
         return `<div class="event-card">
           <span class="badge">Активно</span>
           <div class="event-title">${esc(ev.title)}</div>
@@ -1416,15 +1475,254 @@
               <div class="outcome-pct">${p2}%</div>
             </div>
           </div>
+          ${commissionNote}
+          ${adminBtns}
         </div>`;
       }).join('');
 
       box.querySelectorAll('.outcome').forEach(el => {
         el.addEventListener('click', () => {
-          showToast('Ставки — полный функционал в основной версии');
-          haptic('light');
+          if (!currentUser) { showToast('Войдите через Telegram'); haptic('warning'); return; }
+          openBetPlace(el.dataset.event, parseInt(el.dataset.outcome, 10));
         });
       });
+      box.querySelectorAll('.admin-outcome').forEach(el => {
+        el.addEventListener('click', (e) => { e.stopPropagation(); openOutcomeModal(el.dataset.id); });
+      });
+      box.querySelectorAll('.admin-close').forEach(el => {
+        el.addEventListener('click', (e) => { e.stopPropagation(); closeEventConfirm(el.dataset.id); });
+      });
+    }
+
+    function openBetPlace(eventId, outcome) {
+      const ev = betEvents.find(e => String(e.id) === String(eventId));
+      if (!ev || ev.status === 'closed') { showToast('Событие недоступно'); return; }
+      betPlaceState = { eventId, outcome, amount: 0 };
+      document.getElementById('betPlaceTitle').textContent = 'Сделать ставку';
+      document.getElementById('betPlaceSub').textContent =
+        ev.title + ' → ' + (outcome === 1 ? ev.outcome_1_name : ev.outcome_2_name);
+      document.getElementById('betPlaceBalance').textContent = fmt(balance);
+      document.getElementById('betAmountInput').value = '';
+      document.getElementById('betPlaceModal').classList.add('open');
+      haptic('light');
+    }
+
+    document.getElementById('betPlaceCancel').addEventListener('click', () => {
+      document.getElementById('betPlaceModal').classList.remove('open');
+    });
+    document.getElementById('betPlaceModal').addEventListener('click', e => {
+      if (e.target.id === 'betPlaceModal') document.getElementById('betPlaceModal').classList.remove('open');
+    });
+    document.querySelectorAll('.bet-amt').forEach(b => {
+      b.addEventListener('click', () => {
+        document.getElementById('betAmountInput').value = b.dataset.amt;
+        betPlaceState.amount = parseInt(b.dataset.amt, 10);
+      });
+    });
+    document.getElementById('betPlaceConfirm').addEventListener('click', async () => {
+      const amount = parseInt(document.getElementById('betAmountInput').value, 10) || betPlaceState.amount;
+      if (!amount || amount <= 0) { showToast('Укажите сумму'); haptic('warning'); return; }
+      if (amount > balance) { showToast('Недостаточно очков'); haptic('error'); return; }
+      const btn = document.getElementById('betPlaceConfirm');
+      btn.disabled = true;
+      try {
+        // списываем баланс
+        balance = Math.floor(balance - amount);
+        updateBalanceUI();
+        await sb.from('player_ratings').update({
+          total_score: balance,
+          updated_at: new Date().toISOString()
+        }).eq('telegram_user_id', currentUser.id);
+
+        const bet = {
+          event_id: betPlaceState.eventId,
+          user_id: currentUser.id,
+          user_name: currentUser.name,
+          bet_amount: amount,
+          chosen_outcome: betPlaceState.outcome,
+          result: null,
+          winnings: null,
+          created_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('bet_placements').insert([bet]).select().single();
+        if (error) throw error;
+        userBets.unshift(data);
+
+        const ev = betEvents.find(e => String(e.id) === String(betPlaceState.eventId));
+        if (ev) {
+          if (betPlaceState.outcome === 1) ev.total_bets_outcome_1 = (ev.total_bets_outcome_1 || 0) + amount;
+          else ev.total_bets_outcome_2 = (ev.total_bets_outcome_2 || 0) + amount;
+          await sb.from('bet_events').update({
+            total_bets_outcome_1: ev.total_bets_outcome_1,
+            total_bets_outcome_2: ev.total_bets_outcome_2
+          }).eq('id', ev.id);
+        }
+        document.getElementById('betPlaceModal').classList.remove('open');
+        renderBetEvents();
+        renderMyBets();
+        showToast('Ставка ' + fmt(amount) + ' принята');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        balance += amount;
+        updateBalanceUI();
+        showToast('Ошибка ставки');
+        haptic('error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function openOutcomeModal(eventId) {
+      const ev = betEvents.find(e => String(e.id) === String(eventId));
+      if (!ev) return;
+      pendingOutcomeEventId = eventId;
+      document.getElementById('outcomeModalSub').textContent = ev.title;
+      document.getElementById('outcomeBtn1').textContent = ev.outcome_1_name;
+      document.getElementById('outcomeBtn2').textContent = ev.outcome_2_name;
+      document.getElementById('outcomeModal').classList.add('open');
+      haptic('light');
+    }
+    document.getElementById('outcomeModalClose').addEventListener('click', () => {
+      document.getElementById('outcomeModal').classList.remove('open');
+      pendingOutcomeEventId = null;
+    });
+    document.getElementById('outcomeModal').addEventListener('click', e => {
+      if (e.target.id === 'outcomeModal') {
+        document.getElementById('outcomeModal').classList.remove('open');
+        pendingOutcomeEventId = null;
+      }
+    });
+    async function setWinningOutcome(outcome) {
+      if (!pendingOutcomeEventId || !sb) return;
+      try {
+        await sb.from('bet_events').update({ winning_outcome: outcome }).eq('id', pendingOutcomeEventId);
+        const ev = betEvents.find(e => String(e.id) === String(pendingOutcomeEventId));
+        if (ev) ev.winning_outcome = outcome;
+        document.getElementById('outcomeModal').classList.remove('open');
+        pendingOutcomeEventId = null;
+        renderBetEvents();
+        showToast('Исход установлен');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка');
+        haptic('error');
+      }
+    }
+    document.getElementById('outcomeBtn1').addEventListener('click', () => setWinningOutcome(1));
+    document.getElementById('outcomeBtn2').addEventListener('click', () => setWinningOutcome(2));
+
+    async function addCommissionToUser(userId, userName, amount) {
+      if (!sb || amount <= 0) return;
+      try {
+        const { data } = await sb.from('player_ratings')
+          .select('total_score')
+          .eq('telegram_user_id', userId)
+          .maybeSingle();
+        if (data) {
+          await sb.from('player_ratings').update({
+            total_score: (data.total_score || 0) + amount,
+            updated_at: new Date().toISOString()
+          }).eq('telegram_user_id', userId);
+        } else {
+          await sb.from('player_ratings').insert({
+            telegram_user_id: userId,
+            name: userName,
+            total_score: amount
+          });
+        }
+        if (currentUser && String(userId) === String(currentUser.id)) {
+          balance += amount;
+          updateBalanceUI();
+        }
+      } catch (e) { console.error('commission', e); }
+    }
+
+    async function closeEventConfirm(eventId) {
+      if (!isAdmin()) { showToast('Только админ'); return; }
+      const ev = betEvents.find(e => String(e.id) === String(eventId));
+      if (!ev) return;
+      if (!ev.winning_outcome) {
+        showToast('Сначала выберите исход');
+        haptic('warning');
+        return;
+      }
+      const ok = confirm('Закрыть событие «' + ev.title + '»? Выигрыши будут начислены.');
+      if (!ok) return;
+
+      try {
+        const { data: bets, error } = await sb
+          .from('bet_placements')
+          .select('*')
+          .eq('event_id', eventId);
+        if (error) throw error;
+        const list = bets || [];
+        const totalBets = (ev.total_bets_outcome_1 || 0) + (ev.total_bets_outcome_2 || 0);
+        const winnerPool = ev.winning_outcome === 1
+          ? (ev.total_bets_outcome_1 || 0)
+          : (ev.total_bets_outcome_2 || 0);
+
+        if (totalBets === 0 || winnerPool === 0) {
+          showToast('Нет ставок для распределения');
+        } else {
+          const commissionAnatoly = Math.round(totalBets * ANATOLY_COMMISSION);
+          const commissionVnvv = Math.round(totalBets * VNVV_COMMISSION);
+          const totalCommission = commissionAnatoly + commissionVnvv;
+          const poolAfter = totalBets - totalCommission;
+
+          await addCommissionToUser(ANATOLY_ID, 'Анатолий', commissionAnatoly);
+          await addCommissionToUser(VNVV_ID, 'vnvv', commissionVnvv);
+
+          for (const bet of list) {
+            if (bet.chosen_outcome === ev.winning_outcome) {
+              const share = bet.bet_amount / winnerPool;
+              const winnings = Math.round(poolAfter * share);
+              await sb.from('bet_placements').update({
+                result: 'win',
+                winnings
+              }).eq('id', bet.id);
+              // начислить победителю
+              const { data: pr } = await sb.from('player_ratings')
+                .select('total_score')
+                .eq('telegram_user_id', bet.user_id)
+                .maybeSingle();
+              const newBal = (pr ? pr.total_score : 0) + winnings;
+              await sb.from('player_ratings').upsert({
+                telegram_user_id: bet.user_id,
+                name: bet.user_name || 'Игрок',
+                total_score: newBal,
+                updated_at: new Date().toISOString()
+              }, { onConflict: 'telegram_user_id' });
+              if (currentUser && String(bet.user_id) === String(currentUser.id)) {
+                balance = newBal;
+                updateBalanceUI();
+              }
+            } else {
+              await sb.from('bet_placements').update({
+                result: 'loss',
+                winnings: null
+              }).eq('id', bet.id);
+            }
+          }
+        }
+
+        await sb.from('bet_events').update({
+          status: 'closed',
+          closed_at: new Date().toISOString()
+        }).eq('id', eventId);
+        ev.status = 'closed';
+
+        await fetchUserBets();
+        renderBetEvents();
+        renderMyBets();
+        showToast('Событие закрыто');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка закрытия');
+        haptic('error');
+      }
     }
 
     function renderMyBets() {
@@ -1537,13 +1835,22 @@
       haptic('light');
     });
 
-    // Game links (relative — work after merge)
+    // Game / casino links — open hosted pages
     document.querySelectorAll('[data-href]').forEach(el => {
       el.addEventListener('click', () => {
         const href = el.getAttribute('data-href');
-        showToast('Откроется: ' + href);
-        // location.href = href; // раскомментировать после объединения репо
+        if (!href) return;
         haptic('light');
+        // pass uid/name/theme for games that support it
+        let url = href;
+        if (currentUser && !href.includes('Casino/casino.html') && !href.includes('dog_hause')) {
+          const sep = href.includes('?') ? '&' : '?';
+          const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+          url = href + sep + 'uid=' + encodeURIComponent(currentUser.id)
+            + '&name=' + encodeURIComponent(currentUser.name)
+            + '&theme=' + theme;
+        }
+        window.location.href = url;
       });
     });
 
