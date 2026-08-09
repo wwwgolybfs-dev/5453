@@ -1228,11 +1228,13 @@
       base.alt = name;
       el.appendChild(base);
 
-      // Только для себя — пробуем реальное фото
-      if (isMe && currentUser?.photo) {
+      // Фото из БД (сохраняется при входе в мини-апп)
+      let photo = row.photo_url || null;
+      if (isMe && currentUser?.photo) photo = currentUser.photo;
+      if (photo) {
         const img = document.createElement('img');
         img.referrerPolicy = 'no-referrer';
-        img.src = currentUser.photo;
+        img.src = photo;
         img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
       }
     }
@@ -1276,26 +1278,47 @@
       try {
         const { data, error } = await sb
           .from('player_ratings')
-          .select('total_score, name, games_played')
+          .select('total_score, name, games_played, photo_url')
           .eq('telegram_user_id', currentUser.id)
           .maybeSingle();
         if (error) throw error;
         if (data) {
           balance = data.total_score || 0;
+          // Обновляем имя и фото при каждом входе
+          const patch = {
+            name: currentUser.name,
+            updated_at: new Date().toISOString()
+          };
+          if (currentUser.photo) patch.photo_url = currentUser.photo;
+          await sb.from('player_ratings')
+            .update(patch)
+            .eq('telegram_user_id', currentUser.id);
         } else {
           balance = 10000;
-          await sb.from('player_ratings').upsert({
+          const row = {
             telegram_user_id: currentUser.id,
             name: currentUser.name,
             total_score: balance,
             games_played: 0,
             updated_at: new Date().toISOString()
-          }, { onConflict: 'telegram_user_id' });
+          };
+          if (currentUser.photo) row.photo_url = currentUser.photo;
+          await sb.from('player_ratings').upsert(row, { onConflict: 'telegram_user_id' });
         }
       } catch (e) {
         console.error('loadBalance', e);
-        balance = 0;
-        showToast('Баланс: офлайн');
+        // Если колонки photo_url ещё нет — пробуем без неё
+        try {
+          const { data } = await sb
+            .from('player_ratings')
+            .select('total_score')
+            .eq('telegram_user_id', currentUser.id)
+            .maybeSingle();
+          balance = data ? (data.total_score || 0) : 10000;
+        } catch (e2) {
+          balance = 0;
+          showToast('Баланс: офлайн');
+        }
       }
       updateBalanceUI();
     }
@@ -1314,11 +1337,24 @@
           document.getElementById('statWins').textContent = wins;
         }
 
-        const { data: ranks } = await sb
-          .from('player_ratings')
-          .select('telegram_user_id, name, total_score')
-          .order('total_score', { ascending: false })
-          .limit(15);
+        let ranks = [];
+        try {
+          const res = await sb
+            .from('player_ratings')
+            .select('telegram_user_id, name, total_score, photo_url')
+            .order('total_score', { ascending: false })
+            .limit(15);
+          if (res.error) throw res.error;
+          ranks = res.data || [];
+        } catch (e) {
+          // fallback без photo_url, если колонки ещё нет
+          const res = await sb
+            .from('player_ratings')
+            .select('telegram_user_id, name, total_score')
+            .order('total_score', { ascending: false })
+            .limit(15);
+          ranks = res.data || [];
+        }
 
         if (currentUser && ranks?.length) {
           const idx = ranks.findIndex(r => String(r.telegram_user_id) === String(currentUser.id));
