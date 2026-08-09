@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#0b0b0f" />
   <title>Petzker — Новый интерфейс</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ═══════════════ THEMES ═══════════════ */
     :root, [data-theme="dark"] {
       --bg: #0b0b0f;
       --bg-elevated: #121218;
@@ -42,7 +42,6 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --drawer-w: 286px;
     }
-
     [data-theme="light"] {
       --bg: #f2f0eb;
       --bg-elevated: #ffffff;
@@ -70,7 +69,6 @@
       --day-bg: rgba(0, 0, 0, 0.04);
       --outcome-bg: rgba(0, 0, 0, 0.04);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
       height: 100%;
@@ -80,8 +78,6 @@
       overflow: hidden;
       transition: background 0.35s ease, color 0.25s ease;
     }
-
-    /* ambient glow */
     body::before {
       content: '';
       position: fixed;
@@ -99,7 +95,6 @@
       from { transform: translate(0, 0) scale(1); }
       to { transform: translate(8%, 12%) scale(1.08); }
     }
-
     .app {
       height: 100%;
       display: flex;
@@ -109,8 +104,6 @@
       margin: 0 auto;
       z-index: 1;
     }
-
-    /* ── Top bar (glass) ── */
     .topbar {
       flex-shrink: 0;
       display: flex;
@@ -122,19 +115,17 @@
       -webkit-backdrop-filter: var(--glass);
       border-bottom: 1px solid var(--border-soft);
       z-index: 30;
-      transition: background 0.35s ease;
     }
     .menu-btn {
       width: 42px; height: 42px;
       border-radius: 13px;
       border: 1px solid var(--border);
       background: var(--surface);
-      backdrop-filter: blur(12px);
       color: var(--gold-light);
       font-size: 18px;
       display: grid; place-items: center;
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.2s, background 0.3s;
+      transition: transform 0.15s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
     .menu-btn:active { transform: scale(0.92); }
@@ -143,7 +134,6 @@
       font-weight: 750;
       font-size: 17px;
       letter-spacing: -0.03em;
-      transition: opacity 0.2s;
     }
     .topbar-balance {
       font-size: 13px;
@@ -155,6 +145,8 @@
       border-radius: 99px;
       position: relative;
       overflow: hidden;
+      min-width: 72px;
+      text-align: center;
     }
     .topbar-balance::after {
       content: '';
@@ -168,8 +160,6 @@
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-
-    /* ── Drawer ── */
     .drawer-overlay {
       position: fixed;
       inset: 0;
@@ -182,7 +172,6 @@
       -webkit-backdrop-filter: blur(4px);
     }
     .drawer-overlay.open { opacity: 1; pointer-events: auto; }
-
     .drawer {
       position: fixed;
       top: 0; left: 0; bottom: 0;
@@ -201,7 +190,6 @@
       box-shadow: var(--shadow);
     }
     .drawer.open { transform: translateX(0); }
-
     .drawer-head {
       padding: 22px 20px 18px;
       border-bottom: 1px solid var(--border-soft);
@@ -224,7 +212,6 @@
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      position: relative;
     }
     .drawer-sub {
       font-size: 11px;
@@ -234,7 +221,6 @@
       text-transform: uppercase;
       font-weight: 600;
     }
-
     .drawer-nav {
       flex: 1;
       overflow-y: auto;
@@ -257,7 +243,6 @@
       width: 100%;
       text-align: left;
       font-family: inherit;
-      position: relative;
     }
     .nav-item:active { transform: scale(0.98); }
     .nav-item.active {
@@ -265,21 +250,11 @@
       color: var(--gold-light);
       box-shadow: inset 0 0 0 1px var(--border);
     }
-    .nav-item:not(.active):hover { background: var(--chip-bg); color: var(--text); }
-    .nav-icon {
-      font-size: 18px;
-      width: 26px;
-      text-align: center;
-      transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
-    }
-    .nav-item.active .nav-icon { transform: scale(1.12); }
-
+    .nav-icon { font-size: 18px; width: 26px; text-align: center; }
     .drawer-foot {
       padding: 12px 16px calc(16px + var(--safe-bottom));
       border-top: 1px solid var(--border-soft);
     }
-
-    /* Theme toggle */
     .theme-row {
       display: flex;
       align-items: center;
@@ -305,7 +280,6 @@
       background: var(--surface-solid);
       border: 1px solid var(--border);
       cursor: pointer;
-      transition: background 0.3s;
       flex-shrink: 0;
     }
     .theme-switch::after {
@@ -318,35 +292,25 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.25);
       transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
     }
-    [data-theme="light"] .theme-switch::after {
-      transform: translateX(22px);
-    }
+    [data-theme="light"] .theme-switch::after { transform: translateX(22px); }
     .theme-hint {
       font-size: 10px;
       color: var(--muted);
       text-align: center;
       margin-top: 10px;
-      letter-spacing: 0.04em;
     }
-
-    /* ── Content ── */
     .content {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding: 16px 16px calc(28px + var(--safe-bottom));
     }
-    .view {
-      display: none;
-      animation: viewIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-    }
+    .view { display: none; animation: viewIn 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
     .view.active { display: block; }
     @keyframes viewIn {
       from { opacity: 0; transform: translateY(10px) scale(0.985); }
       to { opacity: 1; transform: none; }
     }
-
-    /* Cards — glass */
     .card {
       background: var(--surface);
       backdrop-filter: blur(16px);
@@ -356,7 +320,6 @@
       padding: 16px;
       margin-bottom: 12px;
       box-shadow: var(--shadow);
-      transition: background 0.35s ease, border-color 0.35s;
       position: relative;
       overflow: hidden;
     }
@@ -371,7 +334,6 @@
     [data-theme="light"] .card::before {
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
     }
-
     .section-label {
       font-size: 11px;
       font-weight: 700;
@@ -381,8 +343,6 @@
       margin: 20px 0 10px;
     }
     .section-label:first-child { margin-top: 4px; }
-
-    /* Profile */
     .profile-hero { text-align: center; padding: 12px 0 8px; }
     .avatar {
       width: 80px; height: 80px;
@@ -409,7 +369,6 @@
       font-weight: 900;
       color: var(--gold-light);
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
     }
     .balance-big span {
       font-size: 14px;
@@ -417,7 +376,6 @@
       font-weight: 600;
       margin-left: 6px;
     }
-
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -430,9 +388,7 @@
       padding: 14px 8px;
       text-align: center;
       border: 1px solid var(--border-soft);
-      transition: transform 0.2s;
     }
-    .stat:active { transform: scale(0.96); }
     .stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
     .stat-lbl {
       font-size: 10px;
@@ -442,7 +398,6 @@
       letter-spacing: 0.05em;
       font-weight: 600;
     }
-
     .my-vacation {
       display: flex;
       align-items: center;
@@ -455,8 +410,6 @@
     .my-vacation:last-child { border-bottom: none; padding-bottom: 0; }
     .my-vacation:first-child { padding-top: 0; }
     .vac-date { font-weight: 700; color: var(--gold-light); }
-
-    /* Calendar */
     .cal-head {
       display: flex;
       align-items: center;
@@ -473,7 +426,6 @@
       font-size: 18px;
       cursor: pointer;
       display: grid; place-items: center;
-      transition: transform 0.15s, background 0.2s;
     }
     .cal-nav:active { transform: scale(0.9); }
     .weekdays {
@@ -504,29 +456,22 @@
       cursor: pointer;
       border: 1px solid transparent;
       color: var(--text);
-      transition: transform 0.12s, background 0.2s, border-color 0.2s;
+      transition: transform 0.12s, background 0.2s;
     }
     .day:not(.empty):active { transform: scale(0.9); }
     .day.empty { background: transparent; cursor: default; }
     .day.today {
       border-color: var(--gold);
       color: var(--gold-light);
-      box-shadow: 0 0 0 1px var(--gold-dim);
     }
     .day.has { background: var(--gold-dim); }
     .day.full {
       background: rgba(232, 69, 90, 0.18);
       border-color: rgba(232, 69, 90, 0.25);
     }
-    [data-theme="light"] .day.full {
-      background: rgba(196, 30, 58, 0.12);
-    }
+    [data-theme="light"] .day.full { background: rgba(196, 30, 58, 0.12); }
     .day-dots { display: flex; gap: 2px; margin-top: 2px; }
-    .dot {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--gold);
-    }
-
+    .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
     .upcoming-item {
       display: flex;
       gap: 12px;
@@ -549,8 +494,6 @@
       color: var(--text);
       border: 1px solid var(--border-soft);
     }
-
-    /* Diary */
     .diary-input {
       width: 100%;
       min-height: 88px;
@@ -563,7 +506,6 @@
       font-size: 14px;
       resize: none;
       margin-bottom: 12px;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .diary-input:focus {
       outline: none;
@@ -571,7 +513,6 @@
       box-shadow: 0 0 0 3px var(--gold-dim);
     }
     .diary-input::placeholder { color: var(--muted); }
-
     .btn {
       display: inline-flex;
       align-items: center;
@@ -584,9 +525,10 @@
       font-size: 14px;
       font-family: inherit;
       cursor: pointer;
-      transition: transform 0.12s, opacity 0.15s, box-shadow 0.2s;
+      transition: transform 0.12s, opacity 0.15s;
     }
     .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
     .btn-primary {
       background: linear-gradient(135deg, #c9a227, var(--gold));
       color: #1a1408;
@@ -603,21 +545,13 @@
       background-size: 200% 100%;
       animation: shimmer 4s ease-in-out infinite;
     }
-    [data-theme="light"] .btn-primary {
-      color: #1a1408;
-      box-shadow: 0 4px 14px rgba(184, 146, 42, 0.25);
-    }
-
     .diary-entry {
       padding: 13px 0;
       border-bottom: 1px solid var(--border-soft);
-      animation: viewIn 0.3s ease;
     }
     .diary-entry:last-child { border-bottom: none; }
     .diary-date { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
     .diary-text { font-size: 14px; line-height: 1.5; color: var(--text); }
-
-    /* Bet */
     .event-card {
       background: var(--surface);
       backdrop-filter: blur(16px);
@@ -627,9 +561,7 @@
       padding: 16px;
       margin-bottom: 12px;
       box-shadow: var(--shadow);
-      transition: transform 0.2s, border-color 0.2s;
     }
-    .event-card:active { transform: scale(0.99); }
     .event-title { font-weight: 750; font-size: 15px; color: var(--text); margin-bottom: 4px; }
     .event-meta { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
     .outcomes {
@@ -644,8 +576,8 @@
       text-align: center;
       cursor: pointer;
       border: 1px solid var(--border-soft);
-      transition: border-color 0.2s, background 0.2s, transform 0.12s;
       color: var(--text);
+      transition: border-color 0.2s, background 0.2s, transform 0.12s;
     }
     .outcome:active {
       border-color: var(--gold);
@@ -663,10 +595,7 @@
       background: rgba(62, 207, 142, 0.15);
       color: var(--green);
       margin-bottom: 10px;
-      letter-spacing: 0.04em;
     }
-
-    /* Games */
     .games-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -681,29 +610,11 @@
       padding: 22px 14px;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1), border-color 0.2s, box-shadow 0.25s;
+      transition: transform 0.2s, border-color 0.2s;
       box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
     }
-    .game-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(212,175,55,0.06) 100%);
-      pointer-events: none;
-    }
-    .game-card:active {
-      transform: scale(0.96);
-      border-color: var(--border);
-    }
-    .game-emoji {
-      font-size: 34px;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-      transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
-    }
-    .game-card:active .game-emoji { transform: scale(1.1); }
+    .game-card:active { transform: scale(0.96); border-color: var(--border); }
+    .game-emoji { font-size: 34px; margin-bottom: 10px; }
     .game-name { font-weight: 750; font-size: 14px; color: var(--text); }
     .game-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
     .game-card.wide {
@@ -715,8 +626,6 @@
       padding: 18px 16px;
     }
     .game-card.wide .game-emoji { margin: 0; font-size: 30px; }
-
-    /* Toast */
     .toast {
       position: fixed;
       bottom: calc(28px + var(--safe-bottom));
@@ -743,8 +652,64 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0) scale(1);
     }
-
-    /* Reduced motion */
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 16px 8px;
+    }
+    .loading-inline {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--drawer-bg);
+      backdrop-filter: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow);
+    }
+    .modal-title { font-weight: 800; font-size: 16px; margin-bottom: 6px; color: var(--text); }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .modal-actions .btn { flex: 1; }
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .name-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .name-input:focus { outline: none; border-color: var(--gold); }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -758,17 +723,17 @@
     <header class="topbar">
       <button class="menu-btn" id="menuBtn" aria-label="Меню">☰</button>
       <div class="topbar-title" id="topTitle">Выходные</div>
-      <div class="topbar-balance" id="topBalance">💎 12 450</div>
+      <div class="topbar-balance" id="topBalance"><span class="loading-inline"></span></div>
     </header>
 
     <main class="content" id="content">
 
-      <!-- 1. CALENDAR (first) -->
+      <!-- CALENDAR -->
       <section class="view active" id="view-calendar" data-title="Выходные">
         <div class="card">
           <div class="cal-head">
             <button class="cal-nav" id="prevMonth">‹</button>
-            <div class="cal-month" id="monthLabel">Август 2026</div>
+            <div class="cal-month" id="monthLabel">—</div>
             <button class="cal-nav" id="nextMonth">›</button>
           </div>
           <div class="weekdays">
@@ -776,69 +741,41 @@
           </div>
           <div class="cal-grid" id="calGrid"></div>
         </div>
-
         <div class="section-label">Ближайшие</div>
         <div class="card" id="upcomingList">
-          <div class="upcoming-item">
-            <div class="up-date">
-              <div class="up-day">15</div>
-              <div class="up-mon">авг</div>
-            </div>
-            <div>
-              <span class="chip">Анатолий</span>
-              <span class="chip">Мария</span>
-            </div>
-          </div>
-          <div class="upcoming-item">
-            <div class="up-date">
-              <div class="up-day">23</div>
-              <div class="up-mon">авг</div>
-            </div>
-            <div>
-              <span class="chip">Анатолий</span>
-            </div>
-          </div>
+          <div class="empty">Загрузка…</div>
         </div>
       </section>
 
-      <!-- 2. PROFILE -->
+      <!-- PROFILE -->
       <section class="view" id="view-profile" data-title="Профиль">
         <div class="profile-hero">
-          <div class="avatar" id="avatar">А</div>
-          <div class="profile-name" id="userName">Анатолий</div>
-          <div class="profile-id" id="userId">Telegram ID · 123456789</div>
-          <div class="balance-big">12 450<span>очков</span></div>
+          <div class="avatar" id="avatar">?</div>
+          <div class="profile-name" id="userName">Гость</div>
+          <div class="profile-id" id="userId">Telegram не определён</div>
+          <div class="balance-big" id="profileBalance">—<span>очков</span></div>
         </div>
-
         <div class="stats-row">
           <div class="stat">
-            <div class="stat-val">14</div>
+            <div class="stat-val" id="statBets">—</div>
             <div class="stat-lbl">Ставок</div>
           </div>
           <div class="stat">
-            <div class="stat-val">5</div>
+            <div class="stat-val" id="statWins">—</div>
             <div class="stat-lbl">Побед</div>
           </div>
           <div class="stat">
-            <div class="stat-val">#3</div>
+            <div class="stat-val" id="statRank">—</div>
             <div class="stat-lbl">Рейтинг</div>
           </div>
         </div>
-
         <div class="section-label">Мои выходные</div>
         <div class="card" id="myVacations">
-          <div class="my-vacation">
-            <span class="vac-date">15 авг</span>
-            <span>Суббота</span>
-          </div>
-          <div class="my-vacation">
-            <span class="vac-date">23 авг</span>
-            <span>Воскресенье</span>
-          </div>
+          <div class="empty">Загрузка…</div>
         </div>
       </section>
 
-      <!-- 3. DIARY -->
+      <!-- DIARY -->
       <section class="view" id="view-diary" data-title="Дневник">
         <div class="card">
           <textarea class="diary-input" id="diaryInput" placeholder="Что нового? Напишите запись…"></textarea>
@@ -846,80 +783,36 @@
         </div>
         <div class="section-label">Записи</div>
         <div class="card" id="diaryList">
-          <div class="diary-entry">
-            <div class="diary-date">суббота, 8 августа</div>
-            <div class="diary-text">Сегодня отличный день для теста нового интерфейса ✨</div>
-          </div>
-          <div class="diary-entry">
-            <div class="diary-date">пятница, 7 августа</div>
-            <div class="diary-text">Планируем выходные на август.</div>
-          </div>
+          <div class="empty">Загрузка…</div>
         </div>
       </section>
 
-      <!-- 4. BET -->
+      <!-- BET -->
       <section class="view" id="view-bet" data-title="Petzker Bet">
-        <button class="btn btn-primary" style="margin-bottom:14px" id="createEventBtn">+ Создать событие</button>
-
         <div class="section-label">Активные события</div>
-        <div class="event-card">
-          <span class="badge">Активно</span>
-          <div class="event-title">Кто выиграет матч?</div>
-          <div class="event-meta">Футбол · пул 2 400 очков</div>
-          <div class="outcomes">
-            <div class="outcome" onclick="showToast('Ставка: Исход 1')">
-              <div class="outcome-name">Команда А</div>
-              <div class="outcome-pct">58%</div>
-            </div>
-            <div class="outcome" onclick="showToast('Ставка: Исход 2')">
-              <div class="outcome-name">Команда Б</div>
-              <div class="outcome-pct">42%</div>
-            </div>
-          </div>
+        <div id="eventsList">
+          <div class="empty">Загрузка…</div>
         </div>
-        <div class="event-card">
-          <span class="badge">Активно</span>
-          <div class="event-title">Будет дождь в субботу?</div>
-          <div class="event-meta">Погода · пул 800 очков</div>
-          <div class="outcomes">
-            <div class="outcome" onclick="showToast('Ставка: Да')">
-              <div class="outcome-name">Да</div>
-              <div class="outcome-pct">35%</div>
-            </div>
-            <div class="outcome" onclick="showToast('Ставка: Нет')">
-              <div class="outcome-name">Нет</div>
-              <div class="outcome-pct">65%</div>
-            </div>
-          </div>
-        </div>
-
         <div class="section-label">Мои ставки</div>
-        <div class="card">
-          <div class="my-vacation">
-            <span>Кто выиграет матч? · Команда А</span>
-            <span style="color:var(--gold-light);font-weight:700">200</span>
-          </div>
-          <div class="my-vacation">
-            <span>Дождь в субботу? · Нет</span>
-            <span style="color:var(--gold-light);font-weight:700">100</span>
-          </div>
+        <div class="card" id="myBetsList">
+          <div class="empty">Загрузка…</div>
         </div>
       </section>
 
-      <!-- 5. GAMES -->
+      <!-- GAMES -->
       <section class="view" id="view-games" data-title="Игры">
         <div class="games-grid">
-          <div class="game-card" onclick="showToast('Минёр — подключится к minesweeper.html')">
+          <div class="game-card" data-href="minesweeper.html">
             <div class="game-emoji">💣</div>
             <div class="game-name">Минёр</div>
             <div class="game-desc">Классика</div>
           </div>
-          <div class="game-card" onclick="showToast('Кубики — скоро')">
+          <div class="game-card" onclick="showToast('Скоро')">
             <div class="game-emoji">🎲</div>
             <div class="game-name">Кубики</div>
             <div class="game-desc">Удача</div>
           </div>
-          <div class="game-card" onclick="showToast('Дудл — скоро')">
+          <div class="game-card" onclick="showToast('Скоро')">
             <div class="game-emoji">🦘</div>
             <div class="game-name">Дудл</div>
             <div class="game-desc">Прыжки</div>
@@ -932,30 +825,30 @@
         </div>
       </section>
 
-      <!-- 6. CASINO -->
+      <!-- CASINO -->
       <section class="view" id="view-casino" data-title="Казино">
         <div class="games-grid">
-          <div class="game-card" onclick="showToast('→ petzker-blackjack-1.html')">
+          <div class="game-card" data-href="petzker-blackjack-1.html">
             <div class="game-emoji">🃏</div>
             <div class="game-name">Блэкджек</div>
             <div class="game-desc">21 против дилера</div>
           </div>
-          <div class="game-card" onclick="showToast('→ roulette.html')">
+          <div class="game-card" data-href="roulette.html">
             <div class="game-emoji">🎰</div>
             <div class="game-name">Рулетка</div>
             <div class="game-desc">Классика</div>
           </div>
-          <div class="game-card" onclick="showToast('→ poker.html')">
+          <div class="game-card" data-href="poker.html">
             <div class="game-emoji">♠️</div>
             <div class="game-name">Покер</div>
             <div class="game-desc">Техасский холдем</div>
           </div>
-          <div class="game-card" onclick="showToast('→ doghouse/index.html')">
+          <div class="game-card" data-href="doghouse/index.html">
             <div class="game-emoji">🐶</div>
             <div class="game-name">Домик собак</div>
             <div class="game-desc">Слот</div>
           </div>
-          <div class="game-card wide" onclick="showToast('→ casino.html')">
+          <div class="game-card wide" data-href="casino.html">
             <div class="game-emoji">✨</div>
             <div>
               <div class="game-name">Открыть лобби</div>
@@ -967,7 +860,6 @@
     </main>
   </div>
 
-  <!-- Drawer -->
   <div class="drawer-overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div class="drawer-head">
@@ -975,24 +867,12 @@
       <div class="drawer-sub">Mini App</div>
     </div>
     <nav class="drawer-nav">
-      <button class="nav-item active" data-view="calendar">
-        <span class="nav-icon">📅</span> Выходные
-      </button>
-      <button class="nav-item" data-view="profile">
-        <span class="nav-icon">👤</span> Профиль
-      </button>
-      <button class="nav-item" data-view="diary">
-        <span class="nav-icon">📓</span> Дневник
-      </button>
-      <button class="nav-item" data-view="bet">
-        <span class="nav-icon">🎯</span> Petzker Bet
-      </button>
-      <button class="nav-item" data-view="games">
-        <span class="nav-icon">🎮</span> Игры
-      </button>
-      <button class="nav-item" data-view="casino">
-        <span class="nav-icon">♠️</span> Казино
-      </button>
+      <button class="nav-item active" data-view="calendar"><span class="nav-icon">📅</span> Выходные</button>
+      <button class="nav-item" data-view="profile"><span class="nav-icon">👤</span> Профиль</button>
+      <button class="nav-item" data-view="diary"><span class="nav-icon">📓</span> Дневник</button>
+      <button class="nav-item" data-view="bet"><span class="nav-icon">🎯</span> Petzker Bet</button>
+      <button class="nav-item" data-view="games"><span class="nav-icon">🎮</span> Игры</button>
+      <button class="nav-item" data-view="casino"><span class="nav-icon">♠️</span> Казино</button>
     </nav>
     <div class="drawer-foot">
       <div class="theme-row">
@@ -1000,16 +880,582 @@
           <span id="themeIcon">🌙</span>
           <span id="themeText">Тёмная</span>
         </div>
-        <div class="theme-switch" id="themeSwitch" role="switch" aria-label="Тема"></div>
+        <div class="theme-switch" id="themeSwitch" role="switch"></div>
       </div>
-      <div class="theme-hint">Макет · v0.2</div>
+      <div class="theme-hint">v0.3 · Supabase</div>
     </div>
   </aside>
+
+  <!-- Day modal -->
+  <div class="modal-overlay" id="dayModal">
+    <div class="modal">
+      <div class="modal-title" id="dayModalTitle">День</div>
+      <div class="modal-sub" id="dayModalWho">—</div>
+      <div id="dayModalForm">
+        <input class="name-input" id="dayNameInput" placeholder="Ваше имя" />
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="dayModalClose">Закрыть</button>
+          <button class="btn btn-primary" id="dayModalSave" style="width:auto;flex:1">Записаться</button>
+        </div>
+      </div>
+      <div id="dayModalFull" style="display:none">
+        <div class="empty">Мест нет (макс. 2)</div>
+        <button class="btn btn-ghost" id="dayModalClose2" style="width:100%;margin-top:10px">Закрыть</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── Theme ──
+    // ═══════════════════════════════════════
+    // SUPABASE
+    // ═══════════════════════════════════════
+    const SUPABASE_URL = 'https://heubrattlnikielnfheg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhldWJyYXR0bG5pa2llbG5maGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NzYyMjcsImV4cCI6MjEwMDU1MjIyN30._lRs77YnsILFN_Ru4uR2wDWQFtAlazZh8UaaKa7fsnM';
+
+    let sb = null;
+    try {
+      if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) { console.warn('Supabase init', e); }
+
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let currentUser = null;
+    let balance = 0;
+    let vacations = {}; // { 'YYYY-MM-DD': [{id, name, telegram_user_id}] }
+    let diaryEntries = [];
+    let betEvents = [];
+    let userBets = [];
+    let selectedDayKey = null;
+
+    const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    const WEEKDAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+    const today = new Date();
+    let curYear = today.getFullYear();
+    let curMonth = today.getMonth();
+
+    // ═══════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════
+    function fmt(n) {
+      return Math.floor(n || 0).toLocaleString('ru-RU');
+    }
+    function esc(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function dayKey(y, m, d) {
+      return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    }
+    function haptic(k) {
+      try {
+        const tg = window.Telegram?.WebApp;
+        if (!tg?.HapticFeedback) return;
+        if (['success','error','warning'].includes(k)) tg.HapticFeedback.notificationOccurred(k);
+        else tg.HapticFeedback.impactOccurred(k || 'light');
+      } catch (e) {}
+    }
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+    window.showToast = showToast;
+
+    function updateBalanceUI() {
+      document.getElementById('topBalance').textContent = '💎 ' + fmt(balance);
+      const pb = document.getElementById('profileBalance');
+      if (pb) pb.innerHTML = fmt(balance) + '<span>очков</span>';
+    }
+
+    // ═══════════════════════════════════════
+    // TELEGRAM USER
+    // ═══════════════════════════════════════
+    function resolveUser() {
+      try {
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+          tg.ready();
+          tg.expand();
+          const u = tg.initDataUnsafe?.user;
+          if (u?.id) {
+            const name = [u.first_name, u.last_name].filter(Boolean).join(' ').trim()
+              || u.username || ('User ' + u.id);
+            return { id: String(u.id), name, photo: u.photo_url || null };
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    // ═══════════════════════════════════════
+    // DATA: BALANCE / PROFILE
+    // ═══════════════════════════════════════
+    async function loadBalance() {
+      if (!sb || !currentUser) {
+        balance = 0;
+        updateBalanceUI();
+        return;
+      }
+      try {
+        const { data, error } = await sb
+          .from('player_ratings')
+          .select('total_score, name, games_played')
+          .eq('telegram_user_id', currentUser.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          balance = data.total_score || 0;
+        } else {
+          balance = 10000;
+          await sb.from('player_ratings').upsert({
+            telegram_user_id: currentUser.id,
+            name: currentUser.name,
+            total_score: balance,
+            games_played: 0,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'telegram_user_id' });
+        }
+      } catch (e) {
+        console.error('loadBalance', e);
+        balance = 0;
+        showToast('Баланс: офлайн');
+      }
+      updateBalanceUI();
+    }
+
+    async function loadRankAndStats() {
+      if (!sb || !currentUser) return;
+      try {
+        const { data: bets } = await sb
+          .from('bet_placements')
+          .select('id, result')
+          .eq('user_id', currentUser.id);
+        const all = bets || [];
+        const wins = all.filter(b => b.result === 'win').length;
+        document.getElementById('statBets').textContent = all.length;
+        document.getElementById('statWins').textContent = wins;
+
+        const { data: ranks } = await sb
+          .from('player_ratings')
+          .select('telegram_user_id, total_score')
+          .order('total_score', { ascending: false })
+          .limit(100);
+        if (ranks?.length) {
+          const idx = ranks.findIndex(r => String(r.telegram_user_id) === String(currentUser.id));
+          document.getElementById('statRank').textContent = idx >= 0 ? '#' + (idx + 1) : '—';
+        }
+      } catch (e) {
+        console.error('stats', e);
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // DATA: VACATIONS
+    // ═══════════════════════════════════════
+    async function fetchVacations() {
+      if (!sb) { vacations = {}; return; }
+      try {
+        const { data, error } = await sb
+          .from('vacations')
+          .select('*')
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        const grouped = {};
+        (data || []).forEach(row => {
+          if (!grouped[row.day]) grouped[row.day] = [];
+          grouped[row.day].push({
+            id: row.id,
+            name: row.name,
+            telegram_user_id: row.telegram_user_id ?? null
+          });
+        });
+        vacations = grouped;
+      } catch (e) {
+        console.error('fetchVacations', e);
+        vacations = {};
+      }
+    }
+
+    async function insertVacation(day, name, ownerId) {
+      if (!sb) throw new Error('no db');
+      const payload = { day, name };
+      if (ownerId != null) payload.telegram_user_id = ownerId;
+      const { data, error } = await sb.from('vacations').insert([payload]).select().single();
+      if (error) throw error;
+      return { id: data.id, name, telegram_user_id: data.telegram_user_id ?? null };
+    }
+
+    // ═══════════════════════════════════════
+    // DATA: DIARY
+    // ═══════════════════════════════════════
+    async function fetchDiary() {
+      if (!sb) { diaryEntries = []; return; }
+      try {
+        const { data, error } = await sb
+          .from('diary_entries')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(40);
+        if (error) throw error;
+        diaryEntries = (data || []).map(r => ({
+          id: r.id,
+          text: r.text,
+          created_at: r.created_at
+        }));
+      } catch (e) {
+        console.error('fetchDiary', e);
+        diaryEntries = [];
+      }
+    }
+
+    async function insertDiary(text) {
+      if (!sb) throw new Error('no db');
+      const { data, error } = await sb
+        .from('diary_entries')
+        .insert([{ text }])
+        .select()
+        .single();
+      if (error) throw error;
+      return { id: data.id, text, created_at: data.created_at };
+    }
+
+    // ═══════════════════════════════════════
+    // DATA: BETS
+    // ═══════════════════════════════════════
+    async function fetchBetEvents() {
+      if (!sb) { betEvents = []; return; }
+      try {
+        const { data, error } = await sb
+          .from('bet_events')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        betEvents = data || [];
+      } catch (e) {
+        console.error('fetchBetEvents', e);
+        betEvents = [];
+      }
+    }
+
+    async function fetchUserBets() {
+      if (!sb || !currentUser) { userBets = []; return; }
+      try {
+        const { data, error } = await sb
+          .from('bet_placements')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(30);
+        if (error) throw error;
+        userBets = data || [];
+      } catch (e) {
+        console.error('fetchUserBets', e);
+        userBets = [];
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER: CALENDAR
+    // ═══════════════════════════════════════
+    function renderCalendar() {
+      document.getElementById('monthLabel').textContent = MONTHS[curMonth] + ' ' + curYear;
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+      const first = new Date(curYear, curMonth, 1);
+      let start = first.getDay();
+      start = start === 0 ? 6 : start - 1;
+      const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+      const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      for (let i = 0; i < start; i++) {
+        const el = document.createElement('div');
+        el.className = 'day empty';
+        grid.appendChild(el);
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = dayKey(curYear, curMonth, d);
+        const names = vacations[key] || [];
+        const count = names.length;
+        const date = new Date(curYear, curMonth, d);
+        const el = document.createElement('div');
+        el.className = 'day';
+        if (date.getTime() === todayMid.getTime()) el.classList.add('today');
+        if (count === 1) el.classList.add('has');
+        if (count >= 2) el.classList.add('full');
+        let html = String(d);
+        if (count > 0) {
+          html += '<div class="day-dots">' + '<div class="dot"></div>'.repeat(Math.min(count, 2)) + '</div>';
+        }
+        el.innerHTML = html;
+        el.addEventListener('click', () => openDayModal(key, d));
+        grid.appendChild(el);
+      }
+      renderUpcoming();
+    }
+
+    function renderUpcoming() {
+      const list = document.getElementById('upcomingList');
+      const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const cutoff = new Date(todayMid);
+      cutoff.setDate(cutoff.getDate() + 60);
+      const relevant = Object.entries(vacations)
+        .filter(([k, v]) => {
+          const d = new Date(k + 'T00:00:00');
+          return d >= todayMid && d <= cutoff && v.length > 0;
+        })
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(0, 10);
+
+      if (!relevant.length) {
+        list.innerHTML = '<div class="empty">Пока нет запланированных выходных</div>';
+        return;
+      }
+      list.innerHTML = relevant.map(([key, names]) => {
+        const d = new Date(key + 'T00:00:00');
+        return `<div class="upcoming-item">
+          <div class="up-date">
+            <div class="up-day">${d.getDate()}</div>
+            <div class="up-mon">${MONTHS_GEN[d.getMonth()].slice(0, 3)}</div>
+          </div>
+          <div>${names.map(n => `<span class="chip">${esc(n.name)}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderMyVacations() {
+      const box = document.getElementById('myVacations');
+      if (!currentUser) {
+        box.innerHTML = '<div class="empty">Войдите через Telegram</div>';
+        return;
+      }
+      const mine = Object.entries(vacations)
+        .filter(([, list]) => list.some(v => String(v.telegram_user_id) === String(currentUser.id)))
+        .sort(([a], [b]) => a.localeCompare(b));
+
+      if (!mine.length) {
+        box.innerHTML = '<div class="empty">Вы ещё не записаны на выходные</div>';
+        return;
+      }
+      box.innerHTML = mine.map(([key, list]) => {
+        const d = new Date(key + 'T00:00:00');
+        const wd = WEEKDAYS[d.getDay()];
+        return `<div class="my-vacation">
+          <span class="vac-date">${d.getDate()} ${MONTHS_GEN[d.getMonth()].slice(0, 3)}</span>
+          <span style="text-transform:capitalize">${wd}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // DAY MODAL
+    // ═══════════════════════════════════════
+    function openDayModal(key, dayNum) {
+      selectedDayKey = key;
+      const d = new Date(key + 'T00:00:00');
+      document.getElementById('dayModalTitle').textContent =
+        d.getDate() + ' ' + MONTHS_GEN[d.getMonth()] + ' ' + d.getFullYear();
+      const names = vacations[key] || [];
+      document.getElementById('dayModalWho').textContent =
+        names.length
+          ? names.map(n => n.name).join(', ')
+          : 'Пока никто не записан';
+
+      const full = names.length >= 2;
+      document.getElementById('dayModalForm').style.display = full ? 'none' : 'block';
+      document.getElementById('dayModalFull').style.display = full ? 'block' : 'none';
+
+      const input = document.getElementById('dayNameInput');
+      if (currentUser) {
+        input.value = currentUser.name;
+        input.readOnly = true;
+      } else {
+        input.value = '';
+        input.readOnly = false;
+      }
+      document.getElementById('dayModal').classList.add('open');
+      haptic('light');
+    }
+
+    function closeDayModal() {
+      document.getElementById('dayModal').classList.remove('open');
+      selectedDayKey = null;
+    }
+    document.getElementById('dayModalClose').addEventListener('click', closeDayModal);
+    document.getElementById('dayModalClose2').addEventListener('click', closeDayModal);
+    document.getElementById('dayModal').addEventListener('click', e => {
+      if (e.target.id === 'dayModal') closeDayModal();
+    });
+
+    document.getElementById('dayModalSave').addEventListener('click', async () => {
+      if (!selectedDayKey) return;
+      const name = currentUser
+        ? currentUser.name
+        : document.getElementById('dayNameInput').value.trim();
+      if (!name) {
+        showToast('Введите имя');
+        haptic('warning');
+        return;
+      }
+      const current = vacations[selectedDayKey] || [];
+      if (current.length >= 2) {
+        showToast('Мест нет');
+        return;
+      }
+      if (currentUser && current.some(v => String(v.telegram_user_id) === String(currentUser.id))) {
+        showToast('Вы уже записаны');
+        haptic('warning');
+        return;
+      }
+      const btn = document.getElementById('dayModalSave');
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const entry = await insertVacation(
+          selectedDayKey,
+          name,
+          currentUser ? currentUser.id : null
+        );
+        if (!vacations[selectedDayKey]) vacations[selectedDayKey] = [];
+        vacations[selectedDayKey].push(entry);
+        closeDayModal();
+        renderCalendar();
+        renderMyVacations();
+        showToast('Вы записаны!');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка сохранения');
+        haptic('error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Записаться';
+      }
+    });
+
+    // ═══════════════════════════════════════
+    // RENDER: DIARY
+    // ═══════════════════════════════════════
+    function formatDiaryDate(iso) {
+      const d = new Date(iso);
+      return WEEKDAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS_GEN[d.getMonth()];
+    }
+
+    function renderDiary() {
+      const list = document.getElementById('diaryList');
+      if (!diaryEntries.length) {
+        list.innerHTML = '<div class="empty">Пока пусто… Напишите первым</div>';
+        return;
+      }
+      list.innerHTML = diaryEntries.map(e => `
+        <div class="diary-entry">
+          <div class="diary-date">${formatDiaryDate(e.created_at)}</div>
+          <div class="diary-text">${esc(e.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('diaryAdd').addEventListener('click', async () => {
+      const ta = document.getElementById('diaryInput');
+      const text = ta.value.trim();
+      if (!text) return;
+      const btn = document.getElementById('diaryAdd');
+      btn.disabled = true;
+      try {
+        const entry = await insertDiary(text);
+        diaryEntries.unshift(entry);
+        ta.value = '';
+        renderDiary();
+        showToast('Записано');
+        haptic('success');
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка сохранения');
+        haptic('error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ═══════════════════════════════════════
+    // RENDER: BETS
+    // ═══════════════════════════════════════
+    function outcomePct(ev, outcome) {
+      const total = (ev.total_bets_outcome_1 || 0) + (ev.total_bets_outcome_2 || 0);
+      if (!total) return 50;
+      const part = outcome === 1 ? (ev.total_bets_outcome_1 || 0) : (ev.total_bets_outcome_2 || 0);
+      return Math.round((part / total) * 100);
+    }
+
+    function renderBetEvents() {
+      const box = document.getElementById('eventsList');
+      const active = betEvents.filter(e => e.status !== 'closed');
+      if (!active.length) {
+        box.innerHTML = '<div class="card"><div class="empty">Нет активных событий</div></div>';
+        return;
+      }
+      box.innerHTML = active.map(ev => {
+        const p1 = outcomePct(ev, 1);
+        const p2 = 100 - p1;
+        return `<div class="event-card">
+          <span class="badge">Активно</span>
+          <div class="event-title">${esc(ev.title)}</div>
+          <div class="event-meta">${esc(ev.description || 'Без описания')} · пул ${fmt((ev.total_bets_outcome_1||0)+(ev.total_bets_outcome_2||0))}</div>
+          <div class="outcomes">
+            <div class="outcome" data-event="${esc(ev.id)}" data-outcome="1">
+              <div class="outcome-name">${esc(ev.outcome_1_name)}</div>
+              <div class="outcome-pct">${p1}%</div>
+            </div>
+            <div class="outcome" data-event="${esc(ev.id)}" data-outcome="2">
+              <div class="outcome-name">${esc(ev.outcome_2_name)}</div>
+              <div class="outcome-pct">${p2}%</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      box.querySelectorAll('.outcome').forEach(el => {
+        el.addEventListener('click', () => {
+          showToast('Ставки — полный функционал в основной версии');
+          haptic('light');
+        });
+      });
+    }
+
+    function renderMyBets() {
+      const box = document.getElementById('myBetsList');
+      if (!currentUser) {
+        box.innerHTML = '<div class="empty">Войдите через Telegram</div>';
+        return;
+      }
+      if (!userBets.length) {
+        box.innerHTML = '<div class="empty">У вас пока нет ставок</div>';
+        return;
+      }
+      box.innerHTML = userBets.slice(0, 15).map(b => {
+        const ev = betEvents.find(e => e.id === b.event_id);
+        const title = ev ? ev.title : 'Событие';
+        const out = ev
+          ? (b.chosen_outcome === 1 ? ev.outcome_1_name : ev.outcome_2_name)
+          : '—';
+        let right = fmt(b.bet_amount);
+        if (b.result === 'win') right = '✅ ' + fmt(b.winnings || b.bet_amount);
+        if (b.result === 'loss') right = '❌ ' + fmt(b.bet_amount);
+        return `<div class="my-vacation">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">${esc(title)} · ${esc(out)}</span>
+          <span style="color:var(--gold-light);font-weight:700;flex-shrink:0">${right}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // THEME
+    // ═══════════════════════════════════════
     const root = document.documentElement;
     const savedTheme = localStorage.getItem('petzker_theme') || 'dark';
     root.setAttribute('data-theme', savedTheme);
@@ -1021,47 +1467,21 @@
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.content = theme === 'dark' ? '#0b0b0f' : '#f2f0eb';
       try {
-        if (window.Telegram?.WebApp) {
-          Telegram.WebApp.setHeaderColor(theme === 'dark' ? '#0b0b0f' : '#f2f0eb');
-          Telegram.WebApp.setBackgroundColor(theme === 'dark' ? '#0b0b0f' : '#f2f0eb');
-        }
+        window.Telegram?.WebApp?.setHeaderColor?.(theme === 'dark' ? '#0b0b0f' : '#f2f0eb');
+        window.Telegram?.WebApp?.setBackgroundColor?.(theme === 'dark' ? '#0b0b0f' : '#f2f0eb');
       } catch (e) {}
     }
-
-    function toggleTheme() {
+    document.getElementById('themeSwitch').addEventListener('click', () => {
       const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
       localStorage.setItem('petzker_theme', next);
       updateThemeUI(next);
       haptic('light');
-    }
-    document.getElementById('themeSwitch').addEventListener('click', toggleTheme);
+    });
 
-    // ── Telegram ──
-    try {
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-        const u = Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user;
-        if (u) {
-          const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || 'Игрок';
-          document.getElementById('userName').textContent = name;
-          document.getElementById('userId').textContent = 'Telegram ID · ' + u.id;
-          document.getElementById('avatar').textContent = (name.charAt(0) || 'П').toUpperCase();
-        }
-      }
-    } catch (e) {}
-
-    function haptic(kind) {
-      try {
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (!tg?.HapticFeedback) return;
-        if (['success','error','warning'].includes(kind)) tg.HapticFeedback.notificationOccurred(kind);
-        else tg.HapticFeedback.impactOccurred(kind || 'light');
-      } catch (e) {}
-    }
-
-    // ── Drawer ──
+    // ═══════════════════════════════════════
+    // NAV
+    // ═══════════════════════════════════════
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('overlay');
     document.getElementById('menuBtn').addEventListener('click', () => {
@@ -1069,22 +1489,15 @@
       overlay.classList.add('open');
       haptic('light');
     });
-    overlay.addEventListener('click', closeDrawer);
-    function closeDrawer() {
+    overlay.addEventListener('click', () => {
       drawer.classList.remove('open');
       overlay.classList.remove('open');
-    }
+    });
 
-    // ── Navigation ──
     const titles = {
-      calendar: 'Выходные',
-      profile: 'Профиль',
-      diary: 'Дневник',
-      bet: 'Petzker Bet',
-      games: 'Игры',
-      casino: 'Казино'
+      calendar: 'Выходные', profile: 'Профиль', diary: 'Дневник',
+      bet: 'Petzker Bet', games: 'Игры', casino: 'Казино'
     };
-
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const view = btn.dataset.view;
@@ -1093,82 +1506,82 @@
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         const el = document.getElementById('view-' + view);
         el.classList.add('active');
-        // re-trigger animation
         el.style.animation = 'none';
         void el.offsetHeight;
         el.style.animation = '';
-        document.getElementById('topTitle').textContent = titles[view] || view;
-        closeDrawer();
+        document.getElementById('topTitle').textContent = titles[view];
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        haptic('light');
+        if (view === 'profile') {
+          loadRankAndStats();
+          renderMyVacations();
+        }
+        if (view === 'bet') {
+          renderBetEvents();
+          renderMyBets();
+        }
+      });
+    });
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      curMonth--;
+      if (curMonth < 0) { curMonth = 11; curYear--; }
+      renderCalendar();
+      haptic('light');
+    });
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      curMonth++;
+      if (curMonth > 11) { curMonth = 0; curYear++; }
+      renderCalendar();
+      haptic('light');
+    });
+
+    // Game links (relative — work after merge)
+    document.querySelectorAll('[data-href]').forEach(el => {
+      el.addEventListener('click', () => {
+        const href = el.getAttribute('data-href');
+        showToast('Откроется: ' + href);
+        // location.href = href; // раскомментировать после объединения репо
         haptic('light');
       });
     });
 
-    // ── Calendar ──
-    const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-    let cur = new Date(2026, 7, 1);
-
-    function renderCal() {
-      const y = cur.getFullYear(), m = cur.getMonth();
-      document.getElementById('monthLabel').textContent = MONTHS[m] + ' ' + y;
-      const grid = document.getElementById('calGrid');
-      grid.innerHTML = '';
-      const first = new Date(y, m, 1);
-      let start = first.getDay();
-      start = start === 0 ? 6 : start - 1;
-      const days = new Date(y, m + 1, 0).getDate();
-      const today = new Date();
-      const occupied = { 15: 2, 23: 1, 8: 1 };
-
-      for (let i = 0; i < start; i++) {
-        const el = document.createElement('div');
-        el.className = 'day empty';
-        grid.appendChild(el);
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    async function init() {
+      currentUser = resolveUser();
+      if (currentUser) {
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('userId').textContent = 'Telegram ID · ' + currentUser.id;
+        document.getElementById('avatar').textContent = (currentUser.name.charAt(0) || 'П').toUpperCase();
       }
-      for (let d = 1; d <= days; d++) {
-        const el = document.createElement('div');
-        el.className = 'day';
-        if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) el.classList.add('today');
-        if (occupied[d] === 1) el.classList.add('has');
-        if (occupied[d] >= 2) el.classList.add('full');
-        el.innerHTML = d + (occupied[d] ? '<div class="day-dots">' + '<div class="dot"></div>'.repeat(Math.min(occupied[d], 2)) + '</div>' : '');
-        el.addEventListener('click', () => { showToast(d + ' ' + MONTHS[m].toLowerCase()); haptic('light'); });
-        grid.appendChild(el);
+
+      if (!sb) {
+        document.getElementById('topBalance').textContent = '💎 —';
+        showToast('Supabase недоступен');
+        renderCalendar();
+        return;
       }
+
+      await Promise.all([
+        loadBalance(),
+        fetchVacations(),
+        fetchDiary(),
+        fetchBetEvents(),
+        fetchUserBets()
+      ]);
+
+      renderCalendar();
+      renderDiary();
+      renderBetEvents();
+      renderMyBets();
+      renderMyVacations();
+      loadRankAndStats();
     }
-    document.getElementById('prevMonth').addEventListener('click', () => { cur.setMonth(cur.getMonth() - 1); renderCal(); haptic('light'); });
-    document.getElementById('nextMonth').addEventListener('click', () => { cur.setMonth(cur.getMonth() + 1); renderCal(); haptic('light'); });
-    renderCal();
 
-    // ── Diary ──
-    document.getElementById('diaryAdd').addEventListener('click', () => {
-      const ta = document.getElementById('diaryInput');
-      const text = ta.value.trim();
-      if (!text) return;
-      const list = document.getElementById('diaryList');
-      const entry = document.createElement('div');
-      entry.className = 'diary-entry';
-      entry.innerHTML = `<div class="diary-date">сегодня</div><div class="diary-text">${text.replace(/</g,'&lt;')}</div>`;
-      list.insertBefore(entry, list.firstChild);
-      ta.value = '';
-      showToast('Запись добавлена');
-      haptic('success');
-    });
-
-    document.getElementById('createEventBtn').addEventListener('click', () => {
-      showToast('Создание события — в полной версии');
-      haptic('light');
-    });
-
-    // ── Toast ──
-    let toastTimer;
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-    }
-    window.showToast = showToast;
+    init();
   </script>
 </body>
 </html>
