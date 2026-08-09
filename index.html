@@ -771,6 +771,23 @@
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Fullscreen game: native Telegram BackButton, no overlay controls */
+    .game-shell {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: #000;
+      display: none;
+      flex-direction: column;
+    }
+    .game-shell.open { display: flex; }
+    .game-frame {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+    }
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -899,6 +916,7 @@
 
       <!-- BET -->
       <section class="view" id="view-bet" data-title="Petzker Bet">
+        <button class="btn btn-primary" id="btnCreateEvent" style="margin-bottom:14px">＋ Создать событие</button>
         <div class="section-label">Активные события</div>
         <div id="eventsList">
           <div class="empty">Загрузка…</div>
@@ -1044,6 +1062,27 @@
         <button class="btn btn-primary" id="betPlaceConfirm" style="width:auto;flex:1">Поставить</button>
       </div>
     </div>
+  </div>
+
+  <!-- Create event modal -->
+  <div class="modal-overlay" id="createEventModal">
+    <div class="modal">
+      <div class="modal-title">Новое событие</div>
+      <div class="modal-sub">Создайте событие для ставок</div>
+      <input class="name-input" id="evTitle" placeholder="Название" style="margin-bottom:8px" />
+      <input class="name-input" id="evDesc" placeholder="Описание (необязательно)" style="margin-bottom:8px" />
+      <input class="name-input" id="evOut1" placeholder="Исход 1" value="Победа" style="margin-bottom:8px" />
+      <input class="name-input" id="evOut2" placeholder="Исход 2" value="Поражение" style="margin-bottom:8px" />
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="createEventCancel">Отмена</button>
+        <button class="btn btn-primary" id="createEventConfirm" style="width:auto;flex:1">Создать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen game shell (iframe + Telegram BackButton) -->
+  <div id="gameShell" class="game-shell" aria-hidden="true">
+    <iframe id="gameFrame" class="game-frame" title="Игра" allow="fullscreen"></iframe>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -2241,23 +2280,155 @@
       haptic('light');
     });
 
-    // Game / casino links — open hosted pages
+    // ── Fullscreen games / casino ──
+    let gameReturnView = 'games';
+    let backHandlerBound = false;
+
+    function bindTelegramBack(handler) {
+      try {
+        const tg = window.Telegram?.WebApp;
+        if (!tg?.BackButton) return;
+        if (backHandlerBound) {
+          try { tg.BackButton.offClick(closeGameShell); } catch (e) {}
+        }
+        tg.BackButton.onClick(handler);
+        tg.BackButton.show();
+        backHandlerBound = true;
+      } catch (e) {}
+    }
+    function hideTelegramBack() {
+      try {
+        const tg = window.Telegram?.WebApp;
+        if (!tg?.BackButton) return;
+        try { tg.BackButton.offClick(closeGameShell); } catch (e) {}
+        tg.BackButton.hide();
+        backHandlerBound = false;
+      } catch (e) {}
+    }
+
+    function openGameShell(url, returnView) {
+      if (!url) return;
+      gameReturnView = returnView || 'games';
+      const shell = document.getElementById('gameShell');
+      const frame = document.getElementById('gameFrame');
+      frame.src = url;
+      shell.classList.add('open');
+      shell.setAttribute('aria-hidden', 'false');
+      // Нативная кнопка «Назад» Telegram — не перекрывает игру
+      bindTelegramBack(closeGameShell);
+      haptic('light');
+    }
+
+    function closeGameShell() {
+      const shell = document.getElementById('gameShell');
+      const frame = document.getElementById('gameFrame');
+      frame.src = 'about:blank';
+      shell.classList.remove('open');
+      shell.setAttribute('aria-hidden', 'true');
+      hideTelegramBack();
+      // Вернуться на вкладку, откуда открыли
+      const btn = document.querySelector('.nav-item[data-view="' + gameReturnView + '"]');
+      if (btn) btn.click();
+      // Обновить баланс после игры
+      loadBalance();
+      loadRankAndStats();
+      haptic('light');
+    }
+
+    function buildGameUrl(href) {
+      let url = href;
+      const sep = href.includes('?') ? '&' : '?';
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const params = [];
+      if (currentUser) {
+        params.push('uid=' + encodeURIComponent(currentUser.id));
+        params.push('name=' + encodeURIComponent(currentUser.name));
+      }
+      params.push('theme=' + theme);
+      return url + sep + params.join('&');
+    }
+
     document.querySelectorAll('[data-href]').forEach(el => {
       el.addEventListener('click', () => {
         const href = el.getAttribute('data-href');
         if (!href) return;
-        haptic('light');
-        // pass uid/name/theme for games that support it
-        let url = href;
-        if (currentUser && !href.includes('Casino/casino.html') && !href.includes('dog_hause')) {
-          const sep = href.includes('?') ? '&' : '?';
-          const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-          url = href + sep + 'uid=' + encodeURIComponent(currentUser.id)
-            + '&name=' + encodeURIComponent(currentUser.name)
-            + '&theme=' + theme;
-        }
-        window.location.href = url;
+        const view = el.closest('#view-casino') ? 'casino' : 'games';
+        openGameShell(buildGameUrl(href), view);
       });
+    });
+
+    // ── Create bet event ──
+    document.getElementById('btnCreateEvent').addEventListener('click', () => {
+      if (!currentUser) {
+        showToast('Войдите через Telegram');
+        haptic('warning');
+        return;
+      }
+      document.getElementById('evTitle').value = '';
+      document.getElementById('evDesc').value = '';
+      document.getElementById('evOut1').value = 'Победа';
+      document.getElementById('evOut2').value = 'Поражение';
+      document.getElementById('createEventModal').classList.add('open');
+      haptic('light');
+    });
+    document.getElementById('createEventCancel').addEventListener('click', () => {
+      document.getElementById('createEventModal').classList.remove('open');
+    });
+    document.getElementById('createEventModal').addEventListener('click', e => {
+      if (e.target.id === 'createEventModal') document.getElementById('createEventModal').classList.remove('open');
+    });
+    document.getElementById('createEventConfirm').addEventListener('click', async () => {
+      const title = document.getElementById('evTitle').value.trim();
+      const desc = document.getElementById('evDesc').value.trim();
+      const o1 = document.getElementById('evOut1').value.trim() || 'Победа';
+      const o2 = document.getElementById('evOut2').value.trim() || 'Поражение';
+      if (!title) { showToast('Введите название'); haptic('warning'); return; }
+      if (!sb || !currentUser) { showToast('Нет доступа'); return; }
+      const btn = document.getElementById('createEventConfirm');
+      btn.disabled = true;
+      try {
+        const payload = {
+          title,
+          description: desc,
+          outcome_1_name: o1,
+          outcome_2_name: o2,
+          total_bets_outcome_1: 0,
+          total_bets_outcome_2: 0,
+          status: 'open',
+          created_by_user_id: currentUser.id,
+          created_by_name: currentUser.name,
+          created_at: new Date().toISOString()
+        };
+        const { data, error } = await sb.from('bet_events').insert([payload]).select().single();
+        if (error) throw error;
+        betEvents.unshift(data);
+        document.getElementById('createEventModal').classList.remove('open');
+        renderBetEvents();
+        showToast('Событие создано');
+        haptic('success');
+        // уведомление (как в оригинале)
+        try {
+          await fetch(SUPABASE_URL + '/functions/v1/notify-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'apikey': SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({
+              title,
+              creator_name: currentUser.name,
+              description: desc || ''
+            })
+          });
+        } catch (ne) { console.warn('notify', ne); }
+      } catch (e) {
+        console.error(e);
+        showToast('Ошибка создания');
+        haptic('error');
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     // ═══════════════════════════════════════
@@ -2302,4 +2473,4 @@
     init();
   </script>
 </body>
-</html>
+  </html>
