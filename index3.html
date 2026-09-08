@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дополнительный опросник — недостающие разделы</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --accent: #2b6cb0;
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #2d3748;
+            --hint-bg: #ebf8ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container { max-width: 880px; margin: 0 auto; }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 22px 26px;
+            border-radius: 12px 12px 0 0;
+        }
+        header h1 { font-size: 1.3rem; margin-bottom: 6px; }
+        header p { font-size: 0.9rem; opacity: 0.9; }
+        .form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 26px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section:last-of-type { border-bottom: none; }
+        .section h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section h2 span {
+            background: var(--accent);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .hint {
+            font-size: 0.84rem;
+            color: #2b6cb0;
+            background: var(--hint-bg);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            border-left: 4px solid var(--accent);
+        }
+        .comment {
+            font-size: 0.82rem;
+            color: #718096;
+            background: #f7fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.95rem; }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        textarea { min-height: 110px; resize: vertical; }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin: 8px 0 12px;
+            background: #f8fafc;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            font-weight: 400;
+            cursor: pointer;
+            margin: 0;
+            line-height: 1.35;
+        }
+        .options input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+        .field { margin-bottom: 16px; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+        button {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: #edf2f7; color: var(--primary); }
+        .btn-danger { background: #fed7d7; color: #c53030; }
+        #output { margin-top: 26px; display: none; }
+        #result {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.84rem;
+            white-space: pre-wrap;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+        .copy-btn { margin-top: 10px; background: #38a169; color: white; }
+        .success-msg { display: none; margin-top: 8px; color: #38a169; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Дополнительный опросник</h1>
+        <p>Только те разделы, которые остались пустыми или слишком краткими. Заполни — и мы сможем собрать полный текст.</p>
+    </header>
+
+    <div class="form-card">
+        <form id="dopForm">
+
+            <!-- 1. Базовые недостающие данные -->
+            <div class="section">
+                <h2><span>1</span> Базовые данные (не хватало)</h2>
+                
+                <div class="field">
+                    <label>Место рождения (точный населённый пункт)</label>
+                    <div class="comment">В JSON было пусто. Укажи город/посёлок и край.</div>
+                    <input type="text" name="birthplace" placeholder="например: г. Владивосток, Приморский край">
+                </div>
+                <div class="field">
+                    <label>Национальность</label>
+                    <input type="text" name="nationality" placeholder="русский / украинец / смешанная и т.д.">
+                </div>
+            </div>
+
+            <!-- 2. Отец (был почти пустой) -->
+            <div class="section">
+                <h2><span>2</span> Отец (нужно подробнее)</h2>
+                <div class="hint">В JSON указано только «умер». Бланк требует: национальность, дата и место рождения, образование, профессия, отношение к политическим и религиозным организациям, характер, отношение к детям, увлечения.</div>
+                
+                <div class="field">
+                    <label>ФИО отца полностью</label>
+                    <input type="text" name="father_fio" placeholder="Бондаренко Павел ...">
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label>Год рождения (примерно)</label>
+                        <input type="text" name="father_birth" placeholder="например 1975">
+                    </div>
+                    <div class="field">
+                        <label>Место рождения отца</label>
+                        <input type="text" name="father_place" placeholder="город / село">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Национальность отца</label>
+                    <input type="text" name="father_nat" placeholder="русский">
+                </div>
+                <div class="field">
+                    <label>Образование и профессия отца</label>
+                    <textarea name="father_edu" placeholder="Какое образование, кем работал..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Когда умер и при каких обстоятельствах (если можно)</label>
+                    <textarea name="father_death" placeholder="Год, причина (если знаешь и готов написать)"></textarea>
+                </div>
+                <div class="field">
+                    <label>Характер отца, отношение к тебе и семье, увлечения</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="father_char" value="строгий"> Строгий</label>
+                        <label><input type="checkbox" name="father_char" value="мягкий"> Мягкий / добрый</label>
+                        <label><input type="checkbox" name="father_char" value="мало общался"> Мало общался / был отстранён</label>
+                        <label><input type="checkbox" name="father_char" value="поддерживал"> Поддерживал и интересовался жизнью</label>
+                        <label><input type="checkbox" name="father_char" value="были конфликты"> Были конфликты</label>
+                    </div>
+                    <textarea name="father_desc" placeholder="Свободно опиши, каким он был, как относился к тебе и сёстрам..."></textarea>
+                </div>
+            </div>
+
+            <!-- 3. Мать — дополнение -->
+            <div class="section">
+                <h2><span>3</span> Мать — дополнение</h2>
+                <div class="comment">Ты уже написал: Васильевна Екатерина Сергеевна (ранее Бондаренко, девичья Добровольская), архитектор, сейчас старший специалист в администрации Приморского края. Нужно чуть расширить.</div>
+                
+                <div class="field">
+                    <label>Дата рождения матери (примерно) и место рождения</label>
+                    <input type="text" name="mother_birth" placeholder="год и город/село">
+                </div>
+                <div class="field">
+                    <label>Отношение матери к политическим и религиозным организациям</label>
+                    <div class="options">
+                        <label><input type="radio" name="mother_polit" value="не интересуется"> Не интересуется политикой и религией</label>
+                        <label><input type="radio" name="mother_polit" value="нейтрально"> Нейтрально относится</label>
+                        <label><input type="radio" name="mother_polit" value="есть взгляды"> Имеет определённые взгляды (опиши ниже)</label>
+                    </div>
+                    <textarea name="mother_polit_text" placeholder="Если есть что добавить..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Характер матери, отношение к детям, увлечения, как проводит свободное время</label>
+                    <textarea name="mother_char" placeholder="Какая она по характеру, как относится к тебе и сёстрам, чем увлекается..."></textarea>
+                </div>
+            </div>
+
+            <!-- 4. Детство (было пусто) -->
+            <div class="section">
+                <h2><span>4</span> Раннее детство и семья</h2>
+                <div class="hint">В JSON пусто. Нужно: особенности места рождения, жизнь в семье, братья/сёстры подробнее, характерные события.</div>
+                
+                <div class="field">
+                    <label>Сёстры (имена, возраст примерно, отношения)</label>
+                    <div class="comment">Ты писал, что живёшь с двумя сёстрами. Расскажи подробнее.</div>
+                    <textarea name="sisters" placeholder="Имена, на сколько лет младше/старше, какие отношения..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Отчим — кратко</label>
+                    <textarea name="stepfather" placeholder="Как зовут, когда появился в семье, какие отношения, кем работает..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Атмосфера в семье в детстве и характерные события</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="child_atm" value="спокойная"> Спокойная, тёплая</label>
+                        <label><input type="checkbox" name="child_atm" value="были трудности"> Были материальные/другие трудности</label>
+                        <label><input type="checkbox" name="child_atm" value="много внимания"> Родители много внимания уделяли детям</label>
+                        <label><input type="checkbox" name="child_atm" value="предоставляли свободу"> Предоставляли много свободы</label>
+                    </div>
+                    <textarea name="childhood_full" style="min-height:130px" placeholder="Где рос, какие яркие воспоминания, переезды, важные события до школы и в младших классах..."></textarea>
+                </div>
+            </div>
+
+            <!-- 5. Школа — чуть расширить -->
+            <div class="section">
+                <h2><span>5</span> Школьные годы (дополнение)</h2>
+                <div class="comment">Ты написал, что общался в основном со своим классом и параллелью, конфликтов не было. Можно чуть подробнее.</div>
+                
+                <div class="field">
+                    <label>Любимые и нелюбимые предметы, успехи, нарушения дисциплины</label>
+                    <textarea name="school_extra" placeholder="Какие предметы нравились, были ли пятёрки/двойки, замечания, участие в олимпиадах, спорте, кружках..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Были ли в школе или после какие-то значимые события в 15–19 лет</label>
+                    <textarea name="events_1519" placeholder="Первая работа, переезды, важные решения, знакомства и т.д."></textarea>
+                </div>
+            </div>
+
+            <!-- 6. Материальные условия -->
+            <div class="section">
+                <h2><span>6</span> Материальные условия жизни</h2>
+                <div class="hint">В JSON было пусто. Бланк требует: жильё, бюджет семьи, удовлетворённость материальным положением.</div>
+                
+                <div class="field">
+                    <label>Жильё подробнее</label>
+                    <div class="options">
+                        <label><input type="radio" name="housing_detail" value="квартира родителей"> Живу в квартире родителей / семьи</label>
+                        <label><input type="radio" name="housing_detail" value="своя доля"> Есть своя доля / комната</label>
+                        <label><input type="radio" name="housing_detail" value="аренда отдельно"> Снимаю отдельно</label>
+                    </div>
+                    <textarea name="material_full" placeholder="Сколько комнат, условия, есть ли планы на своё жильё, как оцениваешь уровень жизни семьи..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Отношение к деньгам и текущий доход (примерно)</label>
+                    <textarea name="money" placeholder="Хватает ли на нужды, есть ли накопления, крупные траты..."></textarea>
+                </div>
+            </div>
+
+            <!-- 7. Здоровье -->
+            <div class="section">
+                <h2><span>7</span> Здоровье</h2>
+                <div class="hint">В JSON: «отличное», куришь, алкоголь умеренно. Нужно чуть развернуть.</div>
+                
+                <div class="field">
+                    <label>Хронические заболевания, травмы, операции</label>
+                    <div class="options">
+                        <label><input type="radio" name="chronic" value="нет"> Нет хронических заболеваний</label>
+                        <label><input type="radio" name="chronic" value="есть"> Есть (опиши ниже)</label>
+                    </div>
+                    <textarea name="health_full" placeholder="Перенесённые серьёзные болезни, травмы, операции, как относишься к своему здоровью, занимаешься ли спортом регулярно..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Курение и алкоголь — чуть подробнее</label>
+                    <textarea name="habits_detail" placeholder="С какого возраста куришь, сколько примерно, алкоголь — как часто и в каких количествах..."></textarea>
+                </div>
+            </div>
+
+            <!-- 8. Мотивы — самое важное -->
+            <div class="section">
+                <h2><span>8</span> Мотивы службы (подробный текст)</h2>
+                <div class="hint">Ты выбрал: желание защищать закон и порядок, интерес к оперативной/аналитической работе, стабильность и соцгарантии, желание быть полезным обществу. Теперь нужно раскрыть это литературно — это один из ключевых разделов.</div>
+                
+                <div class="field">
+                    <label>Почему именно органы безопасности? Что привлекает больше всего?</label>
+                    <div class="comment">Можно опираться на выбранные пункты. Напиши честно и развёрнуто.</div>
+                    <textarea name="motives_full" style="min-height:160px" placeholder="Пример структуры:&#10;1. Почему решил рассматривать службу в органах&#10;2. Что именно привлекает (работа с информацией, защита интересов государства, стабильность и т.д.)&#10;3. На чём основывается выбор&#10;4. Какие качества считаешь важными для этой работы"></textarea>
+                </div>
+                <div class="field">
+                    <label>Есть ли родственники или знакомые, которые служат/служили в силовых структурах?</label>
+                    <textarea name="relatives_force" placeholder="Если есть — кто и где. Если нет — так и напиши."></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn-primary" onclick="generateJSON()">Сформировать JSON</button>
+                <button type="button" class="btn-secondary" onclick="generateText()">Сформировать текст</button>
+                <button type="button" class="btn-danger" onclick="clearForm()">Очистить</button>
+            </div>
+        </form>
+
+        <div id="output">
+            <h3 id="output-title">Результат</h3>
+            <div id="result"></div>
+            <button class="copy-btn" onclick="copyResult()">Скопировать</button>
+            <div class="success-msg" id="copy-success">✓ Скопировано</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getChecked(name) {
+        return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+    }
+    function getRadio(name) {
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : '';
+    }
+    function getData() {
+        const form = document.getElementById('dopForm');
+        const data = {};
+        for (let el of form.elements) {
+            if (el.name && el.type !== 'checkbox' && el.type !== 'radio' && el.type !== 'button') {
+                data[el.name] = el.value.trim();
+            }
+        }
+        data.father_char = getChecked('father_char');
+        data.mother_polit = getRadio('mother_polit');
+        data.child_atm = getChecked('child_atm');
+        data.housing_detail = getRadio('housing_detail');
+        data.chronic = getRadio('chronic');
+        return data;
+    }
+    function generateJSON() {
+        const json = JSON.stringify(getData(), null, 2);
+        show(json, 'JSON дополнительного опроса');
+    }
+    function generateText() {
+        const d = getData();
+        let t = 'ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ К ОПРОСНИКУ\n=====================================\n\n';
+        t += `Место рождения: ${d.birthplace || ''}\n`;
+        t += `Национальность: ${d.nationality || ''}\n\n`;
+        t += `ОТЕЦ\nФИО: ${d.father_fio || ''}\nГод/место рождения: ${d.father_birth || ''} / ${d.father_place || ''}\nНациональность: ${d.father_nat || ''}\nОбразование и профессия: ${d.father_edu || ''}\nСмерть: ${d.father_death || ''}\nХарактер: ${(d.father_char||[]).join(', ')}\nОписание: ${d.father_desc || ''}\n\n`;
+        t += `МАТЬ (дополнение)\nДата/место рождения: ${d.mother_birth || ''}\nПолитика/религия: ${d.mother_polit || ''} ${d.mother_polit_text || ''}\nХарактер и увлечения: ${d.mother_char || ''}\n\n`;
+        t += `ДЕТСТВО И СЕМЬЯ\nСёстры: ${d.sisters || ''}\nОтчим: ${d.stepfather || ''}\nАтмосфера: ${(d.child_atm||[]).join(', ')}\nПодробно: ${d.childhood_full || ''}\n\n`;
+        t += `ШКОЛА (дополнение)\n${d.school_extra || ''}\nСобытия 15-19 лет: ${d.events_1519 || ''}\n\n`;
+        t += `МАТЕРИАЛЬНЫЕ УСЛОВИЯ\nЖильё: \( {d.housing_detail || ''}\n \){d.material_full || ''}\nДеньги: ${d.money || ''}\n\n`;
+        t += `ЗДОРОВЬЕ\nХронические: \( {d.chronic || ''}\n \){d.health_full || ''}\nПривычки подробно: ${d.habits_detail || ''}\n\n`;
+        t += `МОТИВЫ СЛУЖБЫ\n${d.motives_full || ''}\nРодственники в силовых структурах: ${d.relatives_force || ''}\n`;
+        show(t, 'Текст дополнительных данных');
+    }
+    function show(content, title) {
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output-title').textContent = title;
+        document.getElementById('result').textContent = content;
+        document.getElementById('output').scrollIntoView({behavior:'smooth'});
+    }
+    function copyResult() {
+        navigator.clipboard.writeText(document.getElementById('result').textContent).then(() => {
+            const m = document.getElementById('copy-success');
+            m.style.display = 'block';
+            setTimeout(() => m.style.display = 'none', 2000);
+        });
+    }
+    function clearForm() {
+        if (confirm('Очистить форму?')) {
+            document.getElementById('dopForm').reset();
+            document.getElementById('output').style.display = 'none';
+        }
+    }
+</script>
+</body>
+  </html>
