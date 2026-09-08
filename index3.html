@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дополнительный опросник — недостающие разделы</title>
+    <title>Дополнительный опросник (финальная версия)</title>
     <style>
         :root {
             --primary: #1a365d;
@@ -13,39 +13,40 @@
             --border: #e2e8f0;
             --text: #2d3748;
             --hint-bg: #ebf8ff;
+            --pre: #f0fff4;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            padding: 20px;
+            line-height: 1.55;
+            padding: 18px;
         }
-        .container { max-width: 880px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         header {
             background: var(--primary);
             color: white;
-            padding: 22px 26px;
+            padding: 20px 24px;
             border-radius: 12px 12px 0 0;
         }
-        header h1 { font-size: 1.3rem; margin-bottom: 6px; }
-        header p { font-size: 0.9rem; opacity: 0.9; }
+        header h1 { font-size: 1.25rem; margin-bottom: 5px; }
+        header p { font-size: 0.88rem; opacity: 0.9; }
         .form-card {
             background: var(--card);
             border: 1px solid var(--border);
             border-top: none;
             border-radius: 0 0 12px 12px;
-            padding: 26px;
+            padding: 24px;
         }
         .section {
-            margin-bottom: 30px;
-            padding-bottom: 22px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
         .section:last-of-type { border-bottom: none; }
         .section h2 {
-            font-size: 1.1rem;
+            font-size: 1.08rem;
             color: var(--primary);
             margin-bottom: 12px;
             display: flex;
@@ -55,125 +56,118 @@
         .section h2 span {
             background: var(--accent);
             color: white;
-            width: 26px;
-            height: 26px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
         }
         .hint {
-            font-size: 0.84rem;
+            font-size: 0.83rem;
             color: #2b6cb0;
             background: var(--hint-bg);
-            padding: 10px 14px;
+            padding: 9px 13px;
             border-radius: 8px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             border-left: 4px solid var(--accent);
         }
-        .comment {
-            font-size: 0.82rem;
-            color: #718096;
-            background: #f7fafc;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-style: italic;
+        .prefilled {
+            background: var(--pre);
+            border: 1px solid #9ae6b4;
+            padding: 11px 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
-        label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.95rem; }
-        input[type="text"], input[type="date"], textarea, select {
+        label { display: block; font-weight: 500; margin-bottom: 5px; font-size: 0.93rem; }
+        input[type="text"], input[type="date"], textarea {
             width: 100%;
-            padding: 10px 13px;
+            padding: 9px 12px;
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.93rem;
             font-family: inherit;
         }
-        textarea { min-height: 100px; resize: vertical; }
+        textarea { min-height: 90px; resize: vertical; }
         .options {
             display: flex;
             flex-direction: column;
-            gap: 7px;
-            margin: 8px 0 12px;
+            gap: 6px;
+            margin: 7px 0 12px;
             background: #f8fafc;
-            padding: 12px 14px;
+            padding: 11px 13px;
             border-radius: 8px;
             border: 1px solid var(--border);
         }
         .options label {
             display: flex;
             align-items: flex-start;
-            gap: 9px;
+            gap: 8px;
             font-weight: 400;
             cursor: pointer;
             margin: 0;
             line-height: 1.35;
+            font-size: 0.92rem;
         }
-        .options input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
-        .field { margin-bottom: 16px; }
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .options input { margin-top: 3px; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; }
+        .field { margin-bottom: 14px; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
         .actions {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
-            margin-top: 20px;
-            padding-top: 18px;
+            margin-top: 18px;
+            padding-top: 16px;
             border-top: 1px solid var(--border);
         }
         button {
-            padding: 11px 22px;
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.93rem;
             font-weight: 600;
             cursor: pointer;
         }
         .btn-primary { background: var(--accent); color: white; }
         .btn-secondary { background: #edf2f7; color: var(--primary); }
         .btn-danger { background: #fed7d7; color: #c53030; }
-        #output { margin-top: 26px; display: none; }
+        #output { margin-top: 24px; display: none; }
         #result {
             background: #1a202c;
             color: #e2e8f0;
-            padding: 18px;
+            padding: 16px;
             border-radius: 10px;
             font-family: monospace;
-            font-size: 0.84rem;
+            font-size: 0.83rem;
             white-space: pre-wrap;
-            max-height: 480px;
+            max-height: 460px;
             overflow-y: auto;
         }
         .copy-btn { margin-top: 10px; background: #38a169; color: white; }
         .success-msg { display: none; margin-top: 8px; color: #38a169; }
-        .prefilled {
-            background: #f0fff4;
-            border: 1px solid #9ae6b4;
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>Дополнительный опросник</h1>
-        <p>Недостающие разделы + удобные варианты ответов для характера матери, семьи и отчима</p>
+        <h1>Дополнительный опросник (финальная версия)</h1>
+        <p>Данные от мамы уже внесены. Осталось выбрать варианты по характерам, отношениям и школе.</p>
     </header>
 
     <div class="form-card">
         <form id="dopForm">
 
-            <!-- 1. Базовые данные -->
+            <!-- 1. Базовые -->
             <div class="section">
                 <h2><span>1</span> Базовые данные</h2>
                 <div class="field">
                     <label>Место рождения</label>
-                    <input type="text" name="birthplace" placeholder="г. Владивосток, Приморский край">
+                    <input type="text" name="birthplace" value="г. Владивосток, Приморский край" placeholder="г. Владивосток, Приморский край">
                 </div>
                 <div class="field">
                     <label>Национальность</label>
@@ -184,16 +178,16 @@
             <!-- 2. Отец -->
             <div class="section">
                 <h2><span>2</span> Отец</h2>
-                <div class="hint">Ранее было указано только «умер». Заполни, что знаешь.</div>
+                <div class="hint">Если знаешь — заполни. Если почти ничего не помнишь, можно оставить пустым или выбрать «почти не помню».</div>
                 
                 <div class="field">
-                    <label>ФИО отца полностью</label>
+                    <label>ФИО отца</label>
                     <input type="text" name="father_fio" placeholder="Бондаренко Павел ...">
                 </div>
                 <div class="row">
                     <div class="field">
                         <label>Год рождения (примерно)</label>
-                        <input type="text" name="father_birth" placeholder="например 1975">
+                        <input type="text" name="father_birth" placeholder="например 1978">
                     </div>
                     <div class="field">
                         <label>Место рождения</label>
@@ -201,15 +195,15 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label>Национальность отца</label>
+                    <label>Национальность</label>
                     <input type="text" name="father_nat" placeholder="русский">
                 </div>
                 <div class="field">
-                    <label>Образование и профессия</label>
-                    <textarea name="father_edu" placeholder="Какое образование, кем работал..."></textarea>
+                    <label>Образование и кем работал</label>
+                    <textarea name="father_edu" placeholder="Если знаешь..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Когда умер и при каких обстоятельствах</label>
+                    <label>Когда и при каких обстоятельствах умер</label>
                     <textarea name="father_death" placeholder="Год, причина (если знаешь)"></textarea>
                 </div>
                 <div class="field">
@@ -218,7 +212,7 @@
                         <label><input type="checkbox" name="father_char" value="строгий"> Строгий</label>
                         <label><input type="checkbox" name="father_char" value="мягкий и добрый"> Мягкий и добрый</label>
                         <label><input type="checkbox" name="father_char" value="мало общался"> Мало общался / был отстранён</label>
-                        <label><input type="checkbox" name="father_char" value="поддерживал"> Поддерживал и интересовался жизнью детей</label>
+                        <label><input type="checkbox" name="father_char" value="поддерживал"> Поддерживал и интересовался жизнью</label>
                         <label><input type="checkbox" name="father_char" value="были конфликты"> Были конфликты</label>
                         <label><input type="checkbox" name="father_char" value="почти не помню"> Почти не помню / мало воспоминаний</label>
                     </div>
@@ -226,38 +220,40 @@
                 </div>
             </div>
 
-            <!-- 3. Мать -->
+            <!-- 3. Мать (данные от мамы) -->
             <div class="section">
                 <h2><span>3</span> Мать</h2>
-                <div class="comment">Уже известно: Васильевна Екатерина Сергеевна (девичья Добровольская), архитектор, старший специалист в администрации Приморского края.</div>
-                
-                <div class="field">
-                    <label>Дата и место рождения матери</label>
-                    <input type="text" name="mother_birth" placeholder="год и город/село">
+                <div class="prefilled">
+                    <strong>Васильева Екатерина Сергеевна</strong><br>
+                    Дата рождения: 27.04.1982<br>
+                    Должность: Главный консультант Министерства архитектуры и градостроительной политики Приморского края<br>
+                    Адрес: г. Владивосток, ул. Уткинская, д. 34, кв. 6
                 </div>
 
                 <div class="field">
-                    <label>Характер матери (можно выбрать несколько)</label>
+                    <label>Характер матери (можно несколько)</label>
                     <div class="options">
-                        <label><input type="checkbox" name="mother_char_opt" value="спокойная"> Спокойная, уравновешенная</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="строгая"> Строгая, требовательная</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="заботливая"> Заботливая, внимательная</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="мягкая"> Мягкая, уступчивая</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="энергичная"> Энергичная, активная</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="закрытая"> Сдержанная, закрытая</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="спокойная и уравновешенная"> Спокойная и уравновешенная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="строгая и требовательная"> Строгая и требовательная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="заботливая и внимательная"> Заботливая и внимательная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="мягкая и уступчивая"> Мягкая и уступчивая</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="энергичная и активная"> Энергичная и активная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="сдержанная"> Сдержанная, немного закрытая</label>
                         <label><input type="checkbox" name="mother_char_opt" value="эмоциональная"> Эмоциональная</label>
-                        <label><input type="checkbox" name="mother_char_opt" value="трудолюбивая"> Трудолюбивая</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="трудолюбивая"> Трудолюбивая, много работает</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="ответственная"> Очень ответственная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="поддерживающая"> Всегда поддерживает</label>
                     </div>
                 </div>
 
                 <div class="field">
-                    <label>Отношение матери к детям</label>
+                    <label>Отношение матери к тебе</label>
                     <div class="options">
-                        <label><input type="radio" name="mother_to_children" value="очень тёплое и близкое"> Очень тёплое и близкое</label>
-                        <label><input type="radio" name="mother_to_children" value="хорошее, заботливое"> Хорошее, заботливое</label>
-                        <label><input type="radio" name="mother_to_children" value="нормальное, без особой близости"> Нормальное, без особой близости</label>
-                        <label><input type="radio" name="mother_to_children" value="строгое"> Строгое, требовательное</label>
-                        <label><input type="radio" name="mother_to_children" value="бывает разное"> Бывает по-разному</label>
+                        <label><input type="radio" name="mother_to_me" value="очень тёплое и близкое"> Очень тёплое и близкое</label>
+                        <label><input type="radio" name="mother_to_me" value="хорошее, заботливое"> Хорошее, заботливое</label>
+                        <label><input type="radio" name="mother_to_me" value="нормальное"> Нормальное, без особой близости</label>
+                        <label><input type="radio" name="mother_to_me" value="строгое"> Строгое, требовательное</label>
+                        <label><input type="radio" name="mother_to_me" value="бывает по-разному"> Бывает по-разному</label>
                     </div>
                 </div>
 
@@ -266,14 +262,13 @@
                     <div class="options">
                         <label><input type="radio" name="mother_polit" value="не интересуется"> Не интересуется политикой и религией</label>
                         <label><input type="radio" name="mother_polit" value="нейтрально"> Нейтрально относится</label>
-                        <label><input type="radio" name="mother_polit" value="есть определённые взгляды"> Имеет определённые взгляды</label>
+                        <label><input type="radio" name="mother_polit" value="есть взгляды"> Имеет определённые взгляды</label>
                     </div>
-                    <textarea name="mother_polit_text" placeholder="Если есть что добавить..."></textarea>
                 </div>
 
                 <div class="field">
-                    <label>Увлечения и как проводит свободное время</label>
-                    <textarea name="mother_hobby" placeholder="Работа, дом, хобби, отдых..."></textarea>
+                    <label>Как проводит свободное время / увлечения</label>
+                    <textarea name="mother_hobby" placeholder="Работа, дом, отдых, хобби..."></textarea>
                 </div>
             </div>
 
@@ -283,57 +278,58 @@
 
                 <!-- Мария -->
                 <div class="prefilled">
-                    <strong>Родная младшая сестра по отцу:</strong><br>
-                    Бондаренко Мария Павловна<br>
-                    Дата рождения: 15.12.2004<br>
-                    Образование: закончила колледж по специальности «Архитектор»<br>
-                    Сейчас: работает помощником архитектора в архитектурном бюро
+                    <strong>Родная младшая сестра (по отцу):</strong><br>
+                    Бондаренко Мария Павловна, 15.12.2004<br>
+                    Образование: колледж, специальность «Архитектор»<br>
+                    Работа: помощник архитектора в архитектурном бюро
                 </div>
-
                 <div class="field">
                     <label>Отношения с Марией</label>
                     <div class="options">
-                        <label><input type="radio" name="maria_rel" value="очень близкие"> Очень близкие, дружеские</label>
-                        <label><input type="radio" name="maria_rel" value="хорошие"> Хорошие, спокойные</label>
+                        <label><input type="radio" name="maria_rel" value="очень близкие и дружеские"> Очень близкие и дружеские</label>
+                        <label><input type="radio" name="maria_rel" value="хорошие, спокойные"> Хорошие, спокойные</label>
                         <label><input type="radio" name="maria_rel" value="нормальные"> Нормальные</label>
                         <label><input type="radio" name="maria_rel" value="бывают разногласия"> Бывают разногласия</label>
-                        <label><input type="radio" name="maria_rel" value="не очень близкие"> Не очень близкие</label>
+                        <label><input type="radio" name="maria_rel" value="не очень близкие"> Не очень близкие / каждый сам по себе</label>
                     </div>
-                    <textarea name="maria_extra" placeholder="Что-то ещё хочешь добавить про отношения с сестрой..."></textarea>
+                    <textarea name="maria_extra" placeholder="Что-то ещё про отношения..."></textarea>
                 </div>
 
                 <!-- Василиса -->
+                <div class="prefilled">
+                    <strong>Младшая сестра по отчиму:</strong><br>
+                    Васильева Василиса Николаевна, 11.03.2021<br>
+                    Детский сад № 18 (ул. Уткинская, 18), группа «Светлячки»<br>
+                    Прописка: ул. Уткинская, 34, кв. 6
+                </div>
                 <div class="field">
-                    <label>Младшая сестра по линии отчима</label>
-                    <div class="prefilled">
-                        Васильева Василиса Николаевна<br>
-                        Возраст: примерно 5 лет<br>
-                        Сейчас: ходит в детский сад
-                    </div>
-                    <label style="margin-top:10px;">Точная дата рождения Василисы (если вспомнишь)</label>
-                    <input type="date" name="vasilisa_birth">
-                    <label style="margin-top:10px;">Отношения с Василисой</label>
+                    <label>Отношения с Василисой</label>
                     <div class="options">
-                        <label><input type="radio" name="vasilisa_rel" value="хорошие, тёплые"> Хорошие, тёплые</label>
+                        <label><input type="radio" name="vasilisa_rel" value="хорошие и тёплые"> Хорошие и тёплые</label>
                         <label><input type="radio" name="vasilisa_rel" value="нормальные"> Нормальные</label>
-                        <label><input type="radio" name="vasilisa_rel" value="мало общаемся"> Мало общаемся из-за разницы в возрасте</label>
-                        <label><input type="radio" name="vasilisa_rel" value="как к младшей"> Отношусь как к младшей сестре, помогаю</label>
+                        <label><input type="radio" name="vasilisa_rel" value="мало общаемся из-за возраста"> Мало общаемся из-за большой разницы в возрасте</label>
+                        <label><input type="radio" name="vasilisa_rel" value="отношусь как к младшей, помогаю"> Отношусь как к младшей сестре, стараюсь помогать</label>
                     </div>
                 </div>
 
                 <!-- Отчим -->
+                <div class="prefilled">
+                    <strong>Отчим:</strong><br>
+                    Васильев Николай Викторович, 26.09.1981<br>
+                    ИП Васильев Николай Викторович<br>
+                    Прописка: г. Дальнегорск, ул. Химиков, 8
+                </div>
                 <div class="field">
-                    <label>Отчим</label>
-                    <input type="text" name="stepfather_fio" placeholder="ФИО отчима (если знаешь полностью)">
-                    <div class="options" style="margin-top:10px;">
-                        <strong style="font-size:0.9rem; display:block; margin-bottom:6px;">Отношения с отчимом:</strong>
+                    <label>Отношения с отчимом</label>
+                    <div class="options">
                         <label><input type="radio" name="stepfather_rel" value="хорошие, уважительные"> Хорошие, уважительные</label>
                         <label><input type="radio" name="stepfather_rel" value="нормальные, спокойные"> Нормальные, спокойные</label>
-                        <label><input type="radio" name="stepfather_rel" value="прохладные"> Прохладные / нейтральные</label>
-                        <label><input type="radio" name="stepfather_rel" value="сложные"> Сложные, бывают конфликты</label>
-                        <label><input type="radio" name="stepfather_rel" value="как с отцом"> Воспринимаю почти как родного отца</label>
+                        <label><input type="radio" name="stepfather_rel" value="прохладные / нейтральные"> Прохладные / нейтральные</label>
+                        <label><input type="radio" name="stepfather_rel" value="сложные, бывают конфликты"> Сложные, бывают конфликты</label>
+                        <label><input type="radio" name="stepfather_rel" value="воспринимаю почти как родного отца"> Воспринимаю почти как родного отца</label>
+                        <label><input type="radio" name="stepfather_rel" value="скорее как старшего друга"> Скорее как старшего друга / знакомого</label>
                     </div>
-                    <textarea name="stepfather_extra" placeholder="Когда появился в семье, кем работает, как складываются отношения..."></textarea>
+                    <textarea name="stepfather_extra" placeholder="Когда появился в семье, как складывались отношения..."></textarea>
                 </div>
 
                 <div class="field">
@@ -341,9 +337,10 @@
                     <div class="options">
                         <label><input type="checkbox" name="family_atm" value="спокойная и доброжелательная"> Спокойная и доброжелательная</label>
                         <label><input type="checkbox" name="family_atm" value="поддерживаем друг друга"> Поддерживаем друг друга</label>
-                        <label><input type="checkbox" name="family_atm" value="каждый сам по себе"> Каждый больше сам по себе</label>
-                        <label><input type="checkbox" name="family_atm" value="бывают ссоры"> Бывают ссоры и разногласия</label>
                         <label><input type="checkbox" name="family_atm" value="дружная"> Дружная</label>
+                        <label><input type="checkbox" name="family_atm" value="каждый больше сам по себе"> Каждый больше сам по себе</label>
+                        <label><input type="checkbox" name="family_atm" value="бывают ссоры и разногласия"> Бывают ссоры и разногласия</label>
+                        <label><input type="checkbox" name="family_atm" value="в целом комфортная"> В целом комфортная</label>
                     </div>
                 </div>
             </div>
@@ -355,39 +352,94 @@
                     <label>Атмосфера в семье в детстве</label>
                     <div class="options">
                         <label><input type="checkbox" name="child_atm" value="спокойная и тёплая"> Спокойная и тёплая</label>
-                        <label><input type="checkbox" name="child_atm" value="были трудности"> Были материальные или другие трудности</label>
-                        <label><input type="checkbox" name="child_atm" value="много внимания"> Родители много внимания уделяли детям</label>
-                        <label><input type="checkbox" name="child_atm" value="предоставляли свободу"> Предоставляли много свободы</label>
-                        <label><input type="checkbox" name="child_atm" value="строгая"> Была довольно строгая</label>
+                        <label><input type="checkbox" name="child_atm" value="были материальные трудности"> Были материальные трудности</label>
+                        <label><input type="checkbox" name="child_atm" value="родители много внимания уделяли"> Родители много внимания уделяли детям</label>
+                        <label><input type="checkbox" name="child_atm" value="предоставляли много свободы"> Предоставляли много свободы</label>
+                        <label><input type="checkbox" name="child_atm" value="была довольно строгая"> Была довольно строгая</label>
+                        <label><input type="checkbox" name="child_atm" value="обычная обыденная"> Обычная, без особых событий</label>
                     </div>
-                    <textarea name="childhood_full" placeholder="Где рос, яркие воспоминания, важные события..."></textarea>
+                    <textarea name="childhood_full" placeholder="Где рос, яркие воспоминания, важные события детства..."></textarea>
                 </div>
             </div>
 
-            <!-- 6. Школа -->
+            <!-- 6. Школьные годы (расширенные варианты) -->
             <div class="section">
-                <h2><span>6</span> Школа (дополнение)</h2>
+                <h2><span>6</span> Школьные годы</h2>
+                <div class="hint">Выбери всё, что подходит. Можно несколько вариантов в каждом блоке.</div>
+
                 <div class="field">
-                    <label>Любимые/нелюбимые предметы, успехи, дисциплина</label>
-                    <textarea name="school_extra" placeholder="Какие предметы нравились, были ли замечания, кружки, спорт..."></textarea>
+                    <label>Успеваемость</label>
+                    <div class="options">
+                        <label><input type="radio" name="school_perf" value="отличник"> Отличник</label>
+                        <label><input type="radio" name="school_perf" value="хорошист"> Хорошист</label>
+                        <label><input type="radio" name="school_perf" value="средний уровень"> Средний уровень</label>
+                        <label><input type="radio" name="school_perf" value="ниже среднего"> Ниже среднего</label>
+                        <label><input type="radio" name="school_perf" value="учился неровно"> Учился неровно (были и пятёрки, и тройки)</label>
+                    </div>
                 </div>
+
+                <div class="field">
+                    <label>Любимые предметы (можно несколько)</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="fav_subj" value="математика"> Математика</label>
+                        <label><input type="checkbox" name="fav_subj" value="физика"> Физика</label>
+                        <label><input type="checkbox" name="fav_subj" value="информатика"> Информатика</label>
+                        <label><input type="checkbox" name="fav_subj" value="история"> История</label>
+                        <label><input type="checkbox" name="fav_subj" value="обществознание"> Обществознание</label>
+                        <label><input type="checkbox" name="fav_subj" value="русский язык / литература"> Русский язык / литература</label>
+                        <label><input type="checkbox" name="fav_subj" value="иностранный язык"> Иностранный язык</label>
+                        <label><input type="checkbox" name="fav_subj" value="физкультура"> Физкультура</label>
+                        <label><input type="checkbox" name="fav_subj" value="труд / технология"> Труд / технология</label>
+                        <label><input type="checkbox" name="fav_subj" value="не было ярко любимых"> Не было ярко любимых</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Отношения с одноклассниками</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="school_rel" value="много друзей"> Много друзей</label>
+                        <label><input type="checkbox" name="school_rel" value="небольшой круг общения"> Небольшой, но стабильный круг</label>
+                        <label><input type="checkbox" name="school_rel" value="общался и с параллелью"> Общался и с ребятами из параллели</label>
+                        <label><input type="checkbox" name="school_rel" value="конфликтов почти не было"> Конфликтов почти не было</label>
+                        <label><input type="checkbox" name="school_rel" value="бывали конфликты"> Бывали конфликты</label>
+                        <label><input type="checkbox" name="school_rel" value="держался скорее особняком"> Держался скорее особняком</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Дисциплина и поведение</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="discipline" value="замечаний почти не было"> Замечаний почти не было</label>
+                        <label><input type="checkbox" name="discipline" value="были небольшие замечания"> Были небольшие замечания</label>
+                        <label><input type="checkbox" name="discipline" value="бывало вызывали родителей"> Бывало вызывали родителей</label>
+                        <label><input type="checkbox" name="discipline" value="участвовал в олимпиадах / конкурсах"> Участвовал в олимпиадах / конкурсах</label>
+                        <label><input type="checkbox" name="discipline" value="занимался спортом / кружками"> Занимался спортом или кружками</label>
+                        <label><input type="checkbox" name="discipline" value="в основном просто учился"> В основном просто учился, без особой активности</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Дополнительно про школу своими словами</label>
+                    <textarea name="school_extra" placeholder="Что ещё хочешь сказать про школьные годы..."></textarea>
+                </div>
+
                 <div class="field">
                     <label>Значимые события в 15–19 лет</label>
-                    <textarea name="events_1519" placeholder="Первая работа, важные решения, переезды и т.д."></textarea>
+                    <textarea name="events_1519" placeholder="Первая работа, важные решения, переезды, знакомства..."></textarea>
                 </div>
             </div>
 
-            <!-- 7. Материальное положение -->
+            <!-- 7. Материальное -->
             <div class="section">
                 <h2><span>7</span> Материальные условия</h2>
                 <div class="field">
                     <label>Жильё</label>
                     <div class="options">
-                        <label><input type="radio" name="housing_detail" value="квартира семьи"> Живу в квартире семьи (родителей)</label>
-                        <label><input type="radio" name="housing_detail" value="своя комната"> Есть своя комната</label>
-                        <label><input type="radio" name="housing_detail" value="аренда"> Снимаю отдельно</label>
+                        <label><input type="radio" name="housing_detail" value="живу в квартире семьи"> Живу в квартире семьи (Уткинская 34, кв. 6)</label>
+                        <label><input type="radio" name="housing_detail" value="есть своя комната"> Есть своя комната</label>
+                        <label><input type="radio" name="housing_detail" value="снимаю отдельно"> Снимаю отдельно</label>
                     </div>
-                    <textarea name="material_full" placeholder="Условия, планы на своё жильё, как оцениваешь уровень жизни..."></textarea>
+                    <textarea name="material_full" placeholder="Условия, планы на своё жильё, как оцениваешь уровень жизни семьи..."></textarea>
                 </div>
                 <div class="field">
                     <label>Отношение к деньгам</label>
@@ -408,21 +460,20 @@
                 </div>
                 <div class="field">
                     <label>Курение и алкоголь подробнее</label>
-                    <textarea name="habits_detail" placeholder="С какого возраста куришь, как часто алкоголь..."></textarea>
+                    <textarea name="habits_detail" placeholder="С какого возраста куришь, как часто и сколько алкоголь..."></textarea>
                 </div>
             </div>
 
             <!-- 9. Мотивы -->
             <div class="section">
-                <h2><span>9</span> Мотивы службы (самый важный раздел)</h2>
-                <div class="hint">Ты уже выбрал: защита закона и порядка, интерес к оперативной/аналитической работе, стабильность и соцгарантии, желание быть полезным. Теперь нужно раскрыть это текстом.</div>
-                
+                <h2><span>9</span> Мотивы службы</h2>
+                <div class="hint">Самый важный раздел. Раскрой выбранные ранее мотивы.</div>
                 <div class="field">
-                    <label>Подробно: почему органы безопасности и что привлекает</label>
-                    <textarea name="motives_full" style="min-height:150px" placeholder="Почему решил рассматривать службу, что именно привлекает, на чём основывается выбор..."></textarea>
+                    <label>Почему органы безопасности и что привлекает</label>
+                    <textarea name="motives_full" style="min-height:140px" placeholder="Почему решил рассматривать службу, что именно привлекает, на чём основывается выбор..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Есть ли родственники или знакомые в силовых структурах?</label>
+                    <label>Родственники или знакомые в силовых структурах</label>
                     <textarea name="relatives_force" placeholder="Если есть — кто и где. Если нет — напиши «нет»."></textarea>
                 </div>
             </div>
@@ -461,13 +512,17 @@
         }
         data.father_char = getChecked('father_char');
         data.mother_char_opt = getChecked('mother_char_opt');
-        data.mother_to_children = getRadio('mother_to_children');
+        data.mother_to_me = getRadio('mother_to_me');
         data.mother_polit = getRadio('mother_polit');
         data.maria_rel = getRadio('maria_rel');
         data.vasilisa_rel = getRadio('vasilisa_rel');
         data.stepfather_rel = getRadio('stepfather_rel');
         data.family_atm = getChecked('family_atm');
         data.child_atm = getChecked('child_atm');
+        data.school_perf = getRadio('school_perf');
+        data.fav_subj = getChecked('fav_subj');
+        data.school_rel = getChecked('school_rel');
+        data.discipline = getChecked('discipline');
         data.housing_detail = getRadio('housing_detail');
         data.chronic = getRadio('chronic');
         return data;
@@ -477,15 +532,15 @@
     }
     function generateText() {
         const d = getData();
-        let t = 'ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ\n========================\n\n';
+        let t = 'ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ (ФИНАЛЬНАЯ ВЕРСИЯ)\n==========================================\n\n';
         t += `Место рождения: ${d.birthplace||''}\nНациональность: ${d.nationality||''}\n\n`;
-        t += `ОТЕЦ\nФИО: ${d.father_fio||''}\nГод/место: ${d.father_birth||''} / ${d.father_place||''}\nНациональность: ${d.father_nat||''}\nОбразование/профессия: ${d.father_edu||''}\nСмерть: ${d.father_death||''}\nХарактер: \( {(d.father_char||[]).join(', ')}\n \){d.father_desc||''}\n\n`;
-        t += `МАТЬ\nДата/место рождения: ${d.mother_birth||''}\nХарактер: ${(d.mother_char_opt||[]).join(', ')}\nОтношение к детям: ${d.mother_to_children||''}\nПолитика/религия: ${d.mother_polit||''} ${d.mother_polit_text||''}\nУвлечения: ${d.mother_hobby||''}\n\n`;
-        t += `СЁСТРЫ\nМария Павловна (15.12.2004) — отношения: \( {d.maria_rel||''}\n \){d.maria_extra||''}\nВасилиса Николаевна (дата: ${d.vasilisa_birth||'не указана'}) — отношения: ${d.vasilisa_rel||''}\n\n`;
-        t += `ОТЧИМ\nФИО: ${d.stepfather_fio||''}\nОтношения: \( {d.stepfather_rel||''}\n \){d.stepfather_extra||''}\n\n`;
-        t += `Атмосфера в семье: ${(d.family_atm||[]).join(', ')}\n\n`;
+        t += `ОТЕЦ\nФИО: ${d.father_fio||''}\nГод/место: ${d.father_birth||''} / ${d.father_place||''}\nНациональность: ${d.father_nat||''}\nОбразование/работа: ${d.father_edu||''}\nСмерть: ${d.father_death||''}\nХарактер: \( {(d.father_char||[]).join(', ')}\n \){d.father_desc||''}\n\n`;
+        t += `МАТЬ\nВасильева Екатерина Сергеевна, 27.04.1982\nГлавный консультант Министерства архитектуры и градостроительной политики ПК\nХарактер: ${(d.mother_char_opt||[]).join(', ')}\nОтношение ко мне: ${d.mother_to_me||''}\nПолитика/религия: ${d.mother_polit||''}\nУвлечения: ${d.mother_hobby||''}\n\n`;
+        t += `СЁСТРЫ\nМария Павловна (15.12.2004) — отношения: \( {d.maria_rel||''}\n \){d.maria_extra||''}\nВасилиса Николаевна (11.03.2021) — отношения: ${d.vasilisa_rel||''}\n\n`;
+        t += `ОТЧИМ\nВасильев Николай Викторович (26.09.1981), ИП\nОтношения: \( {d.stepfather_rel||''}\n \){d.stepfather_extra||''}\n\n`;
+        t += `Атмосфера в семье сейчас: ${(d.family_atm||[]).join(', ')}\n\n`;
         t += `ДЕТСТВО\nАтмосфера: \( {(d.child_atm||[]).join(', ')}\n \){d.childhood_full||''}\n\n`;
-        t += `ШКОЛА\n${d.school_extra||''}\nСобытия 15-19 лет: ${d.events_1519||''}\n\n`;
+        t += `ШКОЛА\nУспеваемость: ${d.school_perf||''}\nЛюбимые предметы: ${(d.fav_subj||[]).join(', ')}\nОтношения: ${(d.school_rel||[]).join(', ')}\nДисциплина: \( {(d.discipline||[]).join(', ')}\n \){d.school_extra||''}\nСобытия 15-19 лет: ${d.events_1519||''}\n\n`;
         t += `МАТЕРИАЛЬНОЕ\nЖильё: \( {d.housing_detail||''}\n \){d.material_full||''}\nДеньги: ${d.money||''}\n\n`;
         t += `ЗДОРОВЬЕ\nХронические: \( {d.chronic||''}\n \){d.health_full||''}\nПривычки: ${d.habits_detail||''}\n\n`;
         t += `МОТИВЫ\n${d.motives_full||''}\nРодственники в силовых: ${d.relatives_force||''}\n`;
@@ -512,4 +567,4 @@
     }
 </script>
 </body>
-                               </html>
+</html>
