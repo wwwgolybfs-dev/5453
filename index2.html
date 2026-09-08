@@ -21,26 +21,15 @@
             line-height: 1.6;
             padding: 20px;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .container { max-width: 920px; margin: 0 auto; }
         header {
             background: var(--primary);
             color: white;
             padding: 24px 28px;
             border-radius: 12px 12px 0 0;
-            margin-bottom: 0;
         }
-        header h1 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-        header p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
+        header h1 { font-size: 1.35rem; font-weight: 600; margin-bottom: 6px; }
+        header p { font-size: 0.9rem; opacity: 0.9; }
         .form-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -83,16 +72,8 @@
             padding: 10px 14px;
             border-radius: 8px;
         }
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-        }
-        input[type="text"],
-        input[type="date"],
-        select,
-        textarea {
+        label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.95rem; }
+        input[type="text"], input[type="date"], select, textarea {
             width: 100%;
             padding: 10px 14px;
             border: 1px solid var(--border);
@@ -107,20 +88,48 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(43,108,176,0.15);
         }
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
+        textarea { min-height: 110px; resize: vertical; }
         .row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             margin-bottom: 14px;
         }
-        @media (max-width: 600px) {
-            .row { grid-template-columns: 1fr; }
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+        .field { margin-bottom: 16px; }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0 14px;
+            background: #f8fafc;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
         }
-        .field { margin-bottom: 14px; }
+        .options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-weight: 400;
+            cursor: pointer;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+        .options input[type="checkbox"],
+        .options input[type="radio"] {
+            margin-top: 3px;
+            width: 17px;
+            height: 17px;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+        }
+        .options .other-input {
+            margin-top: 6px;
+            margin-left: 27px;
+            display: none;
+        }
+        .options .other-input.show { display: block; }
         .actions {
             display: flex;
             gap: 12px;
@@ -138,29 +147,14 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
+        .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: #2c5282; }
-        .btn-secondary {
-            background: #edf2f7;
-            color: var(--primary);
-        }
+        .btn-secondary { background: #edf2f7; color: var(--primary); }
         .btn-secondary:hover { background: #e2e8f0; }
-        .btn-danger {
-            background: #fed7d7;
-            color: #c53030;
-        }
+        .btn-danger { background: #fed7d7; color: #c53030; }
         .btn-danger:hover { background: #feb2b2; }
-        #output {
-            margin-top: 28px;
-            display: none;
-        }
-        #output h3 {
-            margin-bottom: 12px;
-            color: var(--primary);
-        }
+        #output { margin-top: 28px; display: none; }
+        #output h3 { margin-bottom: 12px; color: var(--primary); }
         #result {
             background: #1a202c;
             color: #e2e8f0;
@@ -169,29 +163,20 @@
             font-family: "SF Mono", Monaco, Consolas, monospace;
             font-size: 0.85rem;
             white-space: pre-wrap;
-            max-height: 500px;
+            max-height: 520px;
             overflow-y: auto;
             line-height: 1.5;
         }
-        .copy-btn {
-            margin-top: 12px;
-            background: #38a169;
-            color: white;
-        }
+        .copy-btn { margin-top: 12px; background: #38a169; color: white; }
         .copy-btn:hover { background: #2f855a; }
-        .success-msg {
-            display: none;
-            margin-top: 10px;
-            color: #38a169;
-            font-size: 0.9rem;
-        }
+        .success-msg { display: none; margin-top: 10px; color: #38a169; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
         <h1>Опросник ПФЛ МСЧ УФСБ РФ по Приморскому краю</h1>
-        <p>Заполните все разделы максимально подробно. После заполнения сформируйте JSON или текст — пришлите его мне, и мы вместе составим готовый документ.</p>
+        <p>Заполните разделы. Можно выбирать готовые варианты + дописывать своими словами. После заполнения сформируйте JSON или текст и пришлите мне.</p>
     </header>
 
     <div class="form-card">
@@ -200,7 +185,7 @@
             <!-- 1. Общие данные -->
             <div class="section">
                 <h2><span>1</span> Общие данные</h2>
-                <div class="hint">Фамилия, имя, отчество, дата и место рождения, национальность, образование, специальность, должность и характер нынешней профессиональной деятельности, место жительства, семейное положение.</div>
+                <div class="hint">ФИО, дата и место рождения, национальность, образование, должность, место жительства, семейное положение.</div>
                 
                 <div class="row">
                     <div class="field">
@@ -244,19 +229,27 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label>Образование (какое, когда и где получено)</label>
-                    <textarea name="education" placeholder="Высшее, 2015 г., Дальневосточный федеральный университет, факультет..."></textarea>
+                    <label>Образование</label>
+                    <div class="options">
+                        <label><input type="radio" name="edu_level" value="среднее"> Среднее</label>
+                        <label><input type="radio" name="edu_level" value="среднее специальное"> Среднее специальное</label>
+                        <label><input type="radio" name="edu_level" value="неполное высшее"> Неполное высшее</label>
+                        <label><input type="radio" name="edu_level" value="высшее"> Высшее</label>
+                        <label><input type="radio" name="edu_level" value="два и более высших"> Два и более высших</label>
+                        <label><input type="radio" name="edu_level" value="учёная степень"> Учёная степень</label>
+                    </div>
+                    <textarea name="education" placeholder="Подробно: какое, когда и где получено, специальность..."></textarea>
                 </div>
                 <div class="field">
                     <label>Специальность по диплому</label>
-                    <input type="text" name="specialty" placeholder="Юриспруденция">
+                    <input type="text" name="specialty" placeholder="Юриспруденция / Экономика / ...">
                 </div>
                 <div class="field">
-                    <label>Должность и характер нынешней профессиональной деятельности</label>
-                    <textarea name="current_job" placeholder="Менеджер по продажам в компании..., характер работы..."></textarea>
+                    <label>Должность и характер нынешней деятельности</label>
+                    <textarea name="current_job" placeholder="Должность, организация, характер работы..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Место жительства (фактическое)</label>
+                    <label>Место жительства</label>
                     <input type="text" name="address" placeholder="г. Владивосток, ул. ..., д. ..., кв. ...">
                 </div>
             </div>
@@ -264,113 +257,242 @@
             <!-- 2. Родители -->
             <div class="section">
                 <h2><span>2</span> Описание родителей</h2>
-                <div class="hint">Национальность, дата и место рождения, место жительства, социальное положение, отношение к общественным, политическим и религиозным организациям, образование, профессия, их взаимоотношения, отношение к детям, увлечения, средства к жизни, постоянное занятие, проведение свободного времени в настоящее время.</div>
+                <div class="hint">Национальность, образование, профессия, отношение к политическим и религиозным организациям, взаимоотношения, увлечения.</div>
                 
                 <div class="field">
-                    <label>Отец (подробно)</label>
-                    <textarea name="father" style="min-height:160px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, где работает/работал, отношение к политическим и религиозным организациям, характер взаимоотношений в семье, отношение ко мне, увлечения, как проводит свободное время..."></textarea>
+                    <label>Отец</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="father_alive" value="жив"> Жив</label>
+                        <label><input type="checkbox" name="father_alive" value="умер"> Умер</label>
+                    </div>
+                    <textarea name="father" style="min-height:140px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, отношение к политическим/религиозным организациям, характер, отношение ко мне, увлечения..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Мать (подробно)</label>
-                    <textarea name="mother" style="min-height:160px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, где работает/работала, отношение к политическим и религиозным организациям, характер взаимоотношений в семье, отношение ко мне, увлечения, как проводит свободное время..."></textarea>
+                    <label>Мать</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="mother_alive" value="жива"> Жива</label>
+                        <label><input type="checkbox" name="mother_alive" value="умерла"> Умерла</label>
+                    </div>
+                    <textarea name="mother" style="min-height:140px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, отношение к политическим/религиозным организациям, характер, отношение ко мне, увлечения..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Взаимоотношения между родителями и отношение к детям</label>
-                    <textarea name="parents_relations" placeholder="Опишите атмосферу в семье, были ли конфликты, как родители относились к воспитанию..."></textarea>
+                    <label>Взаимоотношения между родителями</label>
+                    <div class="options">
+                        <label><input type="radio" name="parents_rel" value="хорошие, гармоничные"> Хорошие, гармоничные</label>
+                        <label><input type="radio" name="parents_rel" value="нормальные, спокойные"> Нормальные, спокойные</label>
+                        <label><input type="radio" name="parents_rel" value="были конфликты"> Были конфликты</label>
+                        <label><input type="radio" name="parents_rel" value="разведены"> Разведены</label>
+                        <label><input type="radio" name="parents_rel" value="другое"> Другое</label>
+                    </div>
+                    <textarea name="parents_relations" placeholder="Подробнее об атмосфере в семье, отношении к детям..."></textarea>
                 </div>
             </div>
 
-            <!-- 3. Место рождения и детство -->
+            <!-- 3. Детство и школа -->
             <div class="section">
-                <h2><span>3</span> Место рождения, раннее детство и школьные годы</h2>
-                <div class="hint">Город/деревня, особенности места рождения, жизнь в семье, какой ребёнок по счёту, жизнь вне семьи, братья и сёстры, их взаимоотношения, характерные события в жизни. Школьные годы: дошкольные учреждения, специализация школы, любимые предметы, взаимоотношения со сверстниками, нарушения школьной дисциплины, успехи, оценка учебной деятельности, увлечения и т.д.</div>
+                <h2><span>3</span> Место рождения, детство и школьные годы</h2>
                 
                 <div class="field">
-                    <label>Характеристика места рождения и раннего детства</label>
-                    <textarea name="childhood" style="min-height:160px" placeholder="Где родился и рос (город/село), особенности места, какой ребёнок по счёту, братья/сёстры (имена, возраст, отношения), жизнь в семье и вне семьи, яркие события детства..."></textarea>
+                    <label>Место рождения и раннее детство</label>
+                    <div class="options">
+                        <label><input type="radio" name="birth_type" value="город"> Город</label>
+                        <label><input type="radio" name="birth_type" value="посёлок городского типа"> Посёлок городского типа</label>
+                        <label><input type="radio" name="birth_type" value="село / деревня"> Село / деревня</label>
+                    </div>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Какой ребёнок по счёту:</strong>
+                        <label><input type="radio" name="child_order" value="единственный"> Единственный</label>
+                        <label><input type="radio" name="child_order" value="старший"> Старший</label>
+                        <label><input type="radio" name="child_order" value="средний"> Средний</label>
+                        <label><input type="radio" name="child_order" value="младший"> Младший</label>
+                    </div>
+                    <textarea name="childhood" style="min-height:130px" placeholder="Особенности места, братья/сёстры, яркие события детства, атмосфера в семье..."></textarea>
                 </div>
                 <div class="field">
                     <label>Школьные годы</label>
-                    <textarea name="school" style="min-height:160px" placeholder="Какие школы посещал, специализация, любимые и нелюбимые предметы, отношения с одноклассниками и учителями, успеваемость, нарушения дисциплины, увлечения, кружки, спортивные секции..."></textarea>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Успеваемость:</strong>
+                        <label><input type="radio" name="school_perf" value="отличник"> Отличник</label>
+                        <label><input type="radio" name="school_perf" value="хорошист"> Хорошист</label>
+                        <label><input type="radio" name="school_perf" value="средний"> Средний уровень</label>
+                        <label><input type="radio" name="school_perf" value="ниже среднего"> Ниже среднего</label>
+                    </div>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Отношения со сверстниками:</strong>
+                        <label><input type="checkbox" name="school_rel" value="много друзей"> Много друзей</label>
+                        <label><input type="checkbox" name="school_rel" value="небольшой круг"> Небольшой круг общения</label>
+                        <label><input type="checkbox" name="school_rel" value="были конфликты"> Были конфликты</label>
+                        <label><input type="checkbox" name="school_rel" value="держался особняком"> Держался особняком</label>
+                    </div>
+                    <textarea name="school" style="min-height:130px" placeholder="Школы, любимые предметы, нарушения дисциплины, увлечения, кружки, спорт..."></textarea>
                 </div>
             </div>
 
             <!-- 4. Учёба, труд, армия -->
             <div class="section">
-                <h2><span>4</span> Учебные заведения, трудовая деятельность и служба в армии</h2>
-                <div class="hint">Учебные заведения, в которых обучались (причины поступления, планы на будущее, успехи, полученные навыки и умения, характерные события в 17–19 лет). Трудовая деятельность и служба в армии (характер труда и службы, отношение к труду и службе, положение среди других людей, удовлетворённость, влияние трудовой деятельности на личность).</div>
+                <h2><span>4</span> Учёба после школы, труд и армия</h2>
                 
                 <div class="field">
-                    <label>Учёба после школы (ссузы, вузы, курсы)</label>
-                    <textarea name="higher_education" style="min-height:140px" placeholder="Куда поступал, почему выбрал это направление, как учился, какие навыки получил, яркие события студенческих лет..."></textarea>
+                    <label>Учёба после школы</label>
+                    <textarea name="higher_education" placeholder="Куда поступал, почему, как учился, навыки, яркие события..."></textarea>
                 </div>
                 <div class="field">
                     <label>Трудовая деятельность</label>
-                    <textarea name="work" style="min-height:140px" placeholder="Где и кем работал, характер работы, отношение к труду, положение в коллективе, удовлетворённость, чему научился..."></textarea>
+                    <div class="options">
+                        <label><input type="radio" name="work_satisf" value="полностью удовлетворён"> Полностью удовлетворён работой</label>
+                        <label><input type="radio" name="work_satisf" value="в целом доволен"> В целом доволен</label>
+                        <label><input type="radio" name="work_satisf" value="частично"> Частично удовлетворён</label>
+                        <label><input type="radio" name="work_satisf" value="не удовлетворён"> Не удовлетворён</label>
+                    </div>
+                    <textarea name="work" placeholder="Где и кем работал, характер труда, положение в коллективе, чему научился..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Служба в армии (если была)</label>
-                    <textarea name="army" placeholder="Где служил, род войск, должности, отношение к службе, как влияла на характер..."></textarea>
+                    <label>Служба в армии</label>
+                    <div class="options">
+                        <label><input type="radio" name="army_status" value="служил"> Служил</label>
+                        <label><input type="radio" name="army_status" value="не служил"> Не служил</label>
+                        <label><input type="radio" name="army_status" value="освобождён"> Освобождён от службы</label>
+                    </div>
+                    <textarea name="army" placeholder="Если служил — где, род войск, должности, отношение к службе..."></textarea>
                 </div>
             </div>
 
             <!-- 5. Семья -->
             <div class="section">
                 <h2><span>5</span> Характеристика семьи</h2>
-                <div class="hint">С кем живёте в настоящее время, отношения между супругами, рождение детей, отношение к детям, отношение к родителям, зависимость от жены (мужа).</div>
                 
                 <div class="field">
                     <label>Состав семьи и отношения</label>
-                    <textarea name="family" style="min-height:160px" placeholder="С кем проживаете сейчас, отношения с супругом/супругой, дети (имена, возраст, отношение к ним), отношения с родителями в настоящее время, есть ли зависимость от супруга..."></textarea>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">С кем проживаете:</strong>
+                        <label><input type="checkbox" name="live_with" value="один/одна"> Один / одна</label>
+                        <label><input type="checkbox" name="live_with" value="с супругом/супругой"> С супругом / супругой</label>
+                        <label><input type="checkbox" name="live_with" value="с детьми"> С детьми</label>
+                        <label><input type="checkbox" name="live_with" value="с родителями"> С родителями</label>
+                        <label><input type="checkbox" name="live_with" value="с другими родственниками"> С другими родственниками</label>
+                    </div>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Отношения с супругом(ой):</strong>
+                        <label><input type="radio" name="spouse_rel" value="отличные"> Отличные</label>
+                        <label><input type="radio" name="spouse_rel" value="хорошие"> Хорошие</label>
+                        <label><input type="radio" name="spouse_rel" value="удовлетворительные"> Удовлетворительные</label>
+                        <label><input type="radio" name="spouse_rel" value="напряжённые"> Напряжённые</label>
+                        <label><input type="radio" name="spouse_rel" value="нет супруга"> Нет супруга</label>
+                    </div>
+                    <textarea name="family" style="min-height:130px" placeholder="Дети (имена, возраст), отношение к ним, отношения с родителями сейчас, зависимость от супруга..."></textarea>
                 </div>
             </div>
 
-            <!-- 6. Профессия и социальная активность -->
+            <!-- 6. Профессия и активность -->
             <div class="section">
-                <h2><span>6</span> Профессия, специальность и социальная активность</h2>
-                <div class="hint">Мотивы выбора профессии и работы, удовлетворённость работой и профессией, продвижение по работе, социальный статус на работе, авторитетность, популярность. Социальная (общественная и политическая) активность: активен / неактивен, сколько тратите времени на общественную деятельность, каково её влияние на быт, семейные дела.</div>
+                <h2><span>6</span> Профессия и социальная активность</h2>
                 
                 <div class="field">
-                    <label>Профессия и отношение к работе</label>
-                    <textarea name="profession" style="min-height:140px" placeholder="Почему выбрали эту профессию, довольны ли работой, как продвигались, какой статус имеете в коллективе, авторитет..."></textarea>
+                    <label>Отношение к профессии и работе</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="prof_motive" value="интерес к профессии"> Интерес к профессии</label>
+                        <label><input type="checkbox" name="prof_motive" value="стабильный доход"> Стабильный доход</label>
+                        <label><input type="checkbox" name="prof_motive" value="карьерный рост"> Карьерный рост</label>
+                        <label><input type="checkbox" name="prof_motive" value="социальный статус"> Социальный статус</label>
+                        <label><input type="checkbox" name="prof_motive" value="семейная традиция"> Семейная традиция</label>
+                    </div>
+                    <textarea name="profession" placeholder="Мотивы выбора, удовлетворённость, продвижение, авторитет в коллективе..."></textarea>
                 </div>
                 <div class="field">
                     <label>Общественная и политическая активность</label>
-                    <textarea name="social_activity" placeholder="Участвуете ли в общественной/политической деятельности, сколько времени уделяете, как это влияет на семью и быт..."></textarea>
+                    <div class="options">
+                        <label><input type="radio" name="social_act" value="активен"> Активен</label>
+                        <label><input type="radio" name="social_act" value="умеренно активен"> Умеренно активен</label>
+                        <label><input type="radio" name="social_act" value="неактивен"> Неактивен</label>
+                    </div>
+                    <textarea name="social_activity" placeholder="Участие в общественной/политической деятельности, сколько времени уделяете, влияние на семью..."></textarea>
                 </div>
             </div>
 
-            <!-- 7. Досуг, материальное положение, здоровье -->
+            <!-- 7. Досуг, материальное, здоровье -->
             <div class="section">
-                <h2><span>7</span> Свободное время, материальные условия и здоровье</h2>
-                <div class="hint">Обычное проведение свободного времени (кино, театр, музыка, спорт, спиртное, азартные игры, круг друзей и знакомых и др.), материальные условия жизни (жильё, бюджет семьи, удовлетворённость своим материальным положением). Здоровье: общее состояние, отношение к своему здоровью, наличие вредных и пагубных привычек, наличие серьёзных заболеваний, перенесённые серьёзные заболевания.</div>
+                <h2><span>7</span> Свободное время, материальное положение и здоровье</h2>
                 
                 <div class="field">
                     <label>Как проводите свободное время</label>
-                    <textarea name="leisure" style="min-height:140px" placeholder="Хобби, спорт, круг общения, отношение к алкоголю, азартным играм, посещение культурных мероприятий..."></textarea>
+                    <div class="options">
+                        <label><input type="checkbox" name="leisure_opt" value="спорт"> Спорт / фитнес</label>
+                        <label><input type="checkbox" name="leisure_opt" value="чтение"> Чтение</label>
+                        <label><input type="checkbox" name="leisure_opt" value="кино/театр"> Кино / театр</label>
+                        <label><input type="checkbox" name="leisure_opt" value="музыка"> Музыка</label>
+                        <label><input type="checkbox" name="leisure_opt" value="компьютер/игры"> Компьютер / игры</label>
+                        <label><input type="checkbox" name="leisure_opt" value="общение с друзьями"> Общение с друзьями</label>
+                        <label><input type="checkbox" name="leisure_opt" value="семья"> Время с семьёй</label>
+                        <label><input type="checkbox" name="leisure_opt" value="рыбалка/охота/природа"> Рыбалка / охота / природа</label>
+                        <label><input type="checkbox" name="leisure_opt" value="автомобиль"> Автомобиль / техника</label>
+                    </div>
+                    <textarea name="leisure" placeholder="Подробнее о хобби, круге общения, отношении к алкоголю и азартным играм..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Материальные условия жизни</label>
-                    <textarea name="material" placeholder="Жильё (своё/аренда), уровень дохода, удовлетворённость материальным положением, крупные траты..."></textarea>
+                    <label>Материальные условия</label>
+                    <div class="options">
+                        <label><input type="radio" name="housing" value="собственное жильё"> Собственное жильё</label>
+                        <label><input type="radio" name="housing" value="аренда"> Аренда</label>
+                        <label><input type="radio" name="housing" value="жильё родителей"> Жильё родителей / родственников</label>
+                        <label><input type="radio" name="housing" value="служебное"> Служебное жильё</label>
+                    </div>
+                    <div class="options">
+                        <label><input type="radio" name="material_satisf" value="полностью удовлетворён"> Полностью удовлетворён материальным положением</label>
+                        <label><input type="radio" name="material_satisf" value="в целом доволен"> В целом доволен</label>
+                        <label><input type="radio" name="material_satisf" value="хотелось бы лучше"> Хотелось бы лучше</label>
+                        <label><input type="radio" name="material_satisf" value="не удовлетворён"> Не удовлетворён</label>
+                    </div>
+                    <textarea name="material" placeholder="Бюджет семьи, крупные траты, уровень дохода..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Состояние здоровья и вредные привычки</label>
-                    <textarea name="health" placeholder="Общее самочувствие, хронические заболевания, отношение к здоровью, курение, алкоголь, другие привычки..."></textarea>
+                    <label>Здоровье и вредные привычки</label>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Общее состояние здоровья:</strong>
+                        <label><input type="radio" name="health_status" value="отличное"> Отличное</label>
+                        <label><input type="radio" name="health_status" value="хорошее"> Хорошее</label>
+                        <label><input type="radio" name="health_status" value="удовлетворительное"> Удовлетворительное</label>
+                        <label><input type="radio" name="health_status" value="есть хронические заболевания"> Есть хронические заболевания</label>
+                    </div>
+                    <div class="options">
+                        <strong style="font-size:0.9rem; margin-bottom:6px; display:block;">Вредные привычки:</strong>
+                        <label><input type="checkbox" name="habits" value="не курю"> Не курю</label>
+                        <label><input type="checkbox" name="habits" value="курю"> Курю</label>
+                        <label><input type="checkbox" name="habits" value="алкоголь редко"> Алкоголь редко / по праздникам</label>
+                        <label><input type="checkbox" name="habits" value="алкоголь умеренно"> Алкоголь умеренно</label>
+                        <label><input type="checkbox" name="habits" value="не употребляю алкоголь"> Не употребляю алкоголь</label>
+                        <label><input type="checkbox" name="habits" value="нет вредных привычек"> Нет вредных привычек</label>
+                    </div>
+                    <textarea name="health" placeholder="Хронические заболевания, перенесённые серьёзные болезни, отношение к своему здоровью..."></textarea>
                 </div>
             </div>
 
             <!-- 8. Мотивы службы -->
             <div class="section">
                 <h2><span>8</span> Мотивы службы в органах безопасности</h2>
-                <div class="hint">Основные мотивы для службы в органах, на чём основывается Ваш выбор данной деятельности, что наиболее привлекательно для Вас в деятельности органов безопасности.</div>
+                <div class="hint">Можно выбрать несколько вариантов. Это один из самых важных разделов.</div>
                 
                 <div class="field">
-                    <label>Почему хотите служить / служите в органах</label>
-                    <textarea name="motives" style="min-height:160px" placeholder="Честно и подробно опишите свои мотивы, что привлекает в службе, на чём основан выбор..."></textarea>
+                    <label>Основные мотивы</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="motives_opt" value="патриотизм и служение Родине"> Патриотизм и служение Родине</label>
+                        <label><input type="checkbox" name="motives_opt" value="желание защищать закон и порядок"> Желание защищать закон и порядок</label>
+                        <label><input type="checkbox" name="motives_opt" value="интерес к оперативной / аналитической работе"> Интерес к оперативной / аналитической работе</label>
+                        <label><input type="checkbox" name="motives_opt" value="стабильность и социальные гарантии"> Стабильность и социальные гарантии</label>
+                        <label><input type="checkbox" name="motives_opt" value="высокий социальный статус службы"> Высокий социальный статус службы</label>
+                        <label><input type="checkbox" name="motives_opt" value="карьерный рост и самореализация"> Карьерный рост и самореализация</label>
+                        <label><input type="checkbox" name="motives_opt" value="семейные традиции (родственники в органах)"> Семейные традиции (родственники в органах)</label>
+                        <label><input type="checkbox" name="motives_opt" value="желание быть полезным обществу"> Желание быть полезным обществу</label>
+                        <label><input type="checkbox" name="motives_opt" value="привлекательность формы и дисциплины"> Привлекательность формы, дисциплины и структуры</label>
+                        <label>
+                            <input type="checkbox" name="motives_opt" value="свой вариант" id="motive_other_check" onchange="toggleOther(this)">
+                            Свой вариант
+                        </label>
+                        <input type="text" class="other-input" id="motive_other_text" name="motive_other" placeholder="Напишите свой мотив...">
+                    </div>
+                    <textarea name="motives" style="min-height:150px" placeholder="Подробно опишите, почему именно органы безопасности, что для вас наиболее привлекательно в этой деятельности, на чём основывается выбор..."></textarea>
                 </div>
             </div>
 
-            <!-- Кнопки -->
             <div class="actions">
                 <button type="button" class="btn-primary" onclick="generateJSON()">Сформировать JSON</button>
                 <button type="button" class="btn-secondary" onclick="generateText()">Сформировать текст</button>
@@ -388,15 +510,60 @@
 </div>
 
 <script>
+    function toggleOther(checkbox) {
+        const input = document.getElementById('motive_other_text');
+        if (checkbox.checked) {
+            input.classList.add('show');
+            input.focus();
+        } else {
+            input.classList.remove('show');
+            input.value = '';
+        }
+    }
+
+    function getCheckedValues(name) {
+        return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+            .map(el => el.value);
+    }
+
+    function getRadioValue(name) {
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : '';
+    }
+
     function getFormData() {
         const form = document.getElementById('oprosnik');
         const data = {};
-        const elements = form.elements;
-        for (let el of elements) {
-            if (el.name) {
+
+        // Обычные поля
+        for (let el of form.elements) {
+            if (el.name && el.type !== 'checkbox' && el.type !== 'radio' && el.type !== 'button') {
                 data[el.name] = el.value.trim();
             }
         }
+
+        // Радио и чекбоксы
+        data.edu_level = getRadioValue('edu_level');
+        data.father_alive = getCheckedValues('father_alive');
+        data.mother_alive = getCheckedValues('mother_alive');
+        data.parents_rel = getRadioValue('parents_rel');
+        data.birth_type = getRadioValue('birth_type');
+        data.child_order = getRadioValue('child_order');
+        data.school_perf = getRadioValue('school_perf');
+        data.school_rel = getCheckedValues('school_rel');
+        data.work_satisf = getRadioValue('work_satisf');
+        data.army_status = getRadioValue('army_status');
+        data.live_with = getCheckedValues('live_with');
+        data.spouse_rel = getRadioValue('spouse_rel');
+        data.prof_motive = getCheckedValues('prof_motive');
+        data.social_act = getRadioValue('social_act');
+        data.leisure_opt = getCheckedValues('leisure_opt');
+        data.housing = getRadioValue('housing');
+        data.material_satisf = getRadioValue('material_satisf');
+        data.health_status = getRadioValue('health_status');
+        data.habits = getCheckedValues('habits');
+        data.motives_opt = getCheckedValues('motives_opt');
+
         return data;
     }
 
@@ -418,44 +585,59 @@
         text += `Место рождения: ${d.birthplace || ''}\n`;
         text += `Национальность: ${d.nationality || ''}\n`;
         text += `Семейное положение: ${d.marital || ''}\n`;
-        text += `Образование: ${d.education || ''}\n`;
+        text += `Уровень образования: ${d.edu_level || ''}\n`;
+        text += `Образование подробно: ${d.education || ''}\n`;
         text += `Специальность: ${d.specialty || ''}\n`;
-        text += `Должность и характер деятельности: ${d.current_job || ''}\n`;
+        text += `Должность и деятельность: ${d.current_job || ''}\n`;
         text += `Место жительства: ${d.address || ''}\n\n`;
 
         text += `2. РОДИТЕЛИ\n`;
-        text += `Отец:\n${d.father || ''}\n\n`;
-        text += `Мать:\n${d.mother || ''}\n\n`;
-        text += `Взаимоотношения в семье:\n${d.parents_relations || ''}\n\n`;
+        text += `Отец (\( {(d.father_alive || []).join(', ')}):\n \){d.father || ''}\n\n`;
+        text += `Мать (\( {(d.mother_alive || []).join(', ')}):\n \){d.mother || ''}\n\n`;
+        text += `Взаимоотношения: \( {d.parents_rel || ''}\n \){d.parents_relations || ''}\n\n`;
 
         text += `3. МЕСТО РОЖДЕНИЯ, ДЕТСТВО И ШКОЛА\n`;
+        text += `Тип населённого пункта: ${d.birth_type || ''}\n`;
+        text += `Ребёнок по счёту: ${d.child_order || ''}\n`;
         text += `Детство:\n${d.childhood || ''}\n\n`;
+        text += `Успеваемость в школе: ${d.school_perf || ''}\n`;
+        text += `Отношения со сверстниками: ${(d.school_rel || []).join(', ')}\n`;
         text += `Школьные годы:\n${d.school || ''}\n\n`;
 
         text += `4. УЧЁБА, ТРУД, АРМИЯ\n`;
         text += `Учёба после школы:\n${d.higher_education || ''}\n\n`;
+        text += `Удовлетворённость работой: ${d.work_satisf || ''}\n`;
         text += `Трудовая деятельность:\n${d.work || ''}\n\n`;
-        text += `Служба в армии:\n${d.army || ''}\n\n`;
+        text += `Служба в армии: \( {d.army_status || ''}\n \){d.army || ''}\n\n`;
 
         text += `5. СЕМЬЯ\n`;
+        text += `Проживает с: ${(d.live_with || []).join(', ')}\n`;
+        text += `Отношения с супругом: ${d.spouse_rel || ''}\n`;
         text += `${d.family || ''}\n\n`;
 
         text += `6. ПРОФЕССИЯ И СОЦИАЛЬНАЯ АКТИВНОСТЬ\n`;
+        text += `Мотивы выбора профессии: ${(d.prof_motive || []).join(', ')}\n`;
         text += `Профессия и работа:\n${d.profession || ''}\n\n`;
-        text += `Общественная активность:\n${d.social_activity || ''}\n\n`;
+        text += `Общественная активность: \( {d.social_act || ''}\n \){d.social_activity || ''}\n\n`;
 
         text += `7. СВОБОДНОЕ ВРЕМЯ, МАТЕРИАЛЬНОЕ ПОЛОЖЕНИЕ, ЗДОРОВЬЕ\n`;
-        text += `Досуг:\n${d.leisure || ''}\n\n`;
-        text += `Материальные условия:\n${d.material || ''}\n\n`;
-        text += `Здоровье:\n${d.health || ''}\n\n`;
+        text += `Досуг: \( {(d.leisure_opt || []).join(', ')}\n \){d.leisure || ''}\n\n`;
+        text += `Жильё: ${d.housing || ''}\n`;
+        text += `Удовлетворённость материальным положением: ${d.material_satisf || ''}\n`;
+        text += `${d.material || ''}\n\n`;
+        text += `Здоровье: ${d.health_status || ''}\n`;
+        text += `Привычки: ${(d.habits || []).join(', ')}\n`;
+        text += `${d.health || ''}\n\n`;
 
         text += `8. МОТИВЫ СЛУЖБЫ В ОРГАНАХ БЕЗОПАСНОСТИ\n`;
-        text += `${d.motives || ''}\n\n`;
+        text += `Выбранные мотивы: ${(d.motives_opt || []).join('; ')}\n`;
+        if (d.motive_other) text += `Свой вариант: ${d.motive_other}\n`;
+        text += `\nПодробное описание:\n${d.motives || ''}\n\n`;
 
         text += `=====================================\n`;
         text += `Дата заполнения: ${new Date().toLocaleDateString('ru-RU')}\n`;
 
-        showResult(text, 'Текст (можно сразу использовать как основу)');
+        showResult(text, 'Текст (можно использовать как основу)');
     }
 
     function showResult(content, title) {
@@ -477,9 +659,10 @@
     function clearForm() {
         if (confirm('Очистить все поля?')) {
             document.getElementById('oprosnik').reset();
+            document.getElementById('motive_other_text').classList.remove('show');
             document.getElementById('output').style.display = 'none';
         }
     }
 </script>
 </body>
-  </html>
+</html>
