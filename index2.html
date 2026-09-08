@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Опросник ПФЛ МСЧ УФСБ</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --accent: #2b6cb0;
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #2d3748;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 24px 28px;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 0;
+        }
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .form-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 28px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section:last-of-type { border-bottom: none; }
+        .section h2 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section h2 span {
+            background: var(--accent);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 14px;
+            background: #edf2f7;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(43,108,176,0.15);
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+        }
+        .field { margin-bottom: 14px; }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover { background: #2c5282; }
+        .btn-secondary {
+            background: #edf2f7;
+            color: var(--primary);
+        }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-danger {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        .btn-danger:hover { background: #feb2b2; }
+        #output {
+            margin-top: 28px;
+            display: none;
+        }
+        #output h3 {
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+        #result {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: "SF Mono", Monaco, Consolas, monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        .copy-btn {
+            margin-top: 12px;
+            background: #38a169;
+            color: white;
+        }
+        .copy-btn:hover { background: #2f855a; }
+        .success-msg {
+            display: none;
+            margin-top: 10px;
+            color: #38a169;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Опросник ПФЛ МСЧ УФСБ РФ по Приморскому краю</h1>
+        <p>Заполните все разделы максимально подробно. После заполнения сформируйте JSON или текст — пришлите его мне, и мы вместе составим готовый документ.</p>
+    </header>
+
+    <div class="form-card">
+        <form id="oprosnik">
+
+            <!-- 1. Общие данные -->
+            <div class="section">
+                <h2><span>1</span> Общие данные</h2>
+                <div class="hint">Фамилия, имя, отчество, дата и место рождения, национальность, образование, специальность, должность и характер нынешней профессиональной деятельности, место жительства, семейное положение.</div>
+                
+                <div class="row">
+                    <div class="field">
+                        <label>Фамилия</label>
+                        <input type="text" name="lastname" placeholder="Иванов">
+                    </div>
+                    <div class="field">
+                        <label>Имя</label>
+                        <input type="text" name="firstname" placeholder="Иван">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label>Отчество</label>
+                        <input type="text" name="middlename" placeholder="Иванович">
+                    </div>
+                    <div class="field">
+                        <label>Дата рождения</label>
+                        <input type="date" name="birthdate">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Место рождения</label>
+                    <input type="text" name="birthplace" placeholder="г. Владивосток, Приморский край">
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label>Национальность</label>
+                        <input type="text" name="nationality" placeholder="русский">
+                    </div>
+                    <div class="field">
+                        <label>Семейное положение</label>
+                        <select name="marital">
+                            <option value="">— выберите —</option>
+                            <option>холост / не замужем</option>
+                            <option>женат / замужем</option>
+                            <option>разведён / разведена</option>
+                            <option>вдовец / вдова</option>
+                            <option>гражданский брак</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Образование (какое, когда и где получено)</label>
+                    <textarea name="education" placeholder="Высшее, 2015 г., Дальневосточный федеральный университет, факультет..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Специальность по диплому</label>
+                    <input type="text" name="specialty" placeholder="Юриспруденция">
+                </div>
+                <div class="field">
+                    <label>Должность и характер нынешней профессиональной деятельности</label>
+                    <textarea name="current_job" placeholder="Менеджер по продажам в компании..., характер работы..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Место жительства (фактическое)</label>
+                    <input type="text" name="address" placeholder="г. Владивосток, ул. ..., д. ..., кв. ...">
+                </div>
+            </div>
+
+            <!-- 2. Родители -->
+            <div class="section">
+                <h2><span>2</span> Описание родителей</h2>
+                <div class="hint">Национальность, дата и место рождения, место жительства, социальное положение, отношение к общественным, политическим и религиозным организациям, образование, профессия, их взаимоотношения, отношение к детям, увлечения, средства к жизни, постоянное занятие, проведение свободного времени в настоящее время.</div>
+                
+                <div class="field">
+                    <label>Отец (подробно)</label>
+                    <textarea name="father" style="min-height:160px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, где работает/работал, отношение к политическим и религиозным организациям, характер взаимоотношений в семье, отношение ко мне, увлечения, как проводит свободное время..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Мать (подробно)</label>
+                    <textarea name="mother" style="min-height:160px" placeholder="ФИО, дата и место рождения, национальность, образование, профессия, где работает/работала, отношение к политическим и религиозным организациям, характер взаимоотношений в семье, отношение ко мне, увлечения, как проводит свободное время..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Взаимоотношения между родителями и отношение к детям</label>
+                    <textarea name="parents_relations" placeholder="Опишите атмосферу в семье, были ли конфликты, как родители относились к воспитанию..."></textarea>
+                </div>
+            </div>
+
+            <!-- 3. Место рождения и детство -->
+            <div class="section">
+                <h2><span>3</span> Место рождения, раннее детство и школьные годы</h2>
+                <div class="hint">Город/деревня, особенности места рождения, жизнь в семье, какой ребёнок по счёту, жизнь вне семьи, братья и сёстры, их взаимоотношения, характерные события в жизни. Школьные годы: дошкольные учреждения, специализация школы, любимые предметы, взаимоотношения со сверстниками, нарушения школьной дисциплины, успехи, оценка учебной деятельности, увлечения и т.д.</div>
+                
+                <div class="field">
+                    <label>Характеристика места рождения и раннего детства</label>
+                    <textarea name="childhood" style="min-height:160px" placeholder="Где родился и рос (город/село), особенности места, какой ребёнок по счёту, братья/сёстры (имена, возраст, отношения), жизнь в семье и вне семьи, яркие события детства..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Школьные годы</label>
+                    <textarea name="school" style="min-height:160px" placeholder="Какие школы посещал, специализация, любимые и нелюбимые предметы, отношения с одноклассниками и учителями, успеваемость, нарушения дисциплины, увлечения, кружки, спортивные секции..."></textarea>
+                </div>
+            </div>
+
+            <!-- 4. Учёба, труд, армия -->
+            <div class="section">
+                <h2><span>4</span> Учебные заведения, трудовая деятельность и служба в армии</h2>
+                <div class="hint">Учебные заведения, в которых обучались (причины поступления, планы на будущее, успехи, полученные навыки и умения, характерные события в 17–19 лет). Трудовая деятельность и служба в армии (характер труда и службы, отношение к труду и службе, положение среди других людей, удовлетворённость, влияние трудовой деятельности на личность).</div>
+                
+                <div class="field">
+                    <label>Учёба после школы (ссузы, вузы, курсы)</label>
+                    <textarea name="higher_education" style="min-height:140px" placeholder="Куда поступал, почему выбрал это направление, как учился, какие навыки получил, яркие события студенческих лет..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Трудовая деятельность</label>
+                    <textarea name="work" style="min-height:140px" placeholder="Где и кем работал, характер работы, отношение к труду, положение в коллективе, удовлетворённость, чему научился..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Служба в армии (если была)</label>
+                    <textarea name="army" placeholder="Где служил, род войск, должности, отношение к службе, как влияла на характер..."></textarea>
+                </div>
+            </div>
+
+            <!-- 5. Семья -->
+            <div class="section">
+                <h2><span>5</span> Характеристика семьи</h2>
+                <div class="hint">С кем живёте в настоящее время, отношения между супругами, рождение детей, отношение к детям, отношение к родителям, зависимость от жены (мужа).</div>
+                
+                <div class="field">
+                    <label>Состав семьи и отношения</label>
+                    <textarea name="family" style="min-height:160px" placeholder="С кем проживаете сейчас, отношения с супругом/супругой, дети (имена, возраст, отношение к ним), отношения с родителями в настоящее время, есть ли зависимость от супруга..."></textarea>
+                </div>
+            </div>
+
+            <!-- 6. Профессия и социальная активность -->
+            <div class="section">
+                <h2><span>6</span> Профессия, специальность и социальная активность</h2>
+                <div class="hint">Мотивы выбора профессии и работы, удовлетворённость работой и профессией, продвижение по работе, социальный статус на работе, авторитетность, популярность. Социальная (общественная и политическая) активность: активен / неактивен, сколько тратите времени на общественную деятельность, каково её влияние на быт, семейные дела.</div>
+                
+                <div class="field">
+                    <label>Профессия и отношение к работе</label>
+                    <textarea name="profession" style="min-height:140px" placeholder="Почему выбрали эту профессию, довольны ли работой, как продвигались, какой статус имеете в коллективе, авторитет..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Общественная и политическая активность</label>
+                    <textarea name="social_activity" placeholder="Участвуете ли в общественной/политической деятельности, сколько времени уделяете, как это влияет на семью и быт..."></textarea>
+                </div>
+            </div>
+
+            <!-- 7. Досуг, материальное положение, здоровье -->
+            <div class="section">
+                <h2><span>7</span> Свободное время, материальные условия и здоровье</h2>
+                <div class="hint">Обычное проведение свободного времени (кино, театр, музыка, спорт, спиртное, азартные игры, круг друзей и знакомых и др.), материальные условия жизни (жильё, бюджет семьи, удовлетворённость своим материальным положением). Здоровье: общее состояние, отношение к своему здоровью, наличие вредных и пагубных привычек, наличие серьёзных заболеваний, перенесённые серьёзные заболевания.</div>
+                
+                <div class="field">
+                    <label>Как проводите свободное время</label>
+                    <textarea name="leisure" style="min-height:140px" placeholder="Хобби, спорт, круг общения, отношение к алкоголю, азартным играм, посещение культурных мероприятий..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Материальные условия жизни</label>
+                    <textarea name="material" placeholder="Жильё (своё/аренда), уровень дохода, удовлетворённость материальным положением, крупные траты..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Состояние здоровья и вредные привычки</label>
+                    <textarea name="health" placeholder="Общее самочувствие, хронические заболевания, отношение к здоровью, курение, алкоголь, другие привычки..."></textarea>
+                </div>
+            </div>
+
+            <!-- 8. Мотивы службы -->
+            <div class="section">
+                <h2><span>8</span> Мотивы службы в органах безопасности</h2>
+                <div class="hint">Основные мотивы для службы в органах, на чём основывается Ваш выбор данной деятельности, что наиболее привлекательно для Вас в деятельности органов безопасности.</div>
+                
+                <div class="field">
+                    <label>Почему хотите служить / служите в органах</label>
+                    <textarea name="motives" style="min-height:160px" placeholder="Честно и подробно опишите свои мотивы, что привлекает в службе, на чём основан выбор..."></textarea>
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="actions">
+                <button type="button" class="btn-primary" onclick="generateJSON()">Сформировать JSON</button>
+                <button type="button" class="btn-secondary" onclick="generateText()">Сформировать текст</button>
+                <button type="button" class="btn-danger" onclick="clearForm()">Очистить всё</button>
+            </div>
+        </form>
+
+        <div id="output">
+            <h3 id="output-title">Результат</h3>
+            <div id="result"></div>
+            <button class="copy-btn" onclick="copyResult()">Скопировать в буфер</button>
+            <div class="success-msg" id="copy-success">✓ Скопировано!</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getFormData() {
+        const form = document.getElementById('oprosnik');
+        const data = {};
+        const elements = form.elements;
+        for (let el of elements) {
+            if (el.name) {
+                data[el.name] = el.value.trim();
+            }
+        }
+        return data;
+    }
+
+    function generateJSON() {
+        const data = getFormData();
+        const json = JSON.stringify(data, null, 2);
+        showResult(json, 'JSON (скопируйте и пришлите мне)');
+    }
+
+    function generateText() {
+        const d = getFormData();
+        let text = `АВТОБИОГРАФИЧЕСКИЙ ОПРОСНИК\n`;
+        text += `ПФЛ МСЧ УФСБ РФ по Приморскому краю\n`;
+        text += `=====================================\n\n`;
+
+        text += `1. ОБЩИЕ ДАННЫЕ\n`;
+        text += `ФИО: ${d.lastname || ''} ${d.firstname || ''} ${d.middlename || ''}\n`;
+        text += `Дата рождения: ${d.birthdate || ''}\n`;
+        text += `Место рождения: ${d.birthplace || ''}\n`;
+        text += `Национальность: ${d.nationality || ''}\n`;
+        text += `Семейное положение: ${d.marital || ''}\n`;
+        text += `Образование: ${d.education || ''}\n`;
+        text += `Специальность: ${d.specialty || ''}\n`;
+        text += `Должность и характер деятельности: ${d.current_job || ''}\n`;
+        text += `Место жительства: ${d.address || ''}\n\n`;
+
+        text += `2. РОДИТЕЛИ\n`;
+        text += `Отец:\n${d.father || ''}\n\n`;
+        text += `Мать:\n${d.mother || ''}\n\n`;
+        text += `Взаимоотношения в семье:\n${d.parents_relations || ''}\n\n`;
+
+        text += `3. МЕСТО РОЖДЕНИЯ, ДЕТСТВО И ШКОЛА\n`;
+        text += `Детство:\n${d.childhood || ''}\n\n`;
+        text += `Школьные годы:\n${d.school || ''}\n\n`;
+
+        text += `4. УЧЁБА, ТРУД, АРМИЯ\n`;
+        text += `Учёба после школы:\n${d.higher_education || ''}\n\n`;
+        text += `Трудовая деятельность:\n${d.work || ''}\n\n`;
+        text += `Служба в армии:\n${d.army || ''}\n\n`;
+
+        text += `5. СЕМЬЯ\n`;
+        text += `${d.family || ''}\n\n`;
+
+        text += `6. ПРОФЕССИЯ И СОЦИАЛЬНАЯ АКТИВНОСТЬ\n`;
+        text += `Профессия и работа:\n${d.profession || ''}\n\n`;
+        text += `Общественная активность:\n${d.social_activity || ''}\n\n`;
+
+        text += `7. СВОБОДНОЕ ВРЕМЯ, МАТЕРИАЛЬНОЕ ПОЛОЖЕНИЕ, ЗДОРОВЬЕ\n`;
+        text += `Досуг:\n${d.leisure || ''}\n\n`;
+        text += `Материальные условия:\n${d.material || ''}\n\n`;
+        text += `Здоровье:\n${d.health || ''}\n\n`;
+
+        text += `8. МОТИВЫ СЛУЖБЫ В ОРГАНАХ БЕЗОПАСНОСТИ\n`;
+        text += `${d.motives || ''}\n\n`;
+
+        text += `=====================================\n`;
+        text += `Дата заполнения: ${new Date().toLocaleDateString('ru-RU')}\n`;
+
+        showResult(text, 'Текст (можно сразу использовать как основу)');
+    }
+
+    function showResult(content, title) {
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output-title').textContent = title;
+        document.getElementById('result').textContent = content;
+        document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyResult() {
+        const text = document.getElementById('result').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const msg = document.getElementById('copy-success');
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 2000);
+        });
+    }
+
+    function clearForm() {
+        if (confirm('Очистить все поля?')) {
+            document.getElementById('oprosnik').reset();
+            document.getElementById('output').style.display = 'none';
+        }
+    }
+</script>
+</body>
+  </html>
