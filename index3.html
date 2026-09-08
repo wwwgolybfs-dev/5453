@@ -83,7 +83,7 @@
             font-style: italic;
         }
         label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.95rem; }
-        input[type="text"], textarea, select {
+        input[type="text"], input[type="date"], textarea, select {
             width: 100%;
             padding: 10px 13px;
             border: 1px solid var(--border);
@@ -91,7 +91,7 @@
             font-size: 0.95rem;
             font-family: inherit;
         }
-        textarea { min-height: 110px; resize: vertical; }
+        textarea { min-height: 100px; resize: vertical; }
         .options {
             display: flex;
             flex-direction: column;
@@ -148,37 +148,43 @@
         }
         .copy-btn { margin-top: 10px; background: #38a169; color: white; }
         .success-msg { display: none; margin-top: 8px; color: #38a169; }
+        .prefilled {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
         <h1>Дополнительный опросник</h1>
-        <p>Только те разделы, которые остались пустыми или слишком краткими. Заполни — и мы сможем собрать полный текст.</p>
+        <p>Недостающие разделы + удобные варианты ответов для характера матери, семьи и отчима</p>
     </header>
 
     <div class="form-card">
         <form id="dopForm">
 
-            <!-- 1. Базовые недостающие данные -->
+            <!-- 1. Базовые данные -->
             <div class="section">
-                <h2><span>1</span> Базовые данные (не хватало)</h2>
-                
+                <h2><span>1</span> Базовые данные</h2>
                 <div class="field">
-                    <label>Место рождения (точный населённый пункт)</label>
-                    <div class="comment">В JSON было пусто. Укажи город/посёлок и край.</div>
-                    <input type="text" name="birthplace" placeholder="например: г. Владивосток, Приморский край">
+                    <label>Место рождения</label>
+                    <input type="text" name="birthplace" placeholder="г. Владивосток, Приморский край">
                 </div>
                 <div class="field">
                     <label>Национальность</label>
-                    <input type="text" name="nationality" placeholder="русский / украинец / смешанная и т.д.">
+                    <input type="text" name="nationality" placeholder="русский">
                 </div>
             </div>
 
-            <!-- 2. Отец (был почти пустой) -->
+            <!-- 2. Отец -->
             <div class="section">
-                <h2><span>2</span> Отец (нужно подробнее)</h2>
-                <div class="hint">В JSON указано только «умер». Бланк требует: национальность, дата и место рождения, образование, профессия, отношение к политическим и религиозным организациям, характер, отношение к детям, увлечения.</div>
+                <h2><span>2</span> Отец</h2>
+                <div class="hint">Ранее было указано только «умер». Заполни, что знаешь.</div>
                 
                 <div class="field">
                     <label>ФИО отца полностью</label>
@@ -190,7 +196,7 @@
                         <input type="text" name="father_birth" placeholder="например 1975">
                     </div>
                     <div class="field">
-                        <label>Место рождения отца</label>
+                        <label>Место рождения</label>
                         <input type="text" name="father_place" placeholder="город / село">
                     </div>
                 </div>
@@ -199,143 +205,225 @@
                     <input type="text" name="father_nat" placeholder="русский">
                 </div>
                 <div class="field">
-                    <label>Образование и профессия отца</label>
+                    <label>Образование и профессия</label>
                     <textarea name="father_edu" placeholder="Какое образование, кем работал..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Когда умер и при каких обстоятельствах (если можно)</label>
-                    <textarea name="father_death" placeholder="Год, причина (если знаешь и готов написать)"></textarea>
+                    <label>Когда умер и при каких обстоятельствах</label>
+                    <textarea name="father_death" placeholder="Год, причина (если знаешь)"></textarea>
                 </div>
                 <div class="field">
-                    <label>Характер отца, отношение к тебе и семье, увлечения</label>
+                    <label>Характер отца и отношение к детям</label>
                     <div class="options">
                         <label><input type="checkbox" name="father_char" value="строгий"> Строгий</label>
-                        <label><input type="checkbox" name="father_char" value="мягкий"> Мягкий / добрый</label>
+                        <label><input type="checkbox" name="father_char" value="мягкий и добрый"> Мягкий и добрый</label>
                         <label><input type="checkbox" name="father_char" value="мало общался"> Мало общался / был отстранён</label>
-                        <label><input type="checkbox" name="father_char" value="поддерживал"> Поддерживал и интересовался жизнью</label>
+                        <label><input type="checkbox" name="father_char" value="поддерживал"> Поддерживал и интересовался жизнью детей</label>
                         <label><input type="checkbox" name="father_char" value="были конфликты"> Были конфликты</label>
+                        <label><input type="checkbox" name="father_char" value="почти не помню"> Почти не помню / мало воспоминаний</label>
                     </div>
-                    <textarea name="father_desc" placeholder="Свободно опиши, каким он был, как относился к тебе и сёстрам..."></textarea>
+                    <textarea name="father_desc" placeholder="Любые дополнительные воспоминания..."></textarea>
                 </div>
             </div>
 
-            <!-- 3. Мать — дополнение -->
+            <!-- 3. Мать -->
             <div class="section">
-                <h2><span>3</span> Мать — дополнение</h2>
-                <div class="comment">Ты уже написал: Васильевна Екатерина Сергеевна (ранее Бондаренко, девичья Добровольская), архитектор, сейчас старший специалист в администрации Приморского края. Нужно чуть расширить.</div>
+                <h2><span>3</span> Мать</h2>
+                <div class="comment">Уже известно: Васильевна Екатерина Сергеевна (девичья Добровольская), архитектор, старший специалист в администрации Приморского края.</div>
                 
                 <div class="field">
-                    <label>Дата рождения матери (примерно) и место рождения</label>
+                    <label>Дата и место рождения матери</label>
                     <input type="text" name="mother_birth" placeholder="год и город/село">
                 </div>
+
                 <div class="field">
-                    <label>Отношение матери к политическим и религиозным организациям</label>
+                    <label>Характер матери (можно выбрать несколько)</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="mother_char_opt" value="спокойная"> Спокойная, уравновешенная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="строгая"> Строгая, требовательная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="заботливая"> Заботливая, внимательная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="мягкая"> Мягкая, уступчивая</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="энергичная"> Энергичная, активная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="закрытая"> Сдержанная, закрытая</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="эмоциональная"> Эмоциональная</label>
+                        <label><input type="checkbox" name="mother_char_opt" value="трудолюбивая"> Трудолюбивая</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Отношение матери к детям</label>
+                    <div class="options">
+                        <label><input type="radio" name="mother_to_children" value="очень тёплое и близкое"> Очень тёплое и близкое</label>
+                        <label><input type="radio" name="mother_to_children" value="хорошее, заботливое"> Хорошее, заботливое</label>
+                        <label><input type="radio" name="mother_to_children" value="нормальное, без особой близости"> Нормальное, без особой близости</label>
+                        <label><input type="radio" name="mother_to_children" value="строгое"> Строгое, требовательное</label>
+                        <label><input type="radio" name="mother_to_children" value="бывает разное"> Бывает по-разному</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Отношение к политическим и религиозным организациям</label>
                     <div class="options">
                         <label><input type="radio" name="mother_polit" value="не интересуется"> Не интересуется политикой и религией</label>
                         <label><input type="radio" name="mother_polit" value="нейтрально"> Нейтрально относится</label>
-                        <label><input type="radio" name="mother_polit" value="есть взгляды"> Имеет определённые взгляды (опиши ниже)</label>
+                        <label><input type="radio" name="mother_polit" value="есть определённые взгляды"> Имеет определённые взгляды</label>
                     </div>
                     <textarea name="mother_polit_text" placeholder="Если есть что добавить..."></textarea>
                 </div>
+
                 <div class="field">
-                    <label>Характер матери, отношение к детям, увлечения, как проводит свободное время</label>
-                    <textarea name="mother_char" placeholder="Какая она по характеру, как относится к тебе и сёстрам, чем увлекается..."></textarea>
+                    <label>Увлечения и как проводит свободное время</label>
+                    <textarea name="mother_hobby" placeholder="Работа, дом, хобби, отдых..."></textarea>
                 </div>
             </div>
 
-            <!-- 4. Детство (было пусто) -->
+            <!-- 4. Сёстры и отчим -->
             <div class="section">
-                <h2><span>4</span> Раннее детство и семья</h2>
-                <div class="hint">В JSON пусто. Нужно: особенности места рождения, жизнь в семье, братья/сёстры подробнее, характерные события.</div>
-                
-                <div class="field">
-                    <label>Сёстры (имена, возраст примерно, отношения)</label>
-                    <div class="comment">Ты писал, что живёшь с двумя сёстрами. Расскажи подробнее.</div>
-                    <textarea name="sisters" placeholder="Имена, на сколько лет младше/старше, какие отношения..."></textarea>
+                <h2><span>4</span> Сёстры и отчим</h2>
+
+                <!-- Мария -->
+                <div class="prefilled">
+                    <strong>Родная младшая сестра по отцу:</strong><br>
+                    Бондаренко Мария Павловна<br>
+                    Дата рождения: 15.12.2004<br>
+                    Образование: закончила колледж по специальности «Архитектор»<br>
+                    Сейчас: работает помощником архитектора в архитектурном бюро
                 </div>
+
                 <div class="field">
-                    <label>Отчим — кратко</label>
-                    <textarea name="stepfather" placeholder="Как зовут, когда появился в семье, какие отношения, кем работает..."></textarea>
-                </div>
-                <div class="field">
-                    <label>Атмосфера в семье в детстве и характерные события</label>
+                    <label>Отношения с Марией</label>
                     <div class="options">
-                        <label><input type="checkbox" name="child_atm" value="спокойная"> Спокойная, тёплая</label>
-                        <label><input type="checkbox" name="child_atm" value="были трудности"> Были материальные/другие трудности</label>
+                        <label><input type="radio" name="maria_rel" value="очень близкие"> Очень близкие, дружеские</label>
+                        <label><input type="radio" name="maria_rel" value="хорошие"> Хорошие, спокойные</label>
+                        <label><input type="radio" name="maria_rel" value="нормальные"> Нормальные</label>
+                        <label><input type="radio" name="maria_rel" value="бывают разногласия"> Бывают разногласия</label>
+                        <label><input type="radio" name="maria_rel" value="не очень близкие"> Не очень близкие</label>
+                    </div>
+                    <textarea name="maria_extra" placeholder="Что-то ещё хочешь добавить про отношения с сестрой..."></textarea>
+                </div>
+
+                <!-- Василиса -->
+                <div class="field">
+                    <label>Младшая сестра по линии отчима</label>
+                    <div class="prefilled">
+                        Васильева Василиса Николаевна<br>
+                        Возраст: примерно 5 лет<br>
+                        Сейчас: ходит в детский сад
+                    </div>
+                    <label style="margin-top:10px;">Точная дата рождения Василисы (если вспомнишь)</label>
+                    <input type="date" name="vasilisa_birth">
+                    <label style="margin-top:10px;">Отношения с Василисой</label>
+                    <div class="options">
+                        <label><input type="radio" name="vasilisa_rel" value="хорошие, тёплые"> Хорошие, тёплые</label>
+                        <label><input type="radio" name="vasilisa_rel" value="нормальные"> Нормальные</label>
+                        <label><input type="radio" name="vasilisa_rel" value="мало общаемся"> Мало общаемся из-за разницы в возрасте</label>
+                        <label><input type="radio" name="vasilisa_rel" value="как к младшей"> Отношусь как к младшей сестре, помогаю</label>
+                    </div>
+                </div>
+
+                <!-- Отчим -->
+                <div class="field">
+                    <label>Отчим</label>
+                    <input type="text" name="stepfather_fio" placeholder="ФИО отчима (если знаешь полностью)">
+                    <div class="options" style="margin-top:10px;">
+                        <strong style="font-size:0.9rem; display:block; margin-bottom:6px;">Отношения с отчимом:</strong>
+                        <label><input type="radio" name="stepfather_rel" value="хорошие, уважительные"> Хорошие, уважительные</label>
+                        <label><input type="radio" name="stepfather_rel" value="нормальные, спокойные"> Нормальные, спокойные</label>
+                        <label><input type="radio" name="stepfather_rel" value="прохладные"> Прохладные / нейтральные</label>
+                        <label><input type="radio" name="stepfather_rel" value="сложные"> Сложные, бывают конфликты</label>
+                        <label><input type="radio" name="stepfather_rel" value="как с отцом"> Воспринимаю почти как родного отца</label>
+                    </div>
+                    <textarea name="stepfather_extra" placeholder="Когда появился в семье, кем работает, как складываются отношения..."></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Общая атмосфера в семье сейчас</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="family_atm" value="спокойная и доброжелательная"> Спокойная и доброжелательная</label>
+                        <label><input type="checkbox" name="family_atm" value="поддерживаем друг друга"> Поддерживаем друг друга</label>
+                        <label><input type="checkbox" name="family_atm" value="каждый сам по себе"> Каждый больше сам по себе</label>
+                        <label><input type="checkbox" name="family_atm" value="бывают ссоры"> Бывают ссоры и разногласия</label>
+                        <label><input type="checkbox" name="family_atm" value="дружная"> Дружная</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Детство -->
+            <div class="section">
+                <h2><span>5</span> Детство</h2>
+                <div class="field">
+                    <label>Атмосфера в семье в детстве</label>
+                    <div class="options">
+                        <label><input type="checkbox" name="child_atm" value="спокойная и тёплая"> Спокойная и тёплая</label>
+                        <label><input type="checkbox" name="child_atm" value="были трудности"> Были материальные или другие трудности</label>
                         <label><input type="checkbox" name="child_atm" value="много внимания"> Родители много внимания уделяли детям</label>
                         <label><input type="checkbox" name="child_atm" value="предоставляли свободу"> Предоставляли много свободы</label>
+                        <label><input type="checkbox" name="child_atm" value="строгая"> Была довольно строгая</label>
                     </div>
-                    <textarea name="childhood_full" style="min-height:130px" placeholder="Где рос, какие яркие воспоминания, переезды, важные события до школы и в младших классах..."></textarea>
+                    <textarea name="childhood_full" placeholder="Где рос, яркие воспоминания, важные события..."></textarea>
                 </div>
             </div>
 
-            <!-- 5. Школа — чуть расширить -->
+            <!-- 6. Школа -->
             <div class="section">
-                <h2><span>5</span> Школьные годы (дополнение)</h2>
-                <div class="comment">Ты написал, что общался в основном со своим классом и параллелью, конфликтов не было. Можно чуть подробнее.</div>
-                
+                <h2><span>6</span> Школа (дополнение)</h2>
                 <div class="field">
-                    <label>Любимые и нелюбимые предметы, успехи, нарушения дисциплины</label>
-                    <textarea name="school_extra" placeholder="Какие предметы нравились, были ли пятёрки/двойки, замечания, участие в олимпиадах, спорте, кружках..."></textarea>
+                    <label>Любимые/нелюбимые предметы, успехи, дисциплина</label>
+                    <textarea name="school_extra" placeholder="Какие предметы нравились, были ли замечания, кружки, спорт..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Были ли в школе или после какие-то значимые события в 15–19 лет</label>
-                    <textarea name="events_1519" placeholder="Первая работа, переезды, важные решения, знакомства и т.д."></textarea>
+                    <label>Значимые события в 15–19 лет</label>
+                    <textarea name="events_1519" placeholder="Первая работа, важные решения, переезды и т.д."></textarea>
                 </div>
             </div>
 
-            <!-- 6. Материальные условия -->
+            <!-- 7. Материальное положение -->
             <div class="section">
-                <h2><span>6</span> Материальные условия жизни</h2>
-                <div class="hint">В JSON было пусто. Бланк требует: жильё, бюджет семьи, удовлетворённость материальным положением.</div>
-                
+                <h2><span>7</span> Материальные условия</h2>
                 <div class="field">
-                    <label>Жильё подробнее</label>
+                    <label>Жильё</label>
                     <div class="options">
-                        <label><input type="radio" name="housing_detail" value="квартира родителей"> Живу в квартире родителей / семьи</label>
-                        <label><input type="radio" name="housing_detail" value="своя доля"> Есть своя доля / комната</label>
-                        <label><input type="radio" name="housing_detail" value="аренда отдельно"> Снимаю отдельно</label>
+                        <label><input type="radio" name="housing_detail" value="квартира семьи"> Живу в квартире семьи (родителей)</label>
+                        <label><input type="radio" name="housing_detail" value="своя комната"> Есть своя комната</label>
+                        <label><input type="radio" name="housing_detail" value="аренда"> Снимаю отдельно</label>
                     </div>
-                    <textarea name="material_full" placeholder="Сколько комнат, условия, есть ли планы на своё жильё, как оцениваешь уровень жизни семьи..."></textarea>
+                    <textarea name="material_full" placeholder="Условия, планы на своё жильё, как оцениваешь уровень жизни..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Отношение к деньгам и текущий доход (примерно)</label>
-                    <textarea name="money" placeholder="Хватает ли на нужды, есть ли накопления, крупные траты..."></textarea>
+                    <label>Отношение к деньгам</label>
+                    <textarea name="money" placeholder="Хватает ли на нужды, есть ли накопления..."></textarea>
                 </div>
             </div>
 
-            <!-- 7. Здоровье -->
+            <!-- 8. Здоровье -->
             <div class="section">
-                <h2><span>7</span> Здоровье</h2>
-                <div class="hint">В JSON: «отличное», куришь, алкоголь умеренно. Нужно чуть развернуть.</div>
-                
+                <h2><span>8</span> Здоровье</h2>
                 <div class="field">
-                    <label>Хронические заболевания, травмы, операции</label>
+                    <label>Хронические заболевания / травмы</label>
                     <div class="options">
                         <label><input type="radio" name="chronic" value="нет"> Нет хронических заболеваний</label>
                         <label><input type="radio" name="chronic" value="есть"> Есть (опиши ниже)</label>
                     </div>
-                    <textarea name="health_full" placeholder="Перенесённые серьёзные болезни, травмы, операции, как относишься к своему здоровью, занимаешься ли спортом регулярно..."></textarea>
+                    <textarea name="health_full" placeholder="Перенесённые болезни, травмы, отношение к здоровью, спорт..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Курение и алкоголь — чуть подробнее</label>
-                    <textarea name="habits_detail" placeholder="С какого возраста куришь, сколько примерно, алкоголь — как часто и в каких количествах..."></textarea>
+                    <label>Курение и алкоголь подробнее</label>
+                    <textarea name="habits_detail" placeholder="С какого возраста куришь, как часто алкоголь..."></textarea>
                 </div>
             </div>
 
-            <!-- 8. Мотивы — самое важное -->
+            <!-- 9. Мотивы -->
             <div class="section">
-                <h2><span>8</span> Мотивы службы (подробный текст)</h2>
-                <div class="hint">Ты выбрал: желание защищать закон и порядок, интерес к оперативной/аналитической работе, стабильность и соцгарантии, желание быть полезным обществу. Теперь нужно раскрыть это литературно — это один из ключевых разделов.</div>
+                <h2><span>9</span> Мотивы службы (самый важный раздел)</h2>
+                <div class="hint">Ты уже выбрал: защита закона и порядка, интерес к оперативной/аналитической работе, стабильность и соцгарантии, желание быть полезным. Теперь нужно раскрыть это текстом.</div>
                 
                 <div class="field">
-                    <label>Почему именно органы безопасности? Что привлекает больше всего?</label>
-                    <div class="comment">Можно опираться на выбранные пункты. Напиши честно и развёрнуто.</div>
-                    <textarea name="motives_full" style="min-height:160px" placeholder="Пример структуры:&#10;1. Почему решил рассматривать службу в органах&#10;2. Что именно привлекает (работа с информацией, защита интересов государства, стабильность и т.д.)&#10;3. На чём основывается выбор&#10;4. Какие качества считаешь важными для этой работы"></textarea>
+                    <label>Подробно: почему органы безопасности и что привлекает</label>
+                    <textarea name="motives_full" style="min-height:150px" placeholder="Почему решил рассматривать службу, что именно привлекает, на чём основывается выбор..."></textarea>
                 </div>
                 <div class="field">
-                    <label>Есть ли родственники или знакомые, которые служат/служили в силовых структурах?</label>
-                    <textarea name="relatives_force" placeholder="Если есть — кто и где. Если нет — так и напиши."></textarea>
+                    <label>Есть ли родственники или знакомые в силовых структурах?</label>
+                    <textarea name="relatives_force" placeholder="Если есть — кто и где. Если нет — напиши «нет»."></textarea>
                 </div>
             </div>
 
@@ -372,28 +460,35 @@
             }
         }
         data.father_char = getChecked('father_char');
+        data.mother_char_opt = getChecked('mother_char_opt');
+        data.mother_to_children = getRadio('mother_to_children');
         data.mother_polit = getRadio('mother_polit');
+        data.maria_rel = getRadio('maria_rel');
+        data.vasilisa_rel = getRadio('vasilisa_rel');
+        data.stepfather_rel = getRadio('stepfather_rel');
+        data.family_atm = getChecked('family_atm');
         data.child_atm = getChecked('child_atm');
         data.housing_detail = getRadio('housing_detail');
         data.chronic = getRadio('chronic');
         return data;
     }
     function generateJSON() {
-        const json = JSON.stringify(getData(), null, 2);
-        show(json, 'JSON дополнительного опроса');
+        show(JSON.stringify(getData(), null, 2), 'JSON дополнительного опроса');
     }
     function generateText() {
         const d = getData();
-        let t = 'ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ К ОПРОСНИКУ\n=====================================\n\n';
-        t += `Место рождения: ${d.birthplace || ''}\n`;
-        t += `Национальность: ${d.nationality || ''}\n\n`;
-        t += `ОТЕЦ\nФИО: ${d.father_fio || ''}\nГод/место рождения: ${d.father_birth || ''} / ${d.father_place || ''}\nНациональность: ${d.father_nat || ''}\nОбразование и профессия: ${d.father_edu || ''}\nСмерть: ${d.father_death || ''}\nХарактер: ${(d.father_char||[]).join(', ')}\nОписание: ${d.father_desc || ''}\n\n`;
-        t += `МАТЬ (дополнение)\nДата/место рождения: ${d.mother_birth || ''}\nПолитика/религия: ${d.mother_polit || ''} ${d.mother_polit_text || ''}\nХарактер и увлечения: ${d.mother_char || ''}\n\n`;
-        t += `ДЕТСТВО И СЕМЬЯ\nСёстры: ${d.sisters || ''}\nОтчим: ${d.stepfather || ''}\nАтмосфера: ${(d.child_atm||[]).join(', ')}\nПодробно: ${d.childhood_full || ''}\n\n`;
-        t += `ШКОЛА (дополнение)\n${d.school_extra || ''}\nСобытия 15-19 лет: ${d.events_1519 || ''}\n\n`;
-        t += `МАТЕРИАЛЬНЫЕ УСЛОВИЯ\nЖильё: \( {d.housing_detail || ''}\n \){d.material_full || ''}\nДеньги: ${d.money || ''}\n\n`;
-        t += `ЗДОРОВЬЕ\nХронические: \( {d.chronic || ''}\n \){d.health_full || ''}\nПривычки подробно: ${d.habits_detail || ''}\n\n`;
-        t += `МОТИВЫ СЛУЖБЫ\n${d.motives_full || ''}\nРодственники в силовых структурах: ${d.relatives_force || ''}\n`;
+        let t = 'ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ\n========================\n\n';
+        t += `Место рождения: ${d.birthplace||''}\nНациональность: ${d.nationality||''}\n\n`;
+        t += `ОТЕЦ\nФИО: ${d.father_fio||''}\nГод/место: ${d.father_birth||''} / ${d.father_place||''}\nНациональность: ${d.father_nat||''}\nОбразование/профессия: ${d.father_edu||''}\nСмерть: ${d.father_death||''}\nХарактер: \( {(d.father_char||[]).join(', ')}\n \){d.father_desc||''}\n\n`;
+        t += `МАТЬ\nДата/место рождения: ${d.mother_birth||''}\nХарактер: ${(d.mother_char_opt||[]).join(', ')}\nОтношение к детям: ${d.mother_to_children||''}\nПолитика/религия: ${d.mother_polit||''} ${d.mother_polit_text||''}\nУвлечения: ${d.mother_hobby||''}\n\n`;
+        t += `СЁСТРЫ\nМария Павловна (15.12.2004) — отношения: \( {d.maria_rel||''}\n \){d.maria_extra||''}\nВасилиса Николаевна (дата: ${d.vasilisa_birth||'не указана'}) — отношения: ${d.vasilisa_rel||''}\n\n`;
+        t += `ОТЧИМ\nФИО: ${d.stepfather_fio||''}\nОтношения: \( {d.stepfather_rel||''}\n \){d.stepfather_extra||''}\n\n`;
+        t += `Атмосфера в семье: ${(d.family_atm||[]).join(', ')}\n\n`;
+        t += `ДЕТСТВО\nАтмосфера: \( {(d.child_atm||[]).join(', ')}\n \){d.childhood_full||''}\n\n`;
+        t += `ШКОЛА\n${d.school_extra||''}\nСобытия 15-19 лет: ${d.events_1519||''}\n\n`;
+        t += `МАТЕРИАЛЬНОЕ\nЖильё: \( {d.housing_detail||''}\n \){d.material_full||''}\nДеньги: ${d.money||''}\n\n`;
+        t += `ЗДОРОВЬЕ\nХронические: \( {d.chronic||''}\n \){d.health_full||''}\nПривычки: ${d.habits_detail||''}\n\n`;
+        t += `МОТИВЫ\n${d.motives_full||''}\nРодственники в силовых: ${d.relatives_force||''}\n`;
         show(t, 'Текст дополнительных данных');
     }
     function show(content, title) {
@@ -417,4 +512,4 @@
     }
 </script>
 </body>
-  </html>
+                               </html>
