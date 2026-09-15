@@ -3,108 +3,217 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Чаты 
+  <title>Отправка сообщений ботом</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    input, button { font-size: 16px; padding: 10px; margin: 5px 0; }
-    input { width: 100%; box-sizing: border-box; }
-    button { cursor: pointer; background: #0088cc; color: white; border: none; border-radius: 6px; }
-    button:hover { background: #006699; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background: #f5f5f5; }
-    .error { color: #c00; margin-top: 15px; }
-    .info { color: #666; font-size: 14px; margin-top: 10px; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f0f2f5;
+      color: #1a1a1a;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #0088cc;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .row > div {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #0088cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0077b3;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+    .status.success {
+      background: #e8f8ef;
+      color: #1e7e34;
+      display: block;
+    }
+    .status.error {
+      background: #fdecea;
+      color: #c0392b;
+      display: block;
+    }
+    .status.info {
+      background: #e8f4fd;
+      color: #0c5460;
+      display: block;
+    }
+    .hint {
+      font-size: 13px;
+      color: #888;
+      margin-top: -10px;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
-  <h1>Чаты, в которых есть бот</h1>
-  <p>Вставь токен бота (он останется только в твоём браузере):</p>
-  <input type="password" id="token" placeholder="123456:ABC-DEF..." autocomplete="off">
-  <br>
-  <button onclick="loadChats()">Получить чаты</button>
-  <div id="status" class="info"></div>
-  <div id="error" class="error"></div>
-  <table id="result" style="display:none">
-    <thead>
-      <tr>
-        <th>Chat ID</th>
-        <th>Тип</th>
-        <th>Название / Username</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="card">
+    <h1>Отправка сообщений</h1>
+    <p class="subtitle">Сообщение будет отправлено от имени бота</p>
+
+    <label for="token">Токен бота</label>
+    <input type="password" id="token" placeholder="123456:ABC-DEF..." autocomplete="off">
+
+    <label for="chatId">Chat ID</label>
+    <input type="text" id="chatId" value="-5144489364" placeholder="-100xxxxxxxxxx">
+    <div class="hint">Можно отправлять в группы, каналы и личные чаты</div>
+
+    <label for="message">Текст сообщения</label>
+    <textarea id="message" placeholder="Напиши сообщение..."></textarea>
+
+    <div class="row">
+      <div>
+        <label for="parseMode">Форматирование</label>
+        <select id="parseMode" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; margin-bottom:16px;">
+          <option value="">Без форматирования</option>
+          <option value="HTML">HTML</option>
+          <option value="Markdown">Markdown</option>
+          <option value="MarkdownV2">MarkdownV2</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="sendBtn" onclick="sendMessage()">Отправить сообщение</button>
+
+    <div id="status" class="status"></div>
+  </div>
 
   <script>
-    async function loadChats() {
+    async function sendMessage() {
       const token = document.getElementById('token').value.trim();
+      const chatId = document.getElementById('chatId').value.trim();
+      const text = document.getElementById('message').value.trim();
+      const parseMode = document.getElementById('parseMode').value;
       const status = document.getElementById('status');
-      const error = document.getElementById('error');
-      const table = document.getElementById('result');
-      const tbody = table.querySelector('tbody');
+      const btn = document.getElementById('sendBtn');
 
-      status.textContent = '';
-      error.textContent = '';
-      table.style.display = 'none';
-      tbody.innerHTML = '';
+      status.className = 'status';
+      status.style.display = 'none';
 
       if (!token) {
-        error.textContent = 'Введи токен';
+        showStatus('Введи токен бота', 'error');
+        return;
+      }
+      if (!chatId) {
+        showStatus('Введи Chat ID', 'error');
+        return;
+      }
+      if (!text) {
+        showStatus('Напиши текст сообщения', 'error');
         return;
       }
 
-      status.textContent = 'Загрузка...';
+      btn.disabled = true;
+      btn.textContent = 'Отправка...';
+      showStatus('Отправляю сообщение...', 'info');
 
       try {
-        // Берём последние обновления (до 100)
-        const res = await fetch(`https://api.telegram.org/bot${token}/getUpdates?limit=100`);
+        const body = {
+          chat_id: chatId,
+          text: text
+        };
+        if (parseMode) {
+          body.parse_mode = parseMode;
+        }
+
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
         const data = await res.json();
 
         if (!data.ok) {
           throw new Error(data.description || 'Ошибка API');
         }
 
-        const chats = new Map();
-
-        for (const update of data.result) {
-          // Ищем chat в разных типах апдейтов
-          const msg = update.message || update.edited_message || update.channel_post ||
-                      update.edited_channel_post || update.my_chat_member || update.chat_member ||
-                      update.chat_join_request;
-
-          if (msg && msg.chat) {
-            const chat = msg.chat;
-            chats.set(chat.id, {
-              id: chat.id,
-              type: chat.type,
-              title: chat.title || chat.username || chat.first_name || '(без названия)'
-            });
-          }
-        }
-
-        if (chats.size === 0) {
-          status.textContent = 'Чатов не найдено. Напиши боту в личку или добавь его в группу/канал и отправь любое сообщение, потом обнови.';
-          return;
-        }
-
-        status.textContent = `Найдено уникальных чатов: ${chats.size}`;
-        table.style.display = 'table';
-
-        for (const chat of chats.values()) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><code>${chat.id}</code></td>
-            <td>${chat.type}</td>
-            <td>${chat.title}</td>
-          `;
-          tbody.appendChild(tr);
-        }
+        showStatus('✅ Сообщение успешно отправлено!', 'success');
+        // document.getElementById('message').value = ''; // раскомментируй, если хочешь очищать поле после отправки
       } catch (e) {
-        error.textContent = 'Ошибка: ' + e.message;
-        status.textContent = '';
+        showStatus('❌ Ошибка: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Отправить сообщение';
       }
     }
+
+    function showStatus(text, type) {
+      const status = document.getElementById('status');
+      status.textContent = text;
+      status.className = 'status ' + type;
+    }
+
+    // Отправка по Ctrl+Enter
+    document.getElementById('message').addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        sendMessage();
+      }
+    });
   </script>
 </body>
 </html>
