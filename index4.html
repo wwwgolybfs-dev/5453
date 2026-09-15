@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Чаты бота</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    input, button { font-size: 16px; padding: 10px; margin: 5px 0; }
+    input { width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; background: #0088cc; color: white; border: none; border-radius: 6px; }
+    button:hover { background: #006699; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f5f5f5; }
+    .error { color: #c00; margin-top: 15px; }
+    .info { color: #666; font-size: 14px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Чаты, в которых есть бот</h1>
+  <p>Вставь токен бота (он останется только в твоём браузере):</p>
+  <input type="password" id="token" placeholder="123456:ABC-DEF..." autocomplete="off">
+  <br>
+  <button onclick="loadChats()">Получить чаты</button>
+  <div id="status" class="info"></div>
+  <div id="error" class="error"></div>
+  <table id="result" style="display:none">
+    <thead>
+      <tr>
+        <th>Chat ID</th>
+        <th>Тип</th>
+        <th>Название / Username</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadChats() {
+      const token = document.getElementById('token').value.trim();
+      const status = document.getElementById('status');
+      const error = document.getElementById('error');
+      const table = document.getElementById('result');
+      const tbody = table.querySelector('tbody');
+
+      status.textContent = '';
+      error.textContent = '';
+      table.style.display = 'none';
+      tbody.innerHTML = '';
+
+      if (!token) {
+        error.textContent = 'Введи токен';
+        return;
+      }
+
+      status.textContent = 'Загрузка...';
+
+      try {
+        // Берём последние обновления (до 100)
+        const res = await fetch(`https://api.telegram.org/bot${token}/getUpdates?limit=100`);
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.description || 'Ошибка API');
+        }
+
+        const chats = new Map();
+
+        for (const update of data.result) {
+          // Ищем chat в разных типах апдейтов
+          const msg = update.message || update.edited_message || update.channel_post ||
+                      update.edited_channel_post || update.my_chat_member || update.chat_member ||
+                      update.chat_join_request;
+
+          if (msg && msg.chat) {
+            const chat = msg.chat;
+            chats.set(chat.id, {
+              id: chat.id,
+              type: chat.type,
+              title: chat.title || chat.username || chat.first_name || '(без названия)'
+            });
+          }
+        }
+
+        if (chats.size === 0) {
+          status.textContent = 'Чатов не найдено. Напиши боту в личку или добавь его в группу/канал и отправь любое сообщение, потом обнови.';
+          return;
+        }
+
+        status.textContent = `Найдено уникальных чатов: ${chats.size}`;
+        table.style.display = 'table';
+
+        for (const chat of chats.values()) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${chat.id}</code></td>
+            <td>${chat.type}</td>
+            <td>${chat.title}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      } catch (e) {
+        error.textContent = 'Ошибка: ' + e.message;
+        status.textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>
