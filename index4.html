@@ -8,27 +8,20 @@
     * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 0 20px;
+      max-width: 620px;
+      margin: 30px auto;
+      padding: 0 16px;
       background: #f0f2f5;
       color: #1a1a1a;
     }
     .card {
       background: white;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
     }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 22px;
-    }
-    .subtitle {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 22px; }
     label {
       display: block;
       font-size: 14px;
@@ -36,30 +29,62 @@
       margin-bottom: 6px;
       color: #333;
     }
-    input, textarea {
+    input[type="text"],
+    input[type="password"],
+    input[type="url"],
+    textarea,
+    select {
       width: 100%;
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 8px;
       font-size: 15px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       transition: border-color 0.2s;
     }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: #0088cc;
     }
     textarea {
-      min-height: 120px;
+      min-height: 100px;
       resize: vertical;
       font-family: inherit;
     }
-    .row {
-      display: flex;
-      gap: 12px;
+    .hint {
+      font-size: 13px;
+      color: #888;
+      margin-top: -8px;
+      margin-bottom: 14px;
     }
-    .row > div {
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .tab {
       flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #f8f9fa;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .tab.active {
+      background: #0088cc;
+      color: white;
+      border-color: #0088cc;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .preview {
+      margin: 10px 0 14px;
+      max-width: 100%;
+      border-radius: 8px;
+      display: none;
     }
     button {
       width: 100%;
@@ -73,9 +98,7 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    button:hover {
-      background: #0077b3;
-    }
+    button:hover { background: #0077b3; }
     button:disabled {
       background: #aaa;
       cursor: not-allowed;
@@ -87,118 +110,109 @@
       font-size: 14px;
       display: none;
     }
-    .status.success {
-      background: #e8f8ef;
-      color: #1e7e34;
-      display: block;
-    }
-    .status.error {
-      background: #fdecea;
-      color: #c0392b;
-      display: block;
-    }
-    .status.info {
-      background: #e8f4fd;
-      color: #0c5460;
-      display: block;
-    }
-    .hint {
-      font-size: 13px;
-      color: #888;
-      margin-top: -10px;
-      margin-bottom: 16px;
-    }
+    .status.success { background: #e8f8ef; color: #1e7e34; display: block; }
+    .status.error   { background: #fdecea; color: #c0392b; display: block; }
+    .status.info    { background: #e8f4fd; color: #0c5460; display: block; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Отправка сообщений</h1>
-    <p class="subtitle">Сообщение будет отправлено от имени бота</p>
+    <h1>Отправка от бота</h1>
+    <p class="subtitle">Текст или картинка</p>
 
-    <label for="token">Токен бота</label>
+    <label>Токен бота</label>
     <input type="password" id="token" placeholder="123456:ABC-DEF..." autocomplete="off">
 
-    <label for="chatId">Chat ID</label>
+    <label>Chat ID</label>
     <input type="text" id="chatId" value="-5144489364" placeholder="-100xxxxxxxxxx">
-    <div class="hint">Можно отправлять в группы, каналы и личные чаты</div>
 
-    <label for="message">Текст сообщения</label>
-    <textarea id="message" placeholder="Напиши сообщение..."></textarea>
-
-    <div class="row">
-      <div>
-        <label for="parseMode">Форматирование</label>
-        <select id="parseMode" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; margin-bottom:16px;">
-          <option value="">Без форматирования</option>
-          <option value="HTML">HTML</option>
-          <option value="Markdown">Markdown</option>
-          <option value="MarkdownV2">MarkdownV2</option>
-        </select>
-      </div>
+    <!-- Переключатель -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('text')">Текст</div>
+      <div class="tab" onclick="switchTab('photo')">Картинка</div>
     </div>
 
-    <button id="sendBtn" onclick="sendMessage()">Отправить сообщение</button>
+    <!-- ===== ТЕКСТ ===== -->
+    <div id="panel-text" class="panel active">
+      <label>Текст сообщения</label>
+      <textarea id="message" placeholder="Напиши сообщение..."></textarea>
+
+      <label>Форматирование</label>
+      <select id="parseMode">
+        <option value="">Без форматирования</option>
+        <option value="HTML">HTML</option>
+        <option value="Markdown">Markdown</option>
+        <option value="MarkdownV2">MarkdownV2</option>
+      </select>
+
+      <button id="sendTextBtn" onclick="sendText()">Отправить текст</button>
+    </div>
+
+    <!-- ===== КАРТИНКА ===== -->
+    <div id="panel-photo" class="panel">
+      <label>Способ отправки</label>
+      <select id="photoMethod" onchange="togglePhotoMethod()">
+        <option value="file">Загрузить с устройства</option>
+        <option value="url">По ссылке (URL)</option>
+      </select>
+
+      <div id="photo-file-block">
+        <label>Выбери картинку</label>
+        <input type="file" id="photoFile" accept="image/*" onchange="previewImage(event)">
+        <img id="preview" class="preview" alt="Превью">
+      </div>
+
+      <div id="photo-url-block" style="display:none">
+        <label>Ссылка на картинку</label>
+        <input type="url" id="photoUrl" placeholder="https://example.com/image.jpg">
+        <div class="hint">Ссылка должна быть прямой и доступной</div>
+      </div>
+
+      <label>Подпись (необязательно)</label>
+      <textarea id="caption" placeholder="Текст под картинкой..." style="min-height:70px"></textarea>
+
+      <label>Форматирование подписи</label>
+      <select id="captionParseMode">
+        <option value="">Без форматирования</option>
+        <option value="HTML">HTML</option>
+        <option value="Markdown">Markdown</option>
+        <option value="MarkdownV2">MarkdownV2</option>
+      </select>
+
+      <button id="sendPhotoBtn" onclick="sendPhoto()">Отправить картинку</button>
+    </div>
 
     <div id="status" class="status"></div>
   </div>
 
   <script>
-    async function sendMessage() {
-      const token = document.getElementById('token').value.trim();
-      const chatId = document.getElementById('chatId').value.trim();
-      const text = document.getElementById('message').value.trim();
-      const parseMode = document.getElementById('parseMode').value;
-      const status = document.getElementById('status');
-      const btn = document.getElementById('sendBtn');
-
-      status.className = 'status';
-      status.style.display = 'none';
-
-      if (!token) {
-        showStatus('Введи токен бота', 'error');
-        return;
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      
+      if (tab === 'text') {
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('panel-text').classList.add('active');
+      } else {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('panel-photo').classList.add('active');
       }
-      if (!chatId) {
-        showStatus('Введи Chat ID', 'error');
-        return;
-      }
-      if (!text) {
-        showStatus('Напиши текст сообщения', 'error');
-        return;
-      }
+    }
 
-      btn.disabled = true;
-      btn.textContent = 'Отправка...';
-      showStatus('Отправляю сообщение...', 'info');
+    function togglePhotoMethod() {
+      const method = document.getElementById('photoMethod').value;
+      document.getElementById('photo-file-block').style.display = method === 'file' ? 'block' : 'none';
+      document.getElementById('photo-url-block').style.display = method === 'url' ? 'block' : 'none';
+    }
 
-      try {
-        const body = {
-          chat_id: chatId,
-          text: text
-        };
-        if (parseMode) {
-          body.parse_mode = parseMode;
-        }
-
-        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (!data.ok) {
-          throw new Error(data.description || 'Ошибка API');
-        }
-
-        showStatus('✅ Сообщение успешно отправлено!', 'success');
-        // document.getElementById('message').value = ''; // раскомментируй, если хочешь очищать поле после отправки
-      } catch (e) {
-        showStatus('❌ Ошибка: ' + e.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Отправить сообщение';
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('preview');
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
       }
     }
 
@@ -208,11 +222,107 @@
       status.className = 'status ' + type;
     }
 
-    // Отправка по Ctrl+Enter
-    document.getElementById('message').addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'Enter') {
-        sendMessage();
+    function getCommonData() {
+      const token = document.getElementById('token').value.trim();
+      const chatId = document.getElementById('chatId').value.trim();
+      if (!token) throw new Error('Введи токен бота');
+      if (!chatId) throw new Error('Введи Chat ID');
+      return { token, chatId };
+    }
+
+    // ===== Отправка текста =====
+    async function sendText() {
+      const btn = document.getElementById('sendTextBtn');
+      try {
+        const { token, chatId } = getCommonData();
+        const text = document.getElementById('message').value.trim();
+        const parseMode = document.getElementById('parseMode').value;
+
+        if (!text) throw new Error('Напиши текст сообщения');
+
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+        showStatus('Отправляю текст...', 'info');
+
+        const body = { chat_id: chatId, text };
+        if (parseMode) body.parse_mode = parseMode;
+
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.description || 'Ошибка API');
+
+        showStatus('✅ Текст успешно отправлен!', 'success');
+      } catch (e) {
+        showStatus('❌ ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Отправить текст';
       }
+    }
+
+    // ===== Отправка картинки =====
+    async function sendPhoto() {
+      const btn = document.getElementById('sendPhotoBtn');
+      try {
+        const { token, chatId } = getCommonData();
+        const method = document.getElementById('photoMethod').value;
+        const caption = document.getElementById('caption').value.trim();
+        const parseMode = document.getElementById('captionParseMode').value;
+
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+        showStatus('Отправляю картинку...', 'info');
+
+        let res;
+
+        if (method === 'file') {
+          const fileInput = document.getElementById('photoFile');
+          if (!fileInput.files[0]) throw new Error('Выбери картинку');
+
+          const formData = new FormData();
+          formData.append('chat_id', chatId);
+          formData.append('photo', fileInput.files[0]);
+          if (caption) formData.append('caption', caption);
+          if (parseMode) formData.append('parse_mode', parseMode);
+
+          res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+            method: 'POST',
+            body: formData
+          });
+        } else {
+          const url = document.getElementById('photoUrl').value.trim();
+          if (!url) throw new Error('Введи ссылку на картинку');
+
+          const body = { chat_id: chatId, photo: url };
+          if (caption) body.caption = caption;
+          if (parseMode) body.parse_mode = parseMode;
+
+          res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        }
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.description || 'Ошибка API');
+
+        showStatus('✅ Картинка успешно отправлена!', 'success');
+      } catch (e) {
+        showStatus('❌ ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Отправить картинку';
+      }
+    }
+
+    // Ctrl+Enter для текста
+    document.getElementById('message').addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter') sendText();
     });
   </script>
 </body>
