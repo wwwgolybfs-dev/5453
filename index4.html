@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Telegram Bot Sender</title>
+  <title>Telegram Bot — Live Chat</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -16,10 +16,9 @@
       overflow: hidden;
     }
 
-    /* Шапка */
     .header {
       background: #17212b;
-      padding: 14px 16px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -36,35 +35,68 @@
       justify-content: center;
       font-size: 20px;
     }
-    .header-info h1 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .header-info span {
-      font-size: 13px;
-      color: #8b98a5;
-    }
+    .header-info h1 { font-size: 16px; font-weight: 600; }
+    .header-info span { font-size: 13px; color: #8b98a5; }
 
-    /* Область сообщений (пока пустая, просто фон) */
+    /* Область сообщений */
     .chat-area {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 16px 12px;
       background: #0e1621;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      gap: 8px;
     }
+
+    .msg {
+      max-width: 85%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      position: relative;
+    }
+    .msg.in {
+      align-self: flex-start;
+      background: #182533;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.out {
+      align-self: flex-end;
+      background: #2b5278;
+      border-bottom-right-radius: 4px;
+    }
+    .msg .time {
+      font-size: 11px;
+      color: #8b98a5;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .msg .sender {
+      font-size: 13px;
+      color: #64b5ef;
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+    .msg img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 4px;
+      display: block;
+    }
+    .msg .caption { margin-top: 4px; }
+
     .empty-hint {
+      margin: auto;
       text-align: center;
       color: #6b7a8a;
       font-size: 14px;
-      margin: auto;
       padding: 20px;
     }
 
-    /* Превью прикреплённой картинки */
+    /* Превью */
     .preview-bar {
       background: #17212b;
       padding: 10px 16px;
@@ -75,26 +107,28 @@
     }
     .preview-bar.show { display: flex; }
     .preview-img {
-      width: 56px;
-      height: 56px;
+      width: 52px;
+      height: 52px;
       object-fit: cover;
       border-radius: 8px;
     }
-    .preview-info {
-      flex: 1;
-      font-size: 13px;
-      color: #8b98a5;
-    }
+    .preview-info { flex: 1; font-size: 13px; color: #8b98a5; }
     .preview-remove {
-      background: none;
-      border: none;
-      color: #e74c3c;
-      font-size: 22px;
-      cursor: pointer;
-      padding: 4px 8px;
+      background: none; border: none; color: #e74c3c;
+      font-size: 22px; cursor: pointer; padding: 4px 8px;
     }
 
-    /* Нижняя панель ввода */
+    .format-row {
+      display: flex; gap: 6px;
+      padding: 6px 16px 0;
+      background: #17212b;
+    }
+    .format-btn {
+      background: #242f3d; border: none; color: #8b98a5;
+      font-size: 12px; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+    }
+    .format-btn.active { background: #2b5278; color: white; }
+
     .input-bar {
       background: #17212b;
       padding: 10px 12px;
@@ -104,16 +138,9 @@
       border-top: 1px solid #0e1621;
       flex-shrink: 0;
     }
-
     .attach-btn {
-      background: none;
-      border: none;
-      color: #8b98a5;
-      font-size: 26px;
-      cursor: pointer;
-      padding: 6px;
-      line-height: 1;
-      transition: color 0.2s;
+      background: none; border: none; color: #8b98a5;
+      font-size: 26px; cursor: pointer; padding: 6px; line-height: 1;
     }
     .attach-btn:hover { color: #64b5ef; }
 
@@ -141,31 +168,18 @@
     #message::placeholder { color: #6b7a8a; }
 
     .send-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #2b5278;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #2b5278; border: none; color: white;
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
     .send-btn:hover { background: #3a6a94; }
-    .send-btn:disabled {
-      background: #1e2c3a;
-      color: #5a6a7a;
-      cursor: not-allowed;
-    }
+    .send-btn:disabled { background: #1e2c3a; color: #5a6a7a; cursor: not-allowed; }
 
-    /* Статус */
     .status {
       position: fixed;
-      bottom: 80px;
+      bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
       padding: 10px 18px;
@@ -181,91 +195,61 @@
     .status.error   { background: #3a1e1e; color: #f87171; display: block; }
     .status.info    { background: #1e2a3a; color: #60a5fa; display: block; }
 
-    /* Скрытый input файла */
     #photoFile { display: none; }
-
-    /* Форматирование (маленькая кнопка) */
-    .format-row {
-      display: flex;
-      gap: 6px;
-      padding: 6px 16px 0;
-      background: #17212b;
-    }
-    .format-btn {
-      background: #242f3d;
-      border: none;
-      color: #8b98a5;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .format-btn.active {
-      background: #2b5278;
-      color: white;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Шапка -->
   <div class="header">
     <div class="header-avatar">🤖</div>
     <div class="header-info">
-      <h1>Отправка от бота</h1>
-      <span>Сообщения уходят сразу в чат</span>
+      <h1>Бот • Live</h1>
+      <span id="statusText">подключение...</span>
     </div>
   </div>
 
-  <!-- Область чата -->
-  <div class="chat-area">
-    <div class="empty-hint">
-      Напиши сообщение и/или прикрепи картинку,<br>
-      затем нажми ➤
+  <div class="chat-area" id="chatArea">
+    <div class="empty-hint" id="emptyHint">
+      Ожидаю сообщения...<br>
+      <small>Сообщения появятся здесь автоматически</small>
     </div>
   </div>
 
-  <!-- Превью картинки -->
   <div class="preview-bar" id="previewBar">
     <img id="previewImg" class="preview-img" alt="preview">
     <div class="preview-info" id="previewName">Картинка</div>
     <button class="preview-remove" onclick="removePhoto()">×</button>
   </div>
 
-  <!-- Выбор форматирования -->
   <div class="format-row">
     <button class="format-btn active" data-mode="" onclick="setParseMode(this)">Текст</button>
     <button class="format-btn" data-mode="HTML" onclick="setParseMode(this)">HTML</button>
     <button class="format-btn" data-mode="Markdown" onclick="setParseMode(this)">Markdown</button>
   </div>
 
-  <!-- Нижняя панель -->
   <div class="input-bar">
-    <button class="attach-btn" onclick="document.getElementById('photoFile').click()" title="Прикрепить картинку">📎</button>
-    
+    <button class="attach-btn" onclick="document.getElementById('photoFile').click()" title="Прикрепить">📎</button>
     <div class="text-input-wrap">
       <textarea id="message" rows="1" placeholder="Сообщение..." oninput="autoResize(this)"></textarea>
     </div>
-    
-    <button class="send-btn" id="sendBtn" onclick="send()" title="Отправить">➤</button>
+    <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
   </div>
 
   <input type="file" id="photoFile" accept="image/*" onchange="handleFile(event)">
-
   <div id="status" class="status"></div>
 
   <script>
     // ====================== НАСТРОЙКИ ======================
-    // Вставь сюда свой токен бота
-    const BOT_TOKEN = "8815339448:AAFwizdVxZ7RFTZ-j8W7vQmo0G5GcDWPY7Y";
-    
-    // Chat ID уже зашит
-    const CHAT_ID = "-5144489364";
+    const BOT_TOKEN = "8815339448:AAFwizdVxZ7RFTZ-j8W7vQmo0G5GcDWPY7Y";   // ← сюда токен
+    const CHAT_ID   = "-5144489364";          // уже зашит
     // =======================================================
 
     let selectedFile = null;
     let parseMode = "";
+    let offset = 0;               // для getUpdates
+    let isPolling = false;
 
+    // ---------- UI helpers ----------
     function setParseMode(btn) {
       document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -280,15 +264,10 @@
     function handleFile(e) {
       const file = e.target.files[0];
       if (!file) return;
-      
       selectedFile = file;
-      const preview = document.getElementById('previewImg');
-      preview.src = URL.createObjectURL(file);
-      
-      document.getElementById('previewName').textContent = file.name.length > 30 
-        ? file.name.slice(0, 27) + '...' 
-        : file.name;
-      
+      document.getElementById('previewImg').src = URL.createObjectURL(file);
+      document.getElementById('previewName').textContent =
+        file.name.length > 28 ? file.name.slice(0, 25) + '…' : file.name;
       document.getElementById('previewBar').classList.add('show');
     }
 
@@ -296,18 +275,134 @@
       selectedFile = null;
       document.getElementById('photoFile').value = '';
       document.getElementById('previewBar').classList.remove('show');
-      document.getElementById('previewImg').src = '';
     }
 
     function showStatus(text, type) {
       const el = document.getElementById('status');
       el.textContent = text;
       el.className = 'status ' + type;
-      if (type === 'success' || type === 'error') {
-        setTimeout(() => { el.style.display = 'none'; }, 3500);
+      if (type !== 'info') setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    function scrollToBottom() {
+      const area = document.getElementById('chatArea');
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function formatTime(ts) {
+      const d = new Date(ts * 1000);
+      return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ---------- Отображение сообщений ----------
+    function addMessage(opts) {
+      // opts: { text, isOut, sender, time, photoUrl }
+      const hint = document.getElementById('emptyHint');
+      if (hint) hint.remove();
+
+      const div = document.createElement('div');
+      div.className = 'msg ' + (opts.isOut ? 'out' : 'in');
+
+      let html = '';
+      if (opts.sender && !opts.isOut) {
+        html += `<div class="sender">${escapeHtml(opts.sender)}</div>`;
+      }
+      if (opts.photoUrl) {
+        html += `<img src="${opts.photoUrl}" alt="photo" loading="lazy">`;
+      }
+      if (opts.text) {
+        html += `<div class="${opts.photoUrl ? 'caption' : ''}">${opts.text}</div>`;
+      }
+      html += `<div class="time">${opts.time || ''}</div>`;
+
+      div.innerHTML = html;
+      document.getElementById('chatArea').appendChild(div);
+      scrollToBottom();
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ---------- Получение обновлений (long-polling) ----------
+    async function pollUpdates() {
+      if (isPolling) return;
+      isPolling = true;
+
+      document.getElementById('statusText').textContent = 'онлайн';
+
+      while (true) {
+        try {
+          const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${offset}&timeout=25&allowed_updates=["message"]`;
+          const res = await fetch(url);
+          const data = await res.json();
+
+          if (!data.ok) {
+            document.getElementById('statusText').textContent = 'ошибка API';
+            await sleep(5000);
+            continue;
+          }
+
+          for (const upd of data.result) {
+            offset = upd.update_id + 1;
+
+            const msg = upd.message;
+            if (!msg) continue;
+
+            // Только нужный чат
+            if (String(msg.chat.id) !== String(CHAT_ID)) continue;
+
+            // Определяем, от кого
+            let sender = '';
+            if (msg.from) {
+              sender = msg.from.first_name || '';
+              if (msg.from.last_name) sender += ' ' + msg.from.last_name;
+              if (msg.from.username) sender += ` (@${msg.from.username})`;
+            }
+
+            // Фото
+            let photoUrl = null;
+            if (msg.photo && msg.photo.length) {
+              // Берём самое большое фото
+              const fileId = msg.photo[msg.photo.length - 1].file_id;
+              // Получаем ссылку на файл
+              try {
+                const fRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+                const fData = await fRes.json();
+                if (fData.ok) {
+                  photoUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fData.result.file_path}`;
+                }
+              } catch (e) {}
+            }
+
+            const text = msg.caption || msg.text || (photoUrl ? '' : '[медиа]');
+            const isOut = msg.from && msg.from.is_bot; // сообщения самого бота
+
+            addMessage({
+              text: text ? escapeHtml(text).replace(/\n/g, '<br>') : '',
+              isOut,
+              sender: isOut ? null : sender,
+              time: formatTime(msg.date),
+              photoUrl
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById('statusText').textContent = 'переподключение...';
+          await sleep(3000);
+        }
       }
     }
 
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    // ---------- Отправка ----------
     async function send() {
       const btn = document.getElementById('sendBtn');
       const text = document.getElementById('message').value.trim();
@@ -316,9 +411,8 @@
         showStatus('Напиши текст или прикрепи картинку', 'error');
         return;
       }
-
-      if (BOT_TOKEN === "ВСТАВЬ_СВОЙ_ТОКЕН" || !BOT_TOKEN) {
-        showStatus('Сначала вставь токен бота в код!', 'error');
+      if (BOT_TOKEN.includes('ВСТАВЬ')) {
+        showStatus('Вставь токен бота в код!', 'error');
         return;
       }
 
@@ -329,7 +423,6 @@
         let res, data;
 
         if (selectedFile) {
-          // Отправка фото с подписью
           const formData = new FormData();
           formData.append('chat_id', CHAT_ID);
           formData.append('photo', selectedFile);
@@ -341,11 +434,7 @@
             body: formData
           });
         } else {
-          // Обычный текст
-          const body = {
-            chat_id: CHAT_ID,
-            text: text
-          };
+          const body = { chat_id: CHAT_ID, text };
           if (parseMode) body.parse_mode = parseMode;
 
           res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -356,16 +445,30 @@
         }
 
         data = await res.json();
+        if (!data.ok) throw new Error(data.description || 'Ошибка API');
 
-        if (!data.ok) {
-          throw new Error(data.description || 'Ошибка API Telegram');
+        // Сразу показываем своё сообщение
+        const now = Math.floor(Date.now() / 1000);
+        if (selectedFile) {
+          addMessage({
+            text: text ? escapeHtml(text).replace(/\n/g, '<br>') : '',
+            isOut: true,
+            time: formatTime(now),
+            photoUrl: URL.createObjectURL(selectedFile)
+          });
+        } else {
+          addMessage({
+            text: escapeHtml(text).replace(/\n/g, '<br>'),
+            isOut: true,
+            time: formatTime(now)
+          });
         }
 
-        // Очистка после успешной отправки
+        // Очистка
         document.getElementById('message').value = '';
         document.getElementById('message').style.height = 'auto';
         removePhoto();
-        showStatus('✅ Отправлено!', 'success');
+        showStatus('✅ Отправлено', 'success');
 
       } catch (err) {
         showStatus('❌ ' + err.message, 'error');
@@ -374,13 +477,20 @@
       }
     }
 
-    // Enter — отправить, Shift+Enter — новая строка
+    // Enter = отправить
     document.getElementById('message').addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         send();
       }
     });
+
+    // Запуск
+    if (!BOT_TOKEN.includes('ВСТАВЬ')) {
+      pollUpdates();
+    } else {
+      document.getElementById('statusText').textContent = 'вставь токен';
+    }
   </script>
 </body>
 </html>
