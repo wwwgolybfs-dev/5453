@@ -208,6 +208,7 @@
 
   .msg.voice-msg {
     background: linear-gradient(135deg, #4a5d9f, #354785);
+    min-width: 220px;
   }
 
   .msg.pending {
@@ -233,6 +234,7 @@
     max-width: 300px;
     height: 40px;
     border-radius: 20px;
+    filter: invert(1); /* Делаем плеер темным для светлого фона или наоборот */
   }
 
   .msg .meta {
@@ -456,7 +458,7 @@
   .voice-toggle-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     padding: 8px 16px 4px;
   }
 
@@ -947,9 +949,11 @@
   async function generateAudio(text, lang = 'ru') {
     try {
       // Используем Google Translate TTS API
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+      // ВАЖНО: Оборачиваем URL в corsproxy.io чтобы обойти блокировку браузера (CORS)
+      const rawUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+      const proxyUrl = `https://corsproxy.io/?url=` + encodeURIComponent(rawUrl);
       
-      const response = await fetch(url);
+      const response = await fetch(proxyUrl);
       
       if (!response.ok) {
         throw new Error('Не удалось сгенерировать аудио');
@@ -1145,12 +1149,11 @@
         const formData = new FormData();
         formData.append('chat_id', CHAT_ID);
         
-        // Telegram требует OGG OPUS для sendVoice, но пробуем с MP3
-        // Создаем File из Blob с правильным расширением
-        const audioFile = new File([generatedAudio], 'voice.ogg', { type: 'audio/ogg' });
-        formData.append('voice', audioFile);
+        // Telegram принимает mp3 в методе sendAudio
+        const audioFile = new File([generatedAudio], 'voice.mp3', { type: 'audio/mpeg' });
+        formData.append('audio', audioFile); 
         
-        res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
+        res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
           method: 'POST',
           body: formData
         });
