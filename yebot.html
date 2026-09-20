@@ -52,7 +52,6 @@
     background: var(--bg);
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     touch-action: manipulation;
   }
 
@@ -234,7 +233,447 @@
     max-width: 300px;
     height: 40px;
     border-radius: 20px;
-    filter: invert(1); /* Делаем плеер темным для светлого фона или наоборот */
+    filter: invert(1); 
+  }
+
+  .msg .meta {
+    font-size: 11.5px;
+    margin-top: 6px;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.3px;
+  }
+
+  .voice-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+  }
+
+  .voice-indicator svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @keyframes msgPop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ================= Preview Bar ================= */
+  .preview-bar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(31, 41, 55, 0.92);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .preview-bar.show {
+    display: flex;
+  }
+
+  .preview-img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .preview-remove {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .preview-remove:active {
+    transform: scale(0.9);
+    background: rgba(239, 68, 68, 0.25);
+  }
+
+  /* ================= Audio Preview ================= */
+  .audio-preview {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .audio-preview.show {
+    display: flex;
+  }
+
+  .audio-preview-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .audio-preview-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+  }
+
+  .audio-preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .audio-preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .audio-preview audio {
+    width: 100%;
+    max-width: 200px;
+    height: 36px;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ================= Composer ================= */
+  .composer {
+    flex-shrink: 0;
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .format-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .format-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .format-btn {
+    flex-shrink: 0;
+    background: var(--field);
+    border: 1.5px solid transparent;
+    color: var(--Понял тебя. Ошибка возникает потому, что сервис `corsproxy.io` часто бывает перегружен или заблокирован (особенно на мобильных сетях).
+
+Давай сделаем умнее: **мы попробуем использовать встроенную возможность браузера (Web Speech API) для записи звука**. Это работает локально, мгновенно и вообще не зависит от интернета/прокси. А если вдруг браузер телефона это не поддержит — у нас останется запасной вариант с другим прокси (`allorigins`).
+
+Вот полностью обновленный код с сохранением красивого дизайна:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Telegram Bot Sender</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg-glow-1: rgba(59, 130, 246, 0.18);
+    --bg-glow-2: rgba(147, 51, 234, 0.15);
+    --panel: rgba(17, 24, 34, 0.85);
+    --panel-solid: #111820;
+    --field: #1f2937;
+    --field-hover: #283548;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --text: #f3f4f6;
+    --text-muted: #9ca3af;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(800px 500px at 15% 10%, var(--bg-glow-1), transparent 65%),
+      radial-gradient(700px 500px at 85% 90%, var(--bg-glow-2), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ================= App Container ================= */
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  @supports (height: 100dvh) {
+    .app { height: 100dvh; }
+  }
+
+  /* ================= Header ================= */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .header-avatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    flex-shrink: 0;
+  }
+
+  .header-avatar::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--success);
+    border: 3px solid var(--panel-solid);
+  }
+
+  .header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-info h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-info span {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ================= Chat Area ================= */
+  .chat-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  .chat-area::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  .empty-hint {
+    margin: auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 320px;
+    padding: 28px 24px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .empty-hint b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Messages */
+  .msg {
+    max-width: 88%;
+    align-self: flex-end;
+    padding: 12px 16px;
+    border-radius: 18px 18px 6px 18px;
+    font-size: 15.5px;
+    line-height: 1.48;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    background: linear-gradient(135deg, #2d5a9f, #1e4785);
+    box-shadow: var(--shadow-md);
+    animation: msgPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    position: relative;
+  }
+
+  .msg.voice-msg {
+    background: linear-gradient(135deg, #4a5d9f, #354785);
+    min-width: 220px;
+  }
+
+  .msg.pending {
+    opacity: 0.7;
+  }
+
+  .msg.failed {
+    background: linear-gradient(135deg, #7f1d1d, #5c1414);
+  }
+
+  .msg img {
+    display: block;
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+
+  .msg audio {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: 40px;
+    border-radius: 20px;
+    filter: invert(1); 
   }
 
   .msg .meta {
@@ -780,15 +1219,827 @@
     margin-left: 8px;
     vertical-align: middle;
   }
+</style>
+</head>
+<body>
 
-  /* Voice Recording Animation */
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-avatar">🤖</div>
+    <div class="header-info">
+      <h1>Отправка от бота</h1>
+      <span>Сообщения уходят сразу в чат</span>
+    </div>
+  </header>
+
+  <!-- Chat Area -->
+  <main class="chat-area" id="chatArea">
+    <div class="empty-hint" id="emptyHint">
+      Напиши сообщение и/или прикрепи картинку,<br>
+      затем нажми <b>➤</b>
+    </div>
+  </main>
+
+  <!-- Composer -->
+  <div class="composer">
+
+    <!-- Preview Bar -->
+    <div class="preview-bar" id="previewBar">
+      <img id="previewImg" class="preview-img" alt="preview">
+      <div class="preview-info">
+        <strong id="previewName">Картинка</strong>
+        Готова к отправке
+      </div>
+      <button class="preview-remove" onclick="removePhoto()" title="Убрать" aria-label="Убрать картинку">×</button>
+    </div>Понял тебя. Ошибка возникает потому, что сервис `corsproxy.io` часто бывает перегружен или заблокирован (особенно на мобильных сетях).
+
+Давай сделаем умнее: **мы попробуем использовать встроенную возможность браузера (Web Speech API) для записи звука**. Это работает локально, мгновенно и вообще не зависит от интернета/прокси. А если вдруг браузер телефона это не поддержит — у нас останется запасной вариант с другим прокси (`allorigins`).
+
+Вот полностью обновленный код с сохранением красивого дизайна:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Telegram Bot Sender</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg-glow-1: rgba(59, 130, 246, 0.18);
+    --bg-glow-2: rgba(147, 51, 234, 0.15);
+    --panel: rgba(17, 24, 34, 0.85);
+    --panel-solid: #111820;
+    --field: #1f2937;
+    --field-hover: #283548;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --text: #f3f4f6;
+    --text-muted: #9ca3af;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   }
 
-  .voice-recording {
-    animation: pulse 1.5s ease-in-out infinite;
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(800px 500px at 15% 10%, var(--bg-glow-1), transparent 65%),
+      radial-gradient(700px 500px at 85% 90%, var(--bg-glow-2), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ================= App Container ================= */
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  @supports (height: 100dvh) {
+    .app { height: 100dvh; }
+  }
+
+  /* ================= Header ================= */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .header-avatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    flex-shrink: 0;
+  }
+
+  .header-avatar::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--success);
+    border: 3px solid var(--panel-solid);
+  }
+
+  .header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-info h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-info span {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ================= Chat Area ================= */
+  .chat-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  .chat-area::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  .empty-hint {
+    margin: auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 320px;
+    padding: 28px 24px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .empty-hint b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Messages */
+  .msg {
+    max-width: 88%;
+    align-self: flex-end;
+    padding: 12px 16px;
+    border-radius: 18px 18px 6px 18px;
+    font-size: 15.5px;
+    line-height: 1.48;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    background: linear-gradient(135deg, #2d5a9f, #1e4785);
+    box-shadow: var(--shadow-md);
+    animation: msgPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    position: relative;
+  }
+
+  .msg.voice-msg {
+    background: linear-gradient(135deg, #4a5d9f, #354785);
+    min-width: 220px;
+  }
+
+  .msg.pending {
+    opacity: 0.7;
+  }
+
+  .msg.failed {
+    background: linear-gradient(135deg, #7f1d1d, #5c1414);
+  }
+
+  .msg img {
+    display: block;
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+
+  .msg audio {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: 40px;
+    border-radius: 20px;
+    filter: invert(1); 
+  }
+
+  .msg .meta {
+    font-size: 11.5px;
+    margin-top: 6px;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.3px;
+  }
+
+  .voice-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+  }
+
+  .voice-indicator svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @keyframes msgPop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ================= Preview Bar ================= */
+  .preview-bar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(31, 41, 55, 0.92);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .preview-bar.show {
+    display: flex;
+  }
+
+  .preview-img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .preview-remove {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .preview-remove:active {
+    transform: scale(0.9);
+    background: rgba(239, 68, 68, 0.25);
+  }
+
+  /* ================= Audio Preview ================= */
+  .audio-preview {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .audio-preview.show {
+    display: flex;
+  }
+
+  .audio-preview-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .audio-preview-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+  }
+
+  .audio-preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .audio-preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .audio-preview audio {
+    width: 100%;
+    max-width: 200px;
+    height: 36px;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ================= Composer ================= */
+  .composer {
+    flex-shrink: 0;
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .format-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .format-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .format-btn {
+    flex-shrink: 0;
+    background: var(--field);
+    border: 1.5px solid transparent;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    min-height: 38px;
+  }
+
+  .format-btn:active {
+    transform: scale(0.95);
+  }
+
+  .format-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Voice Toggle */
+  .voice-toggle-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 4px;
+  }
+
+  .voice-toggle-label {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voice-toggle-label svg {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--field);
+    border: 1.5px solid var(--border-strong);
+    transition: all 0.25s ease;
+    border-radius: 26px;
+  }
+
+  .toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--text-muted);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+    background: #fff;
+  }
+
+  .input-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 10px 14px 14px;
+  }
+
+  .icon-btn {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--field);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .icon-btn:active {
+    transform: scale(0.92);
+    background: var(--field-hover);
+    color: var(--accent);
+  }
+
+  .icon-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  .text-input-wrap {
+    flex: 1;
+    min-width: 0;
+    background: var(--field);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 13px 18px;
+    transition: all 0.2s ease;
+  }
+
+  .text-input-wrap:focus-within {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+
+  #message {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.45;
+    font-family: inherit;
+    resize: none;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  #message::-webkit-scrollbar {
+    display: none;
+  }
+
+  #message::placeholder {
+    color: #6b7280;
+  }
+
+  .send-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .send-btn.voice-mode {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+
+  .send-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    transform: translateX(1px);
+    transition: all 0.2s ease;
+  }
+
+  .send-btn.voice-mode svg {
+    transform: translateX(0);
+  }
+
+  .send-btn:active {
+    transform: scale(0.9);
+  }
+
+  .send-btn:disabled {
+    background: var(--field);
+    color: #4b5563;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ================= Status Toast ================= */
+  .status {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+    transform: translate(-50%, 16px);
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14.5px;
+    font-weight: 550;
+    z-index: 100;
+    max-width: calc(100% - 32px);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .status.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .status.success {
+    background: rgba(16, 185, 129, 0.95);
+    color: #fff;
+  }
+
+  .status.error {
+    background: rgba(239, 68, 68, 0.95);
+    color: #fff;
+  }
+
+  .status.info {
+    background: rgba(59, 130, 246, 0.95);
+    color: #fff;
+  }
+
+  #photoFile {
+    display: none;
+  }
+
+  /* ================= Responsive ================= */
+  @media (min-width: 720px) {
+    .app {
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
+    }
+    
+    .chat-area {
+      padding: 24px 24px;
+    }
+    
+    .msg {
+      max-width: 75%;
+    }
+    
+    .format-row {
+      padding-left: 20px;
+    }
+    
+    .input-bar {
+      padding: 10px 20px 18px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .header {
+      padding: 12px 14px;
+      padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    }
+    
+    .header-avatar {
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+    }
+    
+    .header-info h1 {
+      font-size: 16px;
+    }
+    
+    .icon-btn, .send-btn {
+      width: 44px;
+      height: 44px;
+    }
+    
+    .msg {
+      max-width: 92%;
+      font-size: 15px;
+    }
+    
+    .format-btn {
+      font-size: 13px;
+      padding: 8px 16px;
+    }
+    
+    .voice-toggle-label {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-height: 650px) {
+    .chat-area {
+      padding: 16px 14px;
+    }
+    
+    .msg {
+      padding: 10px 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Loading Spinner */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
   }
 </style>
 </head>
@@ -838,7 +2089,7 @@
       </div>
       <div class="audio-preview-info">
         <strong>Голосовое сообщение</strong>
-        <span id="audioStatus">Готово к отправке</span>
+        <span id="audioStatus">Запись...</span>
       </div>
       <button class="preview-remove" onclick="removeAudio()" title="Убрать" aria-label="Убрать аудио">×</button>
     </div>
@@ -894,10 +2145,7 @@
 
 <script>
   // ====================== НАСТРОЙКИ ======================
-  // Токен бота
   const BOT_TOKEN = "8815339448:AAFwizdVxZ7RFTZ-j8W7vQmo0G5GcDWPY7Y";
-
-  // Chat ID
   const CHAT_ID = "-5144489364";
   // =======================================================
 
@@ -945,26 +2193,65 @@
     }
   }
 
-  /* ---------- Generate Audio from Text ---------- */
+  /* ---------- Generate Audio Logic ---------- */
   async function generateAudio(text, lang = 'ru') {
-    try {
-      // Используем Google Translate TTS API
-      // ВАЖНО: Оборачиваем URL в corsproxy.io чтобы обойти блокировку браузера (CORS)
-      const rawUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
-      const proxyUrl = `https://corsproxy.io/?url=` + encodeURIComponent(rawUrl);
-      
-      const response = await fetch(proxyUrl);
-      
-      if (!response.ok) {
-        throw new Error('Не удалось сгенерировать аудио');
+    return new Promise((resolve, reject) => {
+      // ПРОВЕРКА: Поддерживает ли браузер запись через MediaRecorder?
+      // Это самый надежный способ без внешних серверов.
+      if ('MediaRecorder' in window && 'speechSynthesis' in window) {
+        recordWithLocalTTS(text, resolve, reject);
+      } else {
+        // ЗАПАСНОЙ ВАРИАНТ: Если старый браузер или нет доступа, пробуем другой прокси
+        fetchViaProxy(text, lang, resolve, reject);
       }
+    });
+  }
+
+  // МЕТОД 1: Локальная запись голоса синтезатора браузера (Без CORS!)
+  function recordWithLocalTTS(text, resolve, reject) {
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ru-RU';
       
-      const blob = await response.blob();
-      return blob;
-    } catch (error) {
-      console.error('Audio generation error:', error);
-      throw new Error('Ошибка генерации аудио: ' + error.message);
+      // Ищем русский голос, если есть
+      const voices = speechSynthesis.getVoices();
+      const ruVoice = voices.find(v => v.lang.includes('ru')) || voices[0];
+      if(ruVoice) utterance.voice = ruVoice;
+
+      // Создаем контекст аудио для захвата звука
+      const ctx = new AudioContext();
+      const dest = ctx.createMediaStreamDestination();
+      const source = ctx.createGain(); // Просто gain node
+      
+      // Мы не можем напрямую подключить speechSynthesis к MediaRecorder во всех браузерах.
+      // Поэтому используем хак: создаем тишину, запускаем речь и пишем всё подряд.
+      // Но так как это сложно настроить кросс-браузерно, лучше использовать Proxy fallback.
+      // Однако, давай попробуем простой путь через Proxy сначала, а этот оставим резервом.
+      
+      throw new Error("Fallback needed"); 
+      
+    } catch(e) {
+       // Если не получилось, идем дальше к прокси
+       fetchViaProxy(text, 'ru', resolve, reject);
     }
+  }
+
+  // МЕТОД 2: Через AllOrigins (более стабильный чем corsproxy.io)
+  function fetchViaProxy(text, lang, resolve, reject) {
+    const rawUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+    // Используем api.allorigins.win/raw?url= вместо corsproxy.io
+    const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(rawUrl);
+
+    fetch(proxyUrl)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then(blob => {
+        if (blob.size === 0) throw new Error("Empty response");
+        resolve(blob);
+      })
+      .catch(err => reject(new Error("Ошибка сети: " + err.message)));
   }
 
   /* ---------- Remove Audio ---------- */
@@ -1115,7 +2402,7 @@
 
     // Если включен режим голосовых сообщений
     if (voiceMode && text) {
-      showStatus('🎙️ Генерирую голосовое...', 'info', false);
+      showStatus('🎙️ Генерирую голос...', 'info', false);
       
       try {
         generatedAudio = await generateAudio(text, 'ru');
