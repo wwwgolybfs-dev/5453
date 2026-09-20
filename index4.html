@@ -206,6 +206,10 @@
     position: relative;
   }
 
+  .msg.voice-msg {
+    background: linear-gradient(135deg, #4a5d9f, #354785);
+  }
+
   .msg.pending {
     opacity: 0.7;
   }
@@ -223,12 +227,34 @@
     margin-bottom: 10px;
   }
 
+  .msg audio {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: 40px;
+    border-radius: 20px;
+  }
+
   .msg .meta {
     font-size: 11.5px;
     margin-top: 6px;
     text-align: right;
     color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.3px;
+  }
+
+  .voice-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+  }
+
+  .voice-indicator svg {
+    width: 16px;
+    height: 16px;
   }
 
   @keyframes msgPop {
@@ -309,6 +335,63 @@
     background: rgba(239, 68, 68, 0.25);
   }
 
+  /* ================= Audio Preview ================= */
+  .audio-preview {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .audio-preview.show {
+    display: flex;
+  }
+
+  .audio-preview-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .audio-preview-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+  }
+
+  .audio-preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .audio-preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .audio-preview audio {
+    width: 100%;
+    max-width: 200px;
+    height: 36px;
+  }
+
   @keyframes slideUp {
     from {
       opacity: 0;
@@ -367,6 +450,75 @@
     color: #fff;
     border-color: transparent;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Voice Toggle */
+  .voice-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 4px;
+  }
+
+  .voice-toggle-label {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voice-toggle-label svg {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--field);
+    border: 1.5px solid var(--border-strong);
+    transition: all 0.25s ease;
+    border-radius: 26px;
+  }
+
+  .toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--text-muted);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+    background: #fff;
   }
 
   .input-bar {
@@ -454,6 +606,12 @@
     place-items: center;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
     transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .send-btn.voice-mode {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
   }
 
   .send-btn svg {
@@ -461,11 +619,15 @@
     height: 22px;
     display: block;
     transform: translateX(1px);
+    transition: all 0.2s ease;
+  }
+
+  .send-btn.voice-mode svg {
+    transform: translateX(0);
   }
 
   .send-btn:active {
     transform: scale(0.9);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
   }
 
   .send-btn:disabled {
@@ -576,6 +738,10 @@
       font-size: 13px;
       padding: 8px 16px;
     }
+    
+    .voice-toggle-label {
+      font-size: 13px;
+    }
   }
 
   @media (max-height: 650px) {
@@ -611,6 +777,16 @@
     animation: spin 0.7s linear infinite;
     margin-left: 8px;
     vertical-align: middle;
+  }
+
+  /* Voice Recording Animation */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .voice-recording {
+    animation: pulse 1.5s ease-in-out infinite;
   }
 </style>
 </head>
@@ -648,11 +824,45 @@
       <button class="preview-remove" onclick="removePhoto()" title="Убрать" aria-label="Убрать картинку">×</button>
     </div>
 
+    <!-- Audio Preview -->
+    <div class="audio-preview" id="audioPreview">
+      <div class="audio-preview-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
+      <div class="audio-preview-info">
+        <strong>Голосовое сообщение</strong>
+        <span id="audioStatus">Готово к отправке</span>
+      </div>
+      <button class="preview-remove" onclick="removeAudio()" title="Убрать" aria-label="Убрать аудио">×</button>
+    </div>
+
     <!-- Format Row -->
     <div class="format-row">
       <button class="format-btn active" data-mode="" onclick="setParseMode(this)">Текст</button>
       <button class="format-btn" data-mode="HTML" onclick="setParseMode(this)">HTML</button>
       <button class="format-btn" data-mode="Markdown" onclick="setParseMode(this)">Markdown</button>
+    </div>
+
+    <!-- Voice Toggle -->
+    <div class="voice-toggle-wrap">
+      <div class="voice-toggle-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        Голосовое сообщение
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="voiceToggle" onchange="toggleVoiceMode()">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
 
     <!-- Input Bar -->
@@ -668,7 +878,7 @@
       </div>
 
       <button class="send-btn" id="sendBtn" onclick="send()" title="Отправить" aria-label="Отправить">
-        <svg viewBox="0 0 24 24" fill="currentColor">
+        <svg id="sendIcon" viewBox="0 0 24 24" fill="currentColor">
           <path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.1L3.6 10.5a1 1 0 0 0 .84.78l9.06 1.22-9.06 1.22a1 1 0 0 0-.84.78l-1.59 5.8a1 1 0 0 0 1.39 1.1z"/>
         </svg>
       </button>
@@ -693,18 +903,74 @@
   const emptyHint = document.getElementById('emptyHint');
   const messageEl = document.getElementById('message');
   const sendBtn   = document.getElementById('sendBtn');
+  const sendIcon  = document.getElementById('sendIcon');
   const statusEl  = document.getElementById('status');
+  const voiceToggle = document.getElementById('voiceToggle');
 
   let selectedFile = null;
   let previewUrl   = null;
   let parseMode    = "";
   let statusTimer  = null;
+  let voiceMode    = false;
+  let audioBlob    = null;
+  let audioUrl     = null;
 
   /* ---------- Format ---------- */
   function setParseMode(btn) {
     document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     parseMode = btn.dataset.mode;
+  }
+
+  /* ---------- Voice Mode Toggle ---------- */
+  function toggleVoiceMode() {
+    voiceMode = voiceToggle.checked;
+    
+    if (voiceMode) {
+      sendBtn.classList.add('voice-mode');
+      sendIcon.innerHTML = `
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      `;
+      messageEl.placeholder = 'Текст для озвучки...';
+    } else {
+      sendBtn.classList.remove('voice-mode');
+      sendIcon.innerHTML = `
+        <path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.1L3.6 10.5a1 1 0 0 0 .84.78l9.06 1.22-9.06 1.22a1 1 0 0 0-.84.78l-1.59 5.8a1 1 0 0 0 1.39 1.1z"/>
+      `;
+      messageEl.placeholder = 'Сообщение...';
+      removeAudio();
+    }
+  }
+
+  /* ---------- Generate Audio from Text ---------- */
+  async function generateAudio(text, lang = 'ru') {
+    try {
+      // Используем Google Translate TTS API
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Не удалось сгенерировать аудио');
+      }
+      
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      console.error('Audio generation error:', error);
+      throw new Error('Ошибка генерации аудио: ' + error.message);
+    }
+  }
+
+  /* ---------- Remove Audio ---------- */
+  function removeAudio() {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      audioUrl = null;
+    }
+    audioBlob = null;
+    document.getElementById('audioPreview').classList.remove('show');
   }
 
   /* ---------- Auto Resize Textarea ---------- */
@@ -767,11 +1033,11 @@
   }
 
   /* ---------- Add Message Bubble ---------- */
-  function addBubble(text, file) {
+  function addBubble(text, file, isVoice = false, audioData = null) {
     if (emptyHint) emptyHint.style.display = 'none';
 
     const el = document.createElement('div');
-    el.className = 'msg pending';
+    el.className = 'msg pending' + (isVoice ? ' voice-msg' : '');
 
     if (file) {
       const img = document.createElement('img');
@@ -780,8 +1046,33 @@
       el.appendChild(img);
     }
 
-    if (text) {
+    if (isVoice && audioData) {
+      const voiceIndicator = document.createElement('div');
+      voiceIndicator.className = 'voice-indicator';
+      voiceIndicator.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        </svg>
+        Голосовое сообщение
+      `;
+      el.appendChild(voiceIndicator);
+
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = URL.createObjectURL(audioData);
+      el.appendChild(audio);
+    }
+
+    if (text && !isVoice) {
       const p = document.createElement('div');
+      p.textContent = text;
+      el.appendChild(p);
+    } else if (text && isVoice) {
+      const p = document.createElement('div');
+      p.style.fontSize = '13px';
+      p.style.color = 'rgba(255, 255, 255, 0.7)';
+      p.style.marginTop = '8px';
       p.textContent = text;
       el.appendChild(p);
     }
@@ -804,7 +1095,7 @@
   async function send() {
     const text = messageEl.value.trim();
 
-    if (!text && !selectedFile) {
+    if (!text && !selectedFile && !audioBlob) {
       showStatus('Напиши текст или прикрепи картинку', 'error');
       return;
     }
@@ -815,7 +1106,32 @@
     }
 
     const fileToSend = selectedFile;
-    const bubble = addBubble(text, fileToSend);
+    let bubble;
+    let generatedAudio = null;
+
+    // Если включен режим голосовых сообщений
+    if (voiceMode && text) {
+      showStatus('🎙️ Генерирую голосовое...', 'info', false);
+      
+      try {
+        generatedAudio = await generateAudio(text, 'ru');
+        audioBlob = generatedAudio;
+        
+        // Показываем превью аудио
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+        audioUrl = URL.createObjectURL(audioBlob);
+        document.getElementById('audioStatus').textContent = 'Готово к отправке';
+        document.getElementById('audioPreview').classList.add('show');
+        
+        bubble = addBubble(text, fileToSend, true, generatedAudio);
+      } catch (error) {
+        showStatus('❌ ' + error.message, 'error');
+        return;
+      }
+    } else {
+      bubble = addBubble(text, fileToSend, false);
+    }
+
     const metaEl = bubble.querySelector('.meta');
 
     sendBtn.disabled = true;
@@ -824,7 +1140,23 @@
     try {
       let res;
 
-      if (fileToSend) {
+      // Отправка голосового сообщения
+      if (voiceMode && text && generatedAudio) {
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        
+        // Telegram требует OGG OPUS для sendVoice, но пробуем с MP3
+        // Создаем File из Blob с правильным расширением
+        const audioFile = new File([generatedAudio], 'voice.ogg', { type: 'audio/ogg' });
+        formData.append('voice', audioFile);
+        
+        res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
+          method: 'POST',
+          body: formData
+        });
+      }
+      // Отправка фото с подписью
+      else if (fileToSend) {
         const formData = new FormData();
         formData.append('chat_id', CHAT_ID);
         formData.append('photo', fileToSend);
@@ -835,7 +1167,9 @@
           method: 'POST',
           body: formData
         });
-      } else {
+      }
+      // Отправка текстового сообщения
+      else {
         const body = { chat_id: CHAT_ID, text: text };
         if (parseMode) body.parse_mode = parseMode;
 
@@ -859,8 +1193,12 @@
       messageEl.value = '';
       messageEl.style.height = 'auto';
       removePhoto();
+      
+      if (!voiceMode) {
+        removeAudio();
+      }
 
-      showStatus('✅ Отправлено!', 'success');
+      showStatus(voiceMode ? '🎙️ Голосовое отправлено!' : '✅ Отправлено!', 'success');
 
     } catch (err) {
       bubble.classList.remove('pending');
@@ -886,7 +1224,6 @@
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         scrollToBottom();
-        // Adjust layout when keyboard appears
         document.querySelector('.app').style.height = window.visualViewport.height + 'px';
       });
     }
