@@ -680,7 +680,7 @@
     <div class="header-avatar">🤖</div>
     <div class="header-info">
       <h1>Отправка от бота</h1>
-      <span>Голосовые теперь точно голосовые + TTS</span>
+      <span>Голосовые теперь точно голосовые + TTS (Google)</span>
     </div>
   </header>
 
@@ -774,14 +774,12 @@
   let statusTimer = null;
   let voiceMode = false;
 
-  /* ---------- Format ---------- */
   function setParseMode(btn) {
     document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     parseMode = btn.dataset.mode;
   }
 
-  /* ---------- Voice Mode Toggle ---------- */
   function toggleVoiceMode() {
     voiceMode = voiceToggle.checked;
     if (voiceMode) {
@@ -795,14 +793,15 @@
     }
   }
 
-  /* ---------- TTS — теперь с duration ---------- */
+  /* ---------- Google TTS (прямой, без CORS-прокси) ---------- */
   async function textToSpeech(text) {
     try {
       const clipped = text.length > 160 ? text.slice(0, 160) : text;
+
       const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(clipped)}`;
 
       const attempts = [
-        u => u,
+        u => u,                    // прямой
         u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
         u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
         u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
@@ -814,7 +813,7 @@
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
               'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.5',
-              'Referer': 'https://translate.google.com/',
+              'Referer': 'translate.google.com',
             },
           });
 
@@ -826,13 +825,12 @@
           if (!ctype.includes('audio') && !ctype.includes('mpeg') && !ctype.includes('octet-stream')) continue;
           if (buf.byteLength < 500) continue;
 
-          // === НОВОЕ: считаем duration ===
+          // duration автоматически
           const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const decoded = await audioCtx.decodeAudioData(buf.buffer);
           const duration = Math.round(decoded.duration);
-          // =====================================
 
-          console.log('TTS готово | duration:', duration, 'bytes:', buf.byteLength);
+          console.log('✅ Google TTS готово | duration:', duration);
           return { audio: buf, duration };
         } catch (e) {
           console.log('TTS attempt failed:', e);
@@ -845,7 +843,6 @@
     }
   }
 
-  /* ---------- sendVoice — теперь с duration (Telegram требует!) ---------- */
   async function sendVoice(audioData, duration) {
     const form = new FormData();
     form.append('chat_id', String(CHAT_ID));
@@ -861,7 +858,6 @@
     return json;
   }
 
-  /* ---------- Backup sendAudio (на случай, если sendVoice не сработает) ---------- */
   async function sendAudio(audioData, duration) {
     const form = new FormData();
     form.append('chat_id', String(CHAT_ID));
@@ -877,13 +873,11 @@
     return json;
   }
 
-  /* ---------- Auto Resize Textarea ---------- */
   function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }
 
-  /* ---------- File Selection ---------- */
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -893,13 +887,11 @@
     selectedFile = file;
 
     document.getElementById('previewImg').src = previewUrl;
-    document.getElementById('previewName').textContent =
-      file.name.length > 28 ? file.name.slice(0, 25) + '...' : file.name;
+    document.getElementById('previewName').textContent = file.name.length > 28 ? file.name.slice(0, 25) + '...' : file.name;
 
     document.getElementById('previewBar').classList.add('show');
   }
 
-  /* ---------- Remove Photo ---------- */
   function removePhoto() {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = null;
@@ -909,27 +901,19 @@
     document.getElementById('previewBar').classList.remove('show');
   }
 
-  /* ---------- Status Toast ---------- */
   function showStatus(text, type, autohide = true) {
     clearTimeout(statusTimer);
     statusEl.textContent = text;
     statusEl.className = 'status ' + type;
     void statusEl.offsetWidth;
     statusEl.classList.add('show');
-
-    if (autohide) {
-      statusTimer = setTimeout(() => statusEl.classList.remove('show'), 3500);
-    }
+    if (autohide) statusTimer = setTimeout(() => statusEl.classList.remove('show'), 3500);
   }
 
-  /* ---------- Scroll to Bottom ---------- */
   function scrollToBottom() {
-    requestAnimationFrame(() => {
-      chatArea.scrollTop = chatArea.scrollHeight;
-    });
+    requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
   }
 
-  /* ---------- Add Message Bubble ---------- */
   function addBubble(text, file, isVoice = false, audioData = null, duration = 0) {
     if (emptyHint) emptyHint.style.display = 'none';
 
@@ -946,13 +930,7 @@
     if (isVoice && audioData) {
       const voiceIndicator = document.createElement('div');
       voiceIndicator.className = 'voice-indicator';
-      voiceIndicator.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-        </svg>
-        Голосовое сообщение
-      `;
+      voiceIndicator.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Голосовое сообщение`;
       el.appendChild(voiceIndicator);
 
       const audio = document.createElement('audio');
@@ -986,7 +964,6 @@
     return new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
-  /* ---------- SEND — теперь с duration ---------- */
   async function send() {
     const text = messageEl.value.trim();
 
@@ -1005,7 +982,6 @@
 
     let voiceSent = false;
 
-    /* ---------- Шаг 1: голос + TTS + duration ---------- */
     if (voiceMode && text) {
       showStatus('🎙️ Генерирую голос...', 'info', false);
       const ttsResult = await textToSpeech(text);
@@ -1031,11 +1007,10 @@
           showStatus('⚠️ Голос не отправился, шлю текстом', 'info');
         }
       } else {
-        showStatus('⚠️ TTS недоступен, шлю текстом', 'info');
+        showStatus('⚠️ Google TTS недоступен, шлю текстом', 'info');
       }
     }
 
-    /* ---------- Шаг 2: текст / фото ---------- */
     const needTextPart = !voiceSent;
 
     if (needTextPart || fileToSend) {
@@ -1045,22 +1020,16 @@
 
       try {
         let res;
-
         if (fileToSend) {
           const formData = new FormData();
           formData.append('chat_id', CHAT_ID);
           formData.append('photo', fileToSend);
           if (needTextPart && text) formData.append('caption', text);
           if (needTextPart && parseMode) formData.append('parse_mode', parseMode);
-
-          res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-            method: 'POST',
-            body: formData
-          });
+          res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
         } else {
           const body = { chat_id: CHAT_ID, text: text };
           if (parseMode) body.parse_mode = parseMode;
-
           res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1085,7 +1054,6 @@
       showStatus('🎙️ Голосовое отправлено!', 'success');
     }
 
-    /* ---------- Cleanup ---------- */
     messageEl.value = '';
     messageEl.style.height = 'auto';
     removePhoto();
@@ -1093,7 +1061,6 @@
     messageEl.focus();
   }
 
-  /* ---------- Keyboard ---------- */
   messageEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -1101,7 +1068,6 @@
     }
   });
 
-  /* ---------- Viewport ---------- */
   window.addEventListener('load', () => {
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
