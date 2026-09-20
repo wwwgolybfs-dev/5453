@@ -2,397 +2,1122 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0e14">
-<title>🔬 Диагностика TTS / Voice</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Telegram Bot Sender</title>
 <style>
-  :root{
-    --bg:#0a0e14; --panel:rgba(17,24,34,.9); --field:#1f2937;
-    --border:rgba(255,255,255,.08); --text:#f3f4f6; --muted:#9ca3af;
-    --accent:#3b82f6; --accent2:#8b5cf6; --ok:#4ade80; --err:#f87171; --warn:#fbbf24;
+  :root {
+    --bg: #0a0e14;
+    --bg-glow-1: rgba(59, 130, 246, 0.18);
+    --bg-glow-2: rgba(147, 51, 234, 0.15);
+    --panel: rgba(17, 24, 34, 0.85);
+    --panel-solid: #111820;
+    --field: #1f2937;
+    --field-hover: #283548;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --text: #f3f4f6;
+    --text-muted: #9ca3af;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg); color:var(--text); min-height:100vh; padding:16px;
-    padding-top:calc(16px + env(safe-area-inset-top,0px));
-    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
-  }
-  .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
-  h1{font-size:20px;font-weight:650;display:flex;align-items:center;gap:10px;}
-  h1 span{font-size:26px;}
-  .note{
-    font-size:13px;line-height:1.6;color:var(--muted);
-    background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.25);
-    padding:12px 14px;border-radius:14px;
-  }
-  .note b{color:var(--text);}
-  .card{
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:16px; padding:14px 16px;
-    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-  }
-  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px;}
-  .kv{font-size:13px;color:var(--muted);margin-bottom:6px;word-break:break-all;}
-  .kv b{color:var(--text);font-weight:550;}
-  textarea{
-    width:100%; background:var(--field); border:1px solid var(--border); border-radius:12px;
-    color:var(--text); font-family:inherit; font-size:15px; padding:10px 12px;
-    resize:vertical; min-height:64px; outline:none;
-  }
-  textarea:focus{border-color:rgba(59,130,246,.6);}
-  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
-  button{
-    border:none; border-radius:12px; padding:12px 10px; font-size:13.5px; font-weight:600;
-    font-family:inherit; cursor:pointer; color:#fff; transition:transform .15s ease, opacity .15s ease;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 4px 14px rgba(59,130,246,.3);
-  }
-  button:active{transform:scale(.96);}
-  button:disabled{opacity:.45;cursor:not-allowed;}
-  button.sec{background:var(--field);box-shadow:none;color:var(--muted);}
-  button.danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 14px rgba(239,68,68,.3);}
-  button.green{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 14px rgba(16,185,129,.3);}
 
-  .audio-card{display:none;align-items:center;gap:12px;}
-  .audio-card.show{display:flex;}
-  .audio-card audio{flex:1;height:40px;min-width:0;}
-  .audio-meta{font-size:12px;color:var(--muted);white-space:nowrap;}
-
-  /* ===== Консоль логов (стили общие для страницы и попапа) ===== */
-  .log-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
-  .log-toolbar button{padding:8px 12px;font-size:12.5px;box-shadow:none;}
-  #console,.popup-console{
-    background:#060a10; border:1px solid var(--border); border-radius:12px;
-    padding:10px; height:46vh; overflow-y:auto;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; line-height:1.5;
-    -webkit-overflow-scrolling:touch;
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
-  .log-line{margin:0 0 8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid transparent;word-break:break-word;}
-  .log-line.info{border-color:#3d8bfd;}
-  .log-line.ok{border-color:#4ade80;}
-  .log-line.warn{border-color:#fbbf24;}
-  .log-line.err{border-color:#f87171;}
-  .log-line .t{color:#64748b;font-size:10.5px;margin-right:6px;}
-  .badge{display:inline-block;min-width:46px;text-align:center;font-size:10px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:6px;text-transform:uppercase;}
-  .badge.info{background:rgba(61,139,253,.18);color:#7cb3ff;}
-  .badge.ok{background:rgba(74,222,128,.15);color:#4ade80;}
-  .badge.warn{background:rgba(251,191,36,.15);color:#fbbf24;}
-  .badge.err{background:rgba(248,113,113,.15);color:#f87171;}
-  .log-line .m{color:#e8eef4;}
-  .log-line pre{margin:6px 0 0;background:rgba(0,0,0,.4);padding:8px;border-radius:8px;overflow-x:auto;font-size:11px;color:#b9c6d4;white-space:pre-wrap;word-break:break-word;font-family:inherit;}
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(800px 500px at 15% 10%, var(--bg-glow-1), transparent 65%),
+      radial-gradient(700px 500px at 85% 90%, var(--bg-glow-2), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  @supports (height: 100dvh) {
+    .app { height: 100dvh; }
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .header-avatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    flex-shrink: 0;
+  }
+
+  .header-avatar::after {
+    content: "";
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--success);
+    border: 3px solid var(--panel-solid);
+  }
+
+  .header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-info h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-info span {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  .chat-area::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+  }
+
+  .empty-hint {
+    margin: auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 320px;
+    padding: 28px 24px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .empty-hint b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .msg {
+    max-width: 88%;
+    align-self: flex-end;
+    padding: 12px 16px;
+    border-radius: 18px 18px 6px 18px;
+    font-size: 15.5px;
+    line-height: 1.48;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    background: linear-gradient(135deg, #2d5a9f, #1e4785);
+    box-shadow: var(--shadow-md);
+    animation: msgPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    position: relative;
+  }
+
+  .msg.voice-msg {
+    background: linear-gradient(135deg, #4a5d9f, #354785);
+    min-width: 220px;
+  }
+
+  .msg.pending {
+    opacity: 0.7;
+  }
+
+  .msg.failed {
+    background: linear-gradient(135deg, #7f1d1d, #5c1414);
+  }
+
+  .msg img {
+    display: block;
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+
+  .msg audio {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: 40px;
+    border-radius: 20px;
+  }
+
+  .msg .meta {
+    font-size: 11.5px;
+    margin-top: 6px;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.3px;
+  }
+
+  .voice-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+  }
+
+  .voice-indicator svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @keyframes msgPop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .preview-bar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    margin: 0 14px 10px;
+    background: rgba(31, 41, 55, 0.92);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: slideUp 0.22s ease both;
+  }
+
+  .preview-bar.show {
+    display: flex;
+  }
+
+  .preview-img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .preview-info {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .preview-info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 550;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .preview-remove {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .preview-remove:active {
+    transform: scale(0.9);
+    background: rgba(239, 68, 68, 0.25);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .composer {
+    flex-shrink: 0;
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .format-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .format-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .format-btn {
+    flex-shrink: 0;
+    background: var(--field);
+    border: 1.5px solid transparent;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    min-height: 38px;
+  }
+
+  .format-btn:active {
+    transform: scale(0.95);
+  }
+
+  .format-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  }
+
+  .voice-toggle-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 4px;
+  }
+
+  .voice-toggle-label {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voice-toggle-label svg {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--field);
+    border: 1.5px solid var(--border-strong);
+    transition: all 0.25s ease;
+    border-radius: 26px;
+  }
+
+  .toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--text-muted);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+    background: #fff;
+  }
+
+  .input-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 10px 14px 14px;
+  }
+
+  .icon-btn {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--field);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+
+  .icon-btn:active {
+    transform: scale(0.92);
+    background: var(--field-hover);
+    color: var(--accent);
+  }
+
+  .icon-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  .text-input-wrap {
+    flex: 1;
+    min-width: 0;
+    background: var(--field);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 13px 18px;
+    transition: all 0.2s ease;
+  }
+
+  .text-input-wrap:focus-within {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+
+  #message {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.45;
+    font-family: inherit;
+    resize: none;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  #message::-webkit-scrollbar {
+    display: none;
+  }
+
+  #message::placeholder {
+    color: #6b7280;
+  }
+
+  .send-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .send-btn.voice-mode {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+
+  .send-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    transform: translateX(1px);
+    transition: all 0.2s ease;
+  }
+
+  .send-btn.voice-mode svg {
+    transform: translateX(0);
+  }
+
+  .send-btn:active {
+    transform: scale(0.9);
+  }
+
+  .send-btn:disabled {
+    background: var(--field);
+    color: #4b5563;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .status {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+    transform: translate(-50%, 16px);
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14.5px;
+    font-weight: 550;
+    z-index: 100;
+    max-width: calc(100% - 32px);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .status.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .status.success {
+    background: rgba(16, 185, 129, 0.95);
+    color: #fff;
+  }
+
+  .status.error {
+    background: rgba(239, 68, 68, 0.95);
+    color: #fff;
+  }
+
+  .status.info {
+    background: rgba(59, 130, 246, 0.95);
+    color: #fff;
+  }
+
+  #photoFile {
+    display: none;
+  }
+
+  @media (min-width: 720px) {
+    .app {
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
+    }
+    .chat-area { padding: 24px 24px; }
+    .msg { max-width: 75%; }
+    .format-row { padding-left: 20px; }
+    .input-bar { padding: 10px 20px 18px; }
+  }
+
+  @media (max-width: 380px) {
+    .header { padding: 12px 14px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+    .header-avatar { width: 44px; height: 44px; font-size: 22px; }
+    .header-info h1 { font-size: 16px; }
+    .icon-btn, .send-btn { width: 44px; height: 44px; }
+    .msg { max-width: 92%; font-size: 15px; }
+    .format-btn { font-size: 13px; padding: 8px 16px; }
+    .voice-toggle-label { font-size: 13px; }
+  }
+
+  @media (max-height: 650px) {
+    .chat-area { padding: 16px 14px; }
+    .msg { padding: 10px 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <h1><span>🔬</span> Диагностика озвучки</h1>
+<div class="app">
 
-  <div class="note">
-    <b>Как читать логи:</b><br>
-    1) <b>Маршруты TTS</b> — видно, какой прокси ответил, какой статус/content-type/размер пришёл и первые байты (MP3 или HTML-ошибка).<br>
-    2) <b>sendVoice / sendAudio</b> — печатается ПОЛНЫЙ ответ Telegram: именно в <b>description</b> написана причина, почему голос не ушёл.<br>
-    3) Кнопка <b>«🪟 В отдельном окне»</b> — откроет консоль логов в новом окне браузера.
-  </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-avatar">🤖</div>
+    <div class="header-info">
+      <h1>Отправка от бота</h1>
+      <span>Голосовые теперь точно голосовые + TTS</span>
+    </div>
+  </header>
 
-  <div class="card">
-    <h2>Параметры</h2>
-    <div class="kv">Токен: <b>…WPY7Y</b> (зашит в коде)</div>
-    <div class="kv">Chat ID: <b>-5144489364</b></div>
-    <div class="kv">Текст для озвучки (обрежется до 160 символов, как в bot_function.ts):</div>
-    <textarea id="testText">Гав гав гав, проверка озвучки, раз два три.</textarea>
-  </div>
+  <!-- Chat Area -->
+  <main class="chat-area" id="chatArea">
+    <div class="empty-hint" id="emptyHint">
+      Напиши сообщение и/или прикрепи картинку,<br>
+      затем нажми <b>➤</b>
+    </div>
+  </main>
 
-  <div class="card">
-    <h2>Действия</h2>
-    <div class="btns">
-      <button class="green" id="btnFull" onclick="runFull()">▶️ Полная диагностика</button>
-      <button id="btnTts" onclick="runTtsOnly()">🎙️ Только TTS</button>
-      <button id="btnVoice" onclick="runVoiceOnly()">📤 sendVoice</button>
-      <button id="btnAudio" onclick="runAudioOnly()">🎵 sendAudio</button>
-      <button class="sec" id="btnText" onclick="runTextControl()">📨 Текст (контроль)</button>
+  <!-- Composer -->
+  <div class="composer">
+
+    <!-- Preview Bar -->
+    <div class="preview-bar" id="previewBar">
+      <img id="previewImg" class="preview-img" alt="preview">
+      <div class="preview-info">
+        <strong id="previewName">Картинка</strong>
+        Готова к отправке
+      </div>
+      <button class="preview-remove" onclick="removePhoto()" title="Убрать" aria-label="Убрать картинку">×</button>
+    </div>
+
+    <!-- Format Row -->
+    <div class="format-row">
+      <button class="format-btn active" data-mode="" onclick="setParseMode(this)">Текст</button>
+      <button class="format-btn" data-mode="HTML" onclick="setParseMode(this)">HTML</button>
+      <button class="format-btn" data-mode="Markdown" onclick="setParseMode(this)">Markdown</button>
+    </div>
+
+    <!-- Voice Toggle -->
+    <div class="voice-toggle-wrap">
+      <div class="voice-toggle-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        Голосовое сообщение
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="voiceToggle" onchange="toggleVoiceMode()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <button class="icon-btn" onclick="document.getElementById('photoFile').click()" title="Прикрепить картинку" aria-label="Прикрепить картинку">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+
+      <div class="text-input-wrap">
+        <textarea id="message" rows="1" placeholder="Сообщение..." oninput="autoResize(this)"></textarea>
+      </div>
+
+      <button class="send-btn" id="sendBtn" onclick="send()" title="Отправить" aria-label="Отправить">
+        <svg id="sendIcon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.1L3.6 10.5a1 1 0 0 0 .84.78l9.06 1.22-9.06 1.22a1 1 0 0 0-.84.78l-1.59 5.8a1 1 0 0 0 1.39 1.1z"/>
+        </svg>
+      </button>
     </div>
   </div>
-
-  <div class="card audio-card" id="audioCard">
-    <audio id="player" controls></audio>
-    <div class="audio-meta" id="audioMeta"></div>
-  </div>
-
-  <div class="card">
-    <h2>Логи</h2>
-    <div class="log-toolbar">
-      <button class="sec" onclick="openLogWindow()">🪟 В отдельном окне</button>
-      <button class="sec" onclick="copyLogs()">📋 Копировать</button>
-      <button class="sec" onclick="clearLogs()">🧹 Очистить</button>
-    </div>
-    <div id="console"></div>
-  </div>
-
 </div>
 
+<input type="file" id="photoFile" accept="image/*" onchange="handleFile(event)">
+
+<div id="status" class="status"></div>
+
 <script>
-  // ====================== НАСТРОЙКИ (те же, что в основном файле) ======================
+  // ====================== НАСТРОЙКИ ======================
   const BOT_TOKEN = "8815339448:AAFwizdVxZ7RFTZ-j8W7vQmo0G5GcDWPY7Y";
   const CHAT_ID = "-5144489364";
-  // =====================================================================================
+  // =======================================================
 
-  const consoleEl = document.getElementById('console');
-  const testTextEl = document.getElementById('testText');
+  const chatArea = document.getElementById('chatArea');
+  const emptyHint = document.getElementById('emptyHint');
+  const messageEl = document.getElementById('message');
+  const sendBtn = document.getElementById('sendBtn');
+  const sendIcon = document.getElementById('sendIcon');
+  const statusEl = document.getElementById('status');
+  const voiceToggle = document.getElementById('voiceToggle');
 
-  let logEntries = [];
-  let popWin = null;
-  let lastAudio = null;   // Uint8Array последнего успешного TTS
-  let lastRoute = null;
-  let busy = false;
+  let selectedFile = null;
+  let previewUrl = null;
+  let parseMode = "";
+  let statusTimer = null;
+  let voiceMode = false;
 
-  /* ================= ЛОГИ ================= */
-  function log(level, msg, data) {
-    const entry = { time: new Date().toLocaleTimeString('ru-RU', { hour12: false }), level, msg, data: data ?? null };
-    logEntries.push(entry);
-    appendEntry(document, consoleEl, entry);
-    if (popWin && !popWin.closed) {
-      const pc = popWin.document.getElementById('pconsole');
-      if (pc) appendEntry(popWin.document, pc, entry);
-    }
+  /* ---------- Format ---------- */
+  function setParseMode(btn) {
+    document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    parseMode = btn.dataset.mode;
   }
 
-  function appendEntry(doc, container, e) {
-    const div = doc.createElement('div');
-    div.className = 'log-line ' + e.level;
-    const t = doc.createElement('span'); t.className = 't'; t.textContent = e.time;
-    const b = doc.createElement('span'); b.className = 'badge ' + e.level; b.textContent = e.level;
-    const m = doc.createElement('span'); m.className = 'm'; m.textContent = e.msg;
-    div.append(t, b, m);
-    if (e.data != null) {
-      const pre = doc.createElement('pre'); pre.textContent = e.data; div.appendChild(pre);
-    }
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function clearLogs() {
-    logEntries = [];
-    consoleEl.innerHTML = '';
-    if (popWin && !popWin.closed) {
-      const pc = popWin.document.getElementById('pconsole');
-      if (pc) pc.innerHTML = '';
-    }
-    log('info', 'Логи очищены');
-  }
-
-  async function copyLogs() {
-    const txt = logEntries.map(e => `[${e.time}] ${e.level.toUpperCase()} ${e.msg}${e.data != null ? '\n' + e.data : ''}`).join('\n');
-    try { await navigator.clipboard.writeText(txt); log('ok', 'Логи скопированы в буфер обмена'); }
-    catch (e) { log('err', 'Не удалось скопировать: ' + e.message); }
-  }
-
-  function openLogWindow() {
-    popWin = window.open('', 'ttsLogs', 'width=520,height=680');
-    if (!popWin) { log('warn', 'Браузер заблокировал всплывающее окно. Разреши попапы для сайта.'); return; }
-    popWin.document.write(`<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">
-      <title>Логи TTS</title>
-      <style>
-        body{background:#060a10;color:#e8eef4;margin:0;padding:10px;
-             font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;}
-        .popup-console{height:calc(100vh - 20px);overflow-y:auto;}
-        .log-line{margin:0 0 8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid transparent;word-break:break-word;}
-        .log-line.info{border-color:#3d8bfd;} .log-line.ok{border-color:#4ade80;}
-        .log-line.warn{border-color:#fbbf24;} .log-line.err{border-color:#f87171;}
-        .log-line .t{color:#64748b;font-size:10.5px;margin-right:6px;}
-        .badge{display:inline-block;min-width:46px;text-align:center;font-size:10px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:6px;text-transform:uppercase;}
-        .badge.info{background:rgba(61,139,253,.18);color:#7cb3ff;} .badge.ok{background:rgba(74,222,128,.15);color:#4ade80;}
-        .badge.warn{background:rgba(251,191,36,.15);color:#fbbf24;} .badge.err{background:rgba(248,113,113,.15);color:#f87171;}
-        .log-line .m{color:#e8eef4;}
-        .log-line pre{margin:6px 0 0;background:rgba(0,0,0,.4);padding:8px;border-radius:8px;overflow-x:auto;font-size:11px;color:#b9c6d4;white-space:pre-wrap;word-break:break-word;font-family:inherit;}
-      </style></head><body><div id="pconsole" class="popup-console"></div></body></html>`);
-    popWin.document.close();
-    const pc = popWin.document.getElementById('pconsole');
-    logEntries.forEach(e => appendEntry(popWin.document, pc, e));
-    log('info', 'Открыто отдельное окно логов');
-  }
-
-  /* ================= УТИЛИТЫ ================= */
-  function headInfo(buf) {
-    const hex = Array.from(buf.slice(0, 12)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-    let text = '';
-    try { text = new TextDecoder('utf-8').decode(buf.slice(0, 48)); } catch (e) {}
-    let sig = 'signature: неизвестна';
-    if (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) sig = 'signature: ID3 → это MP3 ✅';
-    else if (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0) sig = 'signature: MPEG-sync → это MP3 ✅';
-    else if (buf[0] === 0x4F && buf[1] === 0x67 && buf[2] === 0x67 && buf[3] === 0x53) sig = 'signature: OggS → это OGG ✅';
-    else if (text.trim().startsWith('<')) sig = 'signature: похож на HTML (страница ошибки прокси) ❌';
-    else if (text.trim().startsWith('{')) sig = 'signature: похож на JSON (ошибка прокси) ❌';
-    return `hex:  ${hex}\ntext: ${JSON.stringify(text)}\n${sig}`;
-  }
-
-  // Проверки — один в один как в bot_function.ts
-  function validateTts(res, ctype, buf) {
-    if (!res.ok) return { ok: false, why: `HTTP ${res.status}` };
-    if (!ctype.includes('audio') && !ctype.includes('mpeg') && !ctype.includes('octet-stream'))
-      return { ok: false, why: `плохой content-type: ${ctype}` };
-    if (buf.byteLength < 500) return { ok: false, why: `слишком мало: ${buf.byteLength} байт` };
-    return { ok: true };
-  }
-
-  function showAudio(buf) {
-    const blob = new Blob([buf], { type: 'audio/mpeg' });
-    document.getElementById('player').src = URL.createObjectURL(blob);
-    document.getElementById('audioMeta').textContent = `${buf.byteLength} байт`;
-    document.getElementById('audioCard').classList.add('show');
-  }
-
-  function setBusy(v) {
-    busy = v;
-    ['btnFull','btnTts','btnVoice','btnAudio','btnText'].forEach(id => document.getElementById(id).disabled = v);
-  }
-
-  /* ================= TTS МАРШРУТЫ ================= */
-  const ROUTES = [
-    { name: 'напрямую translate.google.com', wrap: u => u },
-    { name: 'напрямую translate.googleapis.com (gtx)', wrap: (u, g) => g },
-    { name: 'прокси codetabs',   wrap: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` },
-    { name: 'прокси allorigins', wrap: u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
-    { name: 'прокси corsproxy.io', wrap: u => `https://corsproxy.io/?url=${encodeURIComponent(u)}` },
-  ];
-
-  async function probeRoute(route, googleUrl, gtxUrl) {
-    log('info', `→ Маршрут: ${route.name}`);
-    const finalUrl = route.wrap(googleUrl, gtxUrl);
-    log('info', `URL: ${finalUrl}`);
-    const t0 = performance.now();
-    try {
-      const res = await fetch(finalUrl, {
-        headers: {
-          'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.5',
-          // как в bot_function.ts; браузер может выкинуть Referer/User-Agent (forbidden headers) — это нормально
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-          'Referer': 'https://translate.google.com/',
-        },
-      });
-      const ms = Math.round(performance.now() - t0);
-      const ctype = res.headers.get('content-type') || '(нет)';
-      const buf = new Uint8Array(await res.arrayBuffer());
-      log(res.ok ? 'info' : 'warn',
-          `← Ответ: HTTP ${res.status} | content-type: ${ctype} | байт: ${buf.byteLength} | ${ms} мс`);
-      log('info', 'Первые байты ответа:', headInfo(buf));
-      const v = validateTts(res, ctype, buf);
-      if (v.ok) { log('ok', `Маршрут «${route.name}»: аудио получено ✅`); return buf; }
-      log('warn', `Маршрут «${route.name}»: отклонён — ${v.why}`);
-      return null;
-    } catch (e) {
-      log('err', `Маршрут «${route.name}»: ошибка запроса — ${e.name}: ${e.message}`);
-      log('info', '«Failed to fetch» = браузер заблокировал запрос (CORS) или прокси недоступен.');
-      return null;
-    }
-  }
-
-  async function runTts() {
-    const raw = testTextEl.value.trim() || 'Тест раз два три';
-    const clipped = raw.length > 160 ? raw.slice(0, 160) : raw;
-    log('info', `=== TTS: текст ${raw.length} симв., после обрезки ${clipped.length} (лимит 160 как в ts) ===`);
-    const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(clipped)}`;
-    const gtxUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&sl=ru&tl=ru&q=${encodeURIComponent(clipped)}`;
-
-    for (const route of ROUTES) {
-      const buf = await probeRoute(route, googleUrl, gtxUrl);
-      if (buf) {
-        lastAudio = buf; lastRoute = route.name;
-        showAudio(buf);
-        log('ok', `TTS итог: аудио ${buf.byteLength} байт через «${route.name}». Можно слушать в плеере выше.`);
-        return buf;
-      }
-    }
-    lastAudio = null;
-    log('err', 'TTS итог: НИ ОДИН маршрут не дал аудио ❌ (причина падения — на этапе генерации)');
-    return null;
-  }
-
-  /* ================= TELEGRAM ================= */
-  function interpretTg(json) {
-    if (json?.ok) return null;
-    const d = (json?.description || '') + ' ' + (json?.error_code || '');
-    if (/ogg|opus|wrong type|must be in/i.test(d))
-      return 'Telegram НЕ принимает MP3 как voice. Решение: sendAudio (придёт как музыка) или конвертация в OGG/OPUS на сервере (твоя Deno-функция это умеет лучше).';
-    if (/not enough rights|not allowed|forbidden|restricted/i.test(d))
-      return 'Боту не хватает прав в чате именно на ГОЛОСОВЫЕ (права «Send Voice Messages»). Текст при этом может работать.';
-    if (/chat not found/i.test(d)) return 'Чат не найден: проверь CHAT_ID и что бот добавлен в чат.';
-    if (/unauthorized|invalid token/i.test(d)) return 'Проблема с токеном бота.';
-    if (/too big|too large/i.test(d)) return 'Файл слишком большой для Telegram.';
-    if (/blocked|kicked|member/i.test(d)) return 'Бот заблокирован/не участник чата.';
-    return 'Смотри description выше — там точная причина от Telegram.';
-  }
-
-  async function tgJson(method, body) {
-    log('info', `TG → ${method}`);
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      log(json.ok ? 'ok' : 'err', `TG ← ${method}:`, JSON.stringify(json, null, 2));
-      const hint = interpretTg(json); if (hint) log('warn', '💡 Подсказка: ' + hint);
-      return json;
-    } catch (e) {
-      log('err', `TG ← ${method}: сеть/CORS — ${e.message}`);
-      return null;
-    }
-  }
-
-  async function tgVoiceOrAudio(method, field) {
-    if (!lastAudio) { log('warn', `Нет аудио для ${method}. Сначала нажми «Только TTS» или «Полная диагностика».`); return null; }
-    log('info', `TG → ${method} (файл voice.mp3, тип audio/mpeg, ${lastAudio.byteLength} байт — как в bot_function.ts)`);
-    try {
-      const form = new FormData();
-      form.append('chat_id', String(CHAT_ID));
-      form.append(field, new Blob([lastAudio], { type: 'audio/mpeg' }), 'voice.mp3');
-      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, { method: 'POST', body: form });
-      const json = await res.json();
-      log(json.ok ? 'ok' : 'err', `TG ← ${method}:`, JSON.stringify(json, null, 2));
-      const hint = interpretTg(json); if (hint) log('warn', '💡 Подсказка: ' + hint);
-      return json;
-    } catch (e) {
-      log('err', `TG ← ${method}: сеть/CORS — ${e.message}`);
-      return null;
-    }
-  }
-
-  /* ================= СЦЕНАРИИ ================= */
-  async function guard(fn) {
-    if (busy) return;
-    setBusy(true);
-    try { await fn(); } finally { setBusy(false); }
-  }
-
-  function runFull() { guard(async () => {
-    log('info', '══════════ ПОЛНАЯ ДИАГНОСТИКА ══════════');
-    await tgJson('getMe', {});
-    const audio = await runTts();
-    if (!audio) {
-      log('warn', 'Аудио нет → sendVoice/sendAudio не тестируем. Проблема на этапе TTS (смотри маршруты выше).');
+  /* ---------- Voice Mode Toggle ---------- */
+  function toggleVoiceMode() {
+    voiceMode = voiceToggle.checked;
+    if (voiceMode) {
+      sendBtn.classList.add('voice-mode');
+      sendIcon.innerHTML = `<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
+      messageEl.placeholder = 'Текст для озвучки...';
     } else {
-      const vr = await tgVoiceOrAudio('sendVoice', 'voice');
-      if (vr?.ok) {
-        log('ok', '✅ sendVoice РАБОТАЕТ. Значит в основном файле проблема была на этапе TTS.');
+      sendBtn.classList.remove('voice-mode');
+      sendIcon.innerHTML = `<path d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.1L3.6 10.5a1 1 0 0 0 .84.78l9.06 1.22-9.06 1.22a1 1 0 0 0-.84.78l-1.59 5.8a1 1 0 0 0 1.39 1.1z"/>`;
+      messageEl.placeholder = 'Сообщение...';
+    }
+  }
+
+  /* ---------- TTS — теперь с duration ---------- */
+  async function textToSpeech(text) {
+    try {
+      const clipped = text.length > 160 ? text.slice(0, 160) : text;
+      const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(clipped)}`;
+
+      const attempts = [
+        u => u,
+        u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+        u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      ];
+
+      for (const wrap of attempts) {
+        try {
+          const res = await fetch(wrap(googleUrl), {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+              'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.5',
+              'Referer': 'https://translate.google.com/',
+            },
+          });
+
+          if (!res.ok) continue;
+
+          const ctype = res.headers.get('content-type') || '';
+          const buf = new Uint8Array(await res.arrayBuffer());
+
+          if (!ctype.includes('audio') && !ctype.includes('mpeg') && !ctype.includes('octet-stream')) continue;
+          if (buf.byteLength < 500) continue;
+
+          // === НОВОЕ: считаем duration ===
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const decoded = await audioCtx.decodeAudioData(buf.buffer);
+          const duration = Math.round(decoded.duration);
+          // =====================================
+
+          console.log('TTS готово | duration:', duration, 'bytes:', buf.byteLength);
+          return { audio: buf, duration };
+        } catch (e) {
+          console.log('TTS attempt failed:', e);
+        }
+      }
+      return null;
+    } catch (e) {
+      console.error('TTS error:', e);
+      return null;
+    }
+  }
+
+  /* ---------- sendVoice — теперь с duration (Telegram требует!) ---------- */
+  async function sendVoice(audioData, duration) {
+    const form = new FormData();
+    form.append('chat_id', String(CHAT_ID));
+    form.append('voice', new Blob([audioData.audio], { type: 'audio/mpeg' }), 'voice.mp3');
+    form.append('duration', String(duration));
+
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVoice`, {
+      method: 'POST',
+      body: form,
+    });
+    const json = await res.json();
+    console.log('TG sendVoice:', JSON.stringify(json));
+    return json;
+  }
+
+  /* ---------- Backup sendAudio (на случай, если sendVoice не сработает) ---------- */
+  async function sendAudio(audioData, duration) {
+    const form = new FormData();
+    form.append('chat_id', String(CHAT_ID));
+    form.append('audio', new Blob([audioData.audio], { type: 'audio/mpeg' }), 'voice.mp3');
+    form.append('duration', String(duration));
+
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+      method: 'POST',
+      body: form,
+    });
+    const json = await res.json();
+    console.log('TG sendAudio:', JSON.stringify(json));
+    return json;
+  }
+
+  /* ---------- Auto Resize Textarea ---------- */
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+
+  /* ---------- File Selection ---------- */
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    selectedFile = file;
+
+    document.getElementById('previewImg').src = previewUrl;
+    document.getElementById('previewName').textContent =
+      file.name.length > 28 ? file.name.slice(0, 25) + '...' : file.name;
+
+    document.getElementById('previewBar').classList.add('show');
+  }
+
+  /* ---------- Remove Photo ---------- */
+  function removePhoto() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    selectedFile = null;
+    document.getElementById('photoFile').value = '';
+    document.getElementById('previewImg').src = '';
+    document.getElementById('previewBar').classList.remove('show');
+  }
+
+  /* ---------- Status Toast ---------- */
+  function showStatus(text, type, autohide = true) {
+    clearTimeout(statusTimer);
+    statusEl.textContent = text;
+    statusEl.className = 'status ' + type;
+    void statusEl.offsetWidth;
+    statusEl.classList.add('show');
+
+    if (autohide) {
+      statusTimer = setTimeout(() => statusEl.classList.remove('show'), 3500);
+    }
+  }
+
+  /* ---------- Scroll to Bottom ---------- */
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+  }
+
+  /* ---------- Add Message Bubble ---------- */
+  function addBubble(text, file, isVoice = false, audioData = null, duration = 0) {
+    if (emptyHint) emptyHint.style.display = 'none';
+
+    const el = document.createElement('div');
+    el.className = 'msg pending' + (isVoice ? ' voice-msg' : '');
+
+    if (file) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = 'Фото';
+      el.appendChild(img);
+    }
+
+    if (isVoice && audioData) {
+      const voiceIndicator = document.createElement('div');
+      voiceIndicator.className = 'voice-indicator';
+      voiceIndicator.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        </svg>
+        Голосовое сообщение
+      `;
+      el.appendChild(voiceIndicator);
+
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = URL.createObjectURL(new Blob([audioData.audio], { type: 'audio/mpeg' }));
+      el.appendChild(audio);
+    }
+
+    if (text) {
+      const p = document.createElement('div');
+      if (isVoice) {
+        p.style.fontSize = '13px';
+        p.style.color = 'rgba(255, 255, 255, 0.7)';
+        p.style.marginTop = '8px';
+      }
+      p.textContent = text;
+      el.appendChild(p);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = timeNow() + ' • отправка<span class="loading"></span>';
+    el.appendChild(meta);
+
+    chatArea.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  function timeNow() {
+    return new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /* ---------- SEND — теперь с duration ---------- */
+  async function send() {
+    const text = messageEl.value.trim();
+
+    if (!text && !selectedFile) {
+      showStatus('Напиши текст или прикрепи картинку', 'error');
+      return;
+    }
+
+    if (!BOT_TOKEN || BOT_TOKEN === "ВСТАВЬ_СВОЙ_ТОКЕН") {
+      showStatus('Сначала вставь токен бота в код!', 'error');
+      return;
+    }
+
+    const fileToSend = selectedFile;
+    sendBtn.disabled = true;
+
+    let voiceSent = false;
+
+    /* ---------- Шаг 1: голос + TTS + duration ---------- */
+    if (voiceMode && text) {
+      showStatus('🎙️ Генерирую голос...', 'info', false);
+      const ttsResult = await textToSpeech(text);
+
+      if (ttsResult) {
+        const bubbleV = addBubble(text, null, true, ttsResult, ttsResult.duration);
+        const metaV = bubbleV.querySelector('.meta');
+
+        let vr = await sendVoice(ttsResult, ttsResult.duration);
+        if (!vr?.ok) {
+          console.log('sendVoice failed, try sendAudio');
+          vr = await sendAudio(ttsResult, ttsResult.duration);
+        }
+
+        if (vr?.ok) {
+          voiceSent = true;
+          bubbleV.classList.remove('pending');
+          metaV.textContent = timeNow() + ' ✓';
+        } else {
+          bubbleV.classList.remove('pending');
+          bubbleV.classList.add('failed');
+          metaV.textContent = timeNow() + ' • голос не прошёл';
+          showStatus('⚠️ Голос не отправился, шлю текстом', 'info');
+        }
       } else {
-        log('warn', 'sendVoice не прошёл → пробуем sendAudio тем же файлом...');
-        const ar = await tgVoiceOrAudio('sendAudio', 'audio');
-        if (ar?.ok) log('ok', '✅ sendAudio работает: в основном файле нужно отправлять через sendAudio, либо конвертировать в OGG/OPUS.');
-        else log('err', '❌ И sendVoice, и sendAudio отказали. Читай description и подсказки выше.');
+        showStatus('⚠️ TTS недоступен, шлю текстом', 'info');
       }
     }
-    log('info', '══════════ ДИАГНОСТИКА ЗАВЕРШЕНА ══════════');
-  }); }
 
-  function runTtsOnly()  { guard(async () => { await runTts(); }); }
-  function runVoiceOnly(){ guard(async () => { await tgVoiceOrAudio('sendVoice', 'voice'); }); }
-  function runAudioOnly(){ guard(async () => { await tgVoiceOrAudio('sendAudio', 'audio'); }); }
-  function runTextControl() { guard(async () => {
-    await tgJson('sendMessage', { chat_id: CHAT_ID, text: '🔬 Контрольное текстовое сообщение со страницы диагностики' });
-  }); }
+    /* ---------- Шаг 2: текст / фото ---------- */
+    const needTextPart = !voiceSent;
 
-  log('info', 'Страница диагностики готова. Нажми «▶️ Полная диагностика».');
-  log('info', 'Совет: сначала открой логи в отдельном окне, потом запускай тесты.');
+    if (needTextPart || fileToSend) {
+      const bubble = addBubble(needTextPart ? text : '', fileToSend, false);
+      const metaEl = bubble.querySelector('.meta');
+      showStatus('Отправляю...', 'info', false);
+
+      try {
+        let res;
+
+        if (fileToSend) {
+          const formData = new FormData();
+          formData.append('chat_id', CHAT_ID);
+          formData.append('photo', fileToSend);
+          if (needTextPart && text) formData.append('caption', text);
+          if (needTextPart && parseMode) formData.append('parse_mode', parseMode);
+
+          res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            body: formData
+          });
+        } else {
+          const body = { chat_id: CHAT_ID, text: text };
+          if (parseMode) body.parse_mode = parseMode;
+
+          res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+        }
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.description || 'Ошибка API Telegram');
+
+        bubble.classList.remove('pending');
+        metaEl.textContent = timeNow() + ' ✓';
+        showStatus(voiceSent ? '✅ Голос + фото отправлены!' : '✅ Отправлено!', 'success');
+
+      } catch (err) {
+        bubble.classList.remove('pending');
+        bubble.classList.add('failed');
+        metaEl.textContent = timeNow() + ' • не отправлено';
+        showStatus('❌ ' + err.message, 'error');
+      }
+    } else {
+      showStatus('🎙️ Голосовое отправлено!', 'success');
+    }
+
+    /* ---------- Cleanup ---------- */
+    messageEl.value = '';
+    messageEl.style.height = 'auto';
+    removePhoto();
+    sendBtn.disabled = false;
+    messageEl.focus();
+  }
+
+  /* ---------- Keyboard ---------- */
+  messageEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  /* ---------- Viewport ---------- */
+  window.addEventListener('load', () => {
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        scrollToBottom();
+        document.querySelector('.app').style.height = window.visualViewport.height + 'px';
+      });
+    }
+    if ('speechSynthesis' in window) speechSynthesis.getVoices();
+  });
+
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', e => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+  }, false);
 </script>
 </body>
 </html>
